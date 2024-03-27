@@ -1,7 +1,7 @@
 import app from './config';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
 
-// import { collection, onSnapshot, addDoc, Timestamp, updateDoc } from 'firebase/firestore';
+// import { onSnapshot, addDoc, Timestamp, updateDoc } from 'firebase/firestore';
 
 // Initialize Firestore
 const db = getFirestore(app);
@@ -19,4 +19,20 @@ const getUserDocument = async (uid: string) => {
     }
 };
 
-export { getUserDocument };
+const getUserQuizzes = async (uid: string) => {
+    if (!uid) return null;
+    const userDocumentReference = doc(db, 'users', uid);
+    const quizCollectionReference = collection(userDocumentReference, 'quizzes');
+    const quizCollection = await getDocs(quizCollectionReference);
+
+    quizCollection.forEach((doc) => {
+        if (doc.exists()) {
+            return doc.data();
+        } else {
+            console.log('Cannot find quiz');
+            return null;
+        }
+    });
+};
+
+export { getUserDocument, getUserQuizzes };
