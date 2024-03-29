@@ -9,7 +9,7 @@ import QuizFireStore from "../../firebase/firestore";
 const Home: FC = () => {
   const [quiz, setQuiz] = useState([]);
 
-   const fetchFireStore = async () => {
+  const fetchFireStore = async () => {
     console.log("Get firestore stuff")
     setQuiz(([await QuizFireStore.getUserDocument("gclVWPbq3lDp2SE2VW3L")]) as Array<never>)
   }
