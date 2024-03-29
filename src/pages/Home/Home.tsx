@@ -7,7 +7,6 @@ import logo_firebase from "../../assets/firebase.svg";
 import QuizFireStore from "../../firebase/firestore";
 
 const Home: FC = () => {
-
   const [quiz, setQuiz] = useState([]);
 
    const fetchFireStore = async () => {
