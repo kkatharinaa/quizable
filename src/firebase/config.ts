@@ -1,21 +1,20 @@
 import { initializeApp } from 'firebase/app';
 
-const process = import.meta.env
-
-console.log(process.VITE_API_KEY)
+const env_var = import.meta.env
 
 
 const firebaseConfig = {
-  apiKey: process.API_KEY,
-  authDomain: process.AUTH_DOMAIN,
-  databaseURL: process.DATABASE_URL,
-  projectId: process.PROJECT_ID,
-  storageBucket: process.STORAGE_BUCKET,
-  messagingSenderId: process.MESSAGING_SENDER_ID,
-  appId: process.APP_ID,
-  measurementId: process.MEASUREMENT_ID
+  apiKey: env_var.VITE_API_KEY,
+  authDomain: env_var.VITE_AUTH_DOMAIN,
+  databaseURL: env_var.VITE_DATABASE_URL,
+  projectId: env_var.VITE_PROJECT_ID,
+  storageBucket: env_var.VITE_STORAGE_BUCKET,
+  messagingSenderId: env_var.VITE_MESSAGING_SENDER_ID,
+  appId: env_var.VITE_APP_ID,
+  measurementId: env_var.VITE_MEASUREMENT_ID
 };
 
+console.log(firebaseConfig)
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
