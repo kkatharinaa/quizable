@@ -1,6 +1,4 @@
-
 import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
 import express from "express";
 
 const app = express()

@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import "./Home.css"
 import logo_vite from "../../assets/vite.svg";

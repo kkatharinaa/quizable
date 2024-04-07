@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
     envDir: './',
     define: {
       
+      
     }
   }
 })
