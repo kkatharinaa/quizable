@@ -29,7 +29,7 @@ const pagesData: RouterType[] = [
     },
     {
       path: "create/editor",
-      element: <CreateEditor />,
+      element: <CreateEditor quizID={"0"}/>, // TODO: put correct quizID here or only make this route accessible from within the quiz overview
       title: "Create / Edit | Quizable"
     },
     {

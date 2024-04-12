@@ -1,0 +1,47 @@
+/* Regular */
+@font-face {
+    font-family: 'Sansation';
+    src: url('./Sansation_Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Bold */
+@font-face {
+    font-family: 'Sansation';
+    src: url('./Sansation_Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+/* Italic */
+@font-face {
+    font-family: 'Sansation';
+    src: url('./Sansation_Italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* Bold Italic */
+@font-face {
+    font-family: 'Sansation';
+    src: url('./Sansation_Bold_Italic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+}
+
+/* Light */
+@font-face {
+    font-family: 'Sansation';
+    src: url('./Sansation_Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+/* Light Italic */
+@font-face {
+    font-family: 'Sansation';
+    src: url('./Sansation_Light_Italic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+}

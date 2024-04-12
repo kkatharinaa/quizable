@@ -1,0 +1,57 @@
+:root {
+    --primary-color: #EB0559; /* magenta */
+    --primary-shadow: #B04;
+    --primary-button: #800080; /* purple */
+    --primary-button-shadow: #610061;
+    --accent-button: #5DBAB2; /* turquoise */
+    --accent-button-shadow: #45948D;
+    --settings-button: #7E6DF3;
+    --settings-button-shadow: #5C4DC7;
+    --delete-button: #FF0F0F;
+    --delete-button-shadow: #B50F0F;
+    --correct-button: #3DE668;
+    --correct-button-shadow: #2CA94C;
+    --white: #FDE6EE;
+    --white2: #ECE4FE;
+    --grey-text: #DDCBD1;
+    --secondary-button-shadow: #CAB2BA;
+    --disabled-button: #C0C0C0;
+    --disabled-button-shadow: #999;
+    --disabled-button-text: #725866;
+    --disabled-button-dark: #909090;
+    --disabled-button-dark-shadow: #666;
+    --black: #450027;
+    --black2: #35001E;
+    --text-field-text: #935779;
+    --text-field-symbols: #730041;
+}
+
+/*
+export const COLOURS = {
+    primary: '#EB0559', // magenta
+    primaryShadow: '#B04',
+    primaryButton: '#800080', // purple
+    primaryButtonShadow: '#610061',
+    settingsButton: '#7E6DF3',
+    settingsButtonShadow: '#5C4DC7',
+    deleteButton: '#FF0F0F',
+    deleteButtonShadow: '#B50F0F',
+    correctButton: '#3DE668',
+    correctButtonShadow: '#2CA94C',
+    white: '#FDE6EE',
+    white2: '#ECE4FE',
+    greyText: '#DDCBD1',
+    secondaryButtonShadow: '#CAB2BA',
+    disabledButton: '#C0C0C0',
+    disabledButtonShadow: '#999',
+    disabledButtonText: '#725866',
+    disabledButtonDark: '#909090',
+    disabledButtonDarkShadow: '#666',
+    black: '#450027',
+    black2: '#35001E',
+    textFieldText: '#935779',
+    textFieldSymbols: '#730041',
+    accentButton: '#5DBAB2', // turquoise
+    accentButtonShadow: '#45948D',
+};
+*/

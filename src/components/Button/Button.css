@@ -1,0 +1,79 @@
+button {
+    display: flex;
+    padding: 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 6px;
+    border-width: 0;
+}
+/* Change ButtonType */
+button.short {
+    color: var(--black);
+}
+button.long {
+    width: 392px;
+    padding: 14px 110px;
+}
+
+button:hover {
+    /* TODO */
+}
+button:focus,
+button:focus-visible {
+    /* TODO */
+}
+
+button img {
+    width: 18px;
+    height: 18px;
+}
+button.long img {
+    flex-shrink: 0;
+    /* currently, the image's colour cannot be changed dynamically, so the img needs to already be passed in in the correct colour (eg. svg in correct colour)*/
+}
+button.long span {
+    font-size: 24px;
+}
+
+/* Change ButtonStyle */
+button.primary {
+    background: var(--primary-button);
+    box-shadow: 0px 6px 0px 0px var(--primary-button-shadow);
+    color: var(--white);
+}
+button.secondary {
+    background: var(--white);
+    box-shadow: 0px 6px 0px 0px var(--secondary-button-shadow);
+    color: var(--black);
+}
+button.accent {
+    background: var(--accent-button);
+    box-shadow: 0px 6px 0px 0px var(--accent-button-shadow);
+    color: var(--black);
+}
+button.settings {
+    background: var(--settings-button);
+    box-shadow: 0px 6px 0px 0px var(--settings-button-shadow);
+    color: var(--white);
+}
+button.delete {
+    background: var(--delete-button);
+    box-shadow: 0px 6px 0px 0px var(--delete-button-shadow);
+    color: var(--black);
+}
+button.disabled {
+    background: var(--disabled-button);
+    box-shadow: 0px 6px 0px 0px var(--disabled-button-shadow);
+    color: var(--disabled-button-text);
+}
+button.disabledDark {
+    background: var(--disabled-button-dark);
+    box-shadow: 0px 6px 0px 0px var(--disabled-button-dark-shadow);
+    color: var(--black);
+}
+button.correct {
+    background: var(--correct-button);
+    box-shadow: 0px 6px 0px 0px var(--correct-button-shadow);
+    color: var(--black);
+}
