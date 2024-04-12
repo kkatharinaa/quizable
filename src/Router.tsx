@@ -6,6 +6,7 @@ import { Join } from "./pages/Join/Join";
 import { QuizLobby } from "./pages/Quiz/QuizLobby/QuizLobby";
 import QuizResult from "./pages/Quiz/QuizResult/QuizResult";
 import { QuizSession } from "./pages/Quiz/QuizSession/QuizSession";
+import {CreateEditor} from "./pages/Create/CreateEditor/CreateEditor.tsx";
 
 
 export interface RouterType {
@@ -28,7 +29,7 @@ const pagesData: RouterType[] = [
     },
     {
       path: "create/editor",
-      element: <CreateSendEmail />,
+      element: <CreateEditor />,
       title: "Create / Edit | Quizable"
     },
     {
