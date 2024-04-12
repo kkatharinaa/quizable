@@ -1,0 +1,7 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    script: |
+      docker build -t europe-central2-docker.pkg.dev/quizzabletest/hello-repo/quizapp-image:quizapp .
+    automapSubstitutions: true
+images:
+  - 'europe-central2-docker.pkg.dev/quizzabletest/hello-repo/quizapp-image:quizapp'
