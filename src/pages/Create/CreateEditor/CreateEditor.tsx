@@ -6,12 +6,9 @@ import {QuizOptions} from "../../../models/QuizOptions.ts";
 import {AuthenticatedUser} from "../../../models/AuthenticatedUser.ts";
 import {Question} from "../../../models/Question.ts";
 import {SAVE_ICON_LIGHT} from "../../../assets/Icons.ts";
-import {getAnswerInputFieldTypeForIndex} from "../../../components/AnswerInputField/AnswerInputFieldExports.ts";
-import {
-    AnswerInputFieldWithActions
-} from "../../../components/AnswerInputFieldWithActions/AnswerInputFieldWithActions.tsx";
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
 import {BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
+import {AnswerInputFieldContainer} from "../../../components/AnswerInputFieldContainer/AnswerInputFieldContainer.tsx";
 
 interface CreateEditorProps {
     quizID: string;
@@ -24,7 +21,7 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
 
     //const [quiz, setQuiz] = useState<Quiz>(originalQuiz);
     const [questions, setQuestions] = useState<Question[]>(originalQuiz.questions);
-    const [answerValues, setAnswerValues] = useState([""]);
+    const [answerValues, setAnswerValues] = useState(["","",""]);
     const [correctIndex, setCorrectIndex] = useState(0);
 
     // answer functions
@@ -41,6 +38,11 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
     const handleAnswerToggleCorrect = (index: number) => {
         setCorrectIndex(index)
     }
+    const handleAddAnswer = () => {
+        const updatedAnswers = [...answerValues]
+        updatedAnswers.push("")
+        setAnswerValues(updatedAnswers)
+    }
 
     // nav functions
     const saveQuiz = () => {
@@ -54,19 +56,14 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
     return (
         <div className="createEditor">
 
-            {answerValues.map((item, index) => (
-                <AnswerInputFieldWithActions
-                    key={index}
-                    value={item}
-                    type={getAnswerInputFieldTypeForIndex(index)}
-                    correct={(correctIndex == index)}
-                    index={index}
-                    canBeDeleted={(answerValues.length>2)}
-                    onChange={handleAnswerInputChange}
-                    onDelete={handleAnswerDelete}
-                    onToggleCorrect={handleAnswerToggleCorrect}
-                />
-            ))}
+            <AnswerInputFieldContainer
+                answers={answerValues}
+                correctIndex={correctIndex}
+                onChange={handleAnswerInputChange}
+                onDelete={handleAnswerDelete}
+                onToggleCorrect={handleAnswerToggleCorrect}
+                onAdd={handleAddAnswer}
+            />
             <BottomNavBar
                 secondaryButtonText="To Overview"
                 secondaryButtonIcon={null}

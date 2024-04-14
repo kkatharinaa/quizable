@@ -2,7 +2,7 @@
 
 .answerInputField {
     display: flex;
-    width: 340px;
+    /*width: 340px;*/align-self: stretch;
     padding: 60px 10px;
     justify-content: center;
     align-items: center;

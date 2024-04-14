@@ -20,7 +20,7 @@ interface AnswerInputFieldWithActionsProps {
 export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> = ({ value, type, correct, index, canBeDeleted, onChange, onDelete, onToggleCorrect}) => {
 
     const handleDelete = () => {
-        onDelete(index)
+        if (canBeDeleted) onDelete(index)
     }
 
     const handleToggleCorrect = () => {
@@ -44,8 +44,8 @@ export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> =
                     onClick={handleDelete}
                 />
                 <ButtonComponent
-                    text="Correct Answer"
-                    icon={TICK_ICON_DARK}
+                    text={correct ? "Correct Answer" : "Correct Answer?"}
+                    icon={correct ? TICK_ICON_DARK : null}
                     type={ButtonType.Medium}
                     style={correct ? ButtonStyle.Correct : ButtonStyle.Disabled}
                     onClick={handleToggleCorrect}

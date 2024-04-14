@@ -1,0 +1,26 @@
+.answerInputFieldContainer {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+    align-self: stretch;
+    flex-wrap: wrap;
+}
+
+.answerInputFieldContainer .answerInputFieldWithActions, .answerInputFieldContainer .filler {
+    flex-basis: 40%;
+}
+
+.answerInputFieldContainer .filler button {
+    display: flex;
+    padding: 12px 180px;
+    gap: 10px;
+    align-self: stretch;
+}
+
+.filler {
+    display: flex;
+    /*width: 340px;*/flex: 1 0 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}

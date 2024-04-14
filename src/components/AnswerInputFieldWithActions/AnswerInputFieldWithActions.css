@@ -1,6 +1,6 @@
 .answerInputFieldWithActions {
     display: flex;
-    width: 340px;
+    /*width: 340px;*/flex: 1 0 0;
     flex-direction: column;
     align-items: center;
     gap: 10px;
