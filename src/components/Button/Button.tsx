@@ -5,7 +5,7 @@ import {Icon} from "../../assets/Icons.ts";
 
 interface ButtonProps {
     text: string
-    icon: Icon
+    icon: Icon | null
     type: ButtonType
     style: ButtonStyle
     onClick?: () => void
@@ -15,7 +15,7 @@ export const ButtonComponent: FC<ButtonProps> = ({ text, icon, type, style , onC
 
     return (
         <button className={`${type} ${style}`} onClick={onClick}>
-            <img src={icon.path} alt={icon.alt}/>
+            {icon != null && <img src={icon.path} alt={icon.alt}/>}
             {type == ButtonType.Long && <span>{text}</span>}
         </button>
     )

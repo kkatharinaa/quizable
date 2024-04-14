@@ -1,4 +1,5 @@
 @import 'colours.css';
+@import './assets/fonts/fonts.css';
 
 :root {
   font-family: 'Sansation', sans-serif;

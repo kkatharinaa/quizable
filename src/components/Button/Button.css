@@ -13,7 +13,7 @@ button.short {
 }
 button.long {
     width: 392px;
-    padding: 14px 110px;
+    /*padding: 14px 110px;*/
 }
 
 button:hover {
@@ -34,6 +34,10 @@ button.long img {
 }
 button.long span {
     font-size: 24px;
+    font-family: 'Sansation', sans-serif;
+    font-style: normal;
+    font-weight: bold;
+    line-height: normal;
 }
 
 /* Change ButtonStyle */
