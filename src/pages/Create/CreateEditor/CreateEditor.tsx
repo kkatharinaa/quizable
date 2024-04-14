@@ -5,11 +5,13 @@ import {QuizName} from "../../../models/ConstrainedTypes.ts";
 import {QuizOptions} from "../../../models/QuizOptions.ts";
 import {AuthenticatedUser} from "../../../models/AuthenticatedUser.ts";
 import {Question} from "../../../models/Question.ts";
-import {ButtonComponent} from "../../../components/Button/Button.tsx";
-import {ButtonStyle, ButtonType} from "../../../components/Button/ButtonExports.ts";
 import {SAVE_ICON_LIGHT} from "../../../assets/Icons.ts";
-import { getAnswerInputFieldTypeForIndex } from "../../../components/AnswerInputField/AnswerInputFieldExports.ts";
-import { AnswerInputFieldWithActions } from "../../../components/AnswerInputFieldWithActions/AnswerInputFieldWithActions.tsx";
+import {getAnswerInputFieldTypeForIndex} from "../../../components/AnswerInputField/AnswerInputFieldExports.ts";
+import {
+    AnswerInputFieldWithActions
+} from "../../../components/AnswerInputFieldWithActions/AnswerInputFieldWithActions.tsx";
+import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
+import {BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 
 interface CreateEditorProps {
     quizID: string;
@@ -25,6 +27,7 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
     const [answerValues, setAnswerValues] = useState([""]);
     const [correctIndex, setCorrectIndex] = useState(0);
 
+    // answer functions
     const handleAnswerInputChange = (value: string, index: number) => {
         const updatedAnswers = [...answerValues]
         updatedAnswers[index] = value
@@ -39,22 +42,18 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
         setCorrectIndex(index)
     }
 
-    // functions
+    // nav functions
     const saveQuiz = () => {
         // TODO: turn answers and questions into actual answers and questions
         // TODO: save changed questions to firebase
     };
+    const toOverview = () => {
+        // TODO: first show a popup asking for confirmation (discard changes?), if yes go back to the previous screen which has the quiz popup
+    }
 
     return (
-        <div className="page_styling vertical">
+        <div className="createEditor">
 
-            <ButtonComponent
-                text="Save Quiz"
-                icon={SAVE_ICON_LIGHT}
-                type={ButtonType.Long}
-                style={ButtonStyle.Primary}
-                onClick={saveQuiz}
-            />
             {answerValues.map((item, index) => (
                 <AnswerInputFieldWithActions
                     key={index}
@@ -68,6 +67,15 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
                     onToggleCorrect={handleAnswerToggleCorrect}
                 />
             ))}
+            <BottomNavBar
+                secondaryButtonText="To Overview"
+                secondaryButtonIcon={null}
+                primaryButtonText="Save Quiz"
+                primaryButtonIcon={SAVE_ICON_LIGHT}
+                type={BottomNavBarType.Default}
+                onSecondaryClick={toOverview}
+                onPrimaryClick={saveQuiz}
+            />
         </div>
     )
 }

@@ -46,7 +46,7 @@ export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> =
                 <ButtonComponent
                     text="Correct Answer"
                     icon={TICK_ICON_DARK}
-                    type={ButtonType.Long}
+                    type={ButtonType.Medium}
                     style={correct ? ButtonStyle.Correct : ButtonStyle.Disabled}
                     onClick={handleToggleCorrect}
                 />

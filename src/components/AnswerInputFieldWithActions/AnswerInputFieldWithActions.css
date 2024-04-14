@@ -12,10 +12,6 @@
     gap: 10px;
     align-self: stretch;
 }
-
-.buttons button.long {
-    padding: 12px;
-}
-.buttons button.long span {
-    font-size: 20px;
+.buttons button.medium {
+    flex: 1 0 0;
 }

@@ -1,5 +1,5 @@
 button {
-    display: flex;
+    display: inline-flex;
     padding: 14px;
     justify-content: center;
     align-items: center;
@@ -12,8 +12,11 @@ button.short {
     color: var(--black);
 }
 button.long {
-    width: 392px;
-    /*padding: 14px 110px;*/
+    /*width: 392px;*/
+}
+button.medium {
+    padding: 12px 14px;
+    gap: 8px;
 }
 
 button:hover {
@@ -29,15 +32,22 @@ button img {
     height: 18px;
 }
 button.long img {
+    width: 20px;
+    height: 20px;
+}
+button.long img, button.medium img {
     flex-shrink: 0;
     /* currently, the image's colour cannot be changed dynamically, so the img needs to already be passed in in the correct colour (eg. svg in correct colour)*/
 }
-button.long span {
+button.long span, button.medium span {
     font-size: 24px;
     font-family: 'Sansation', sans-serif;
     font-style: normal;
     font-weight: bold;
     line-height: normal;
+}
+button.medium span {
+    font-size: 20px;
 }
 
 /* Change ButtonStyle */
@@ -46,38 +56,62 @@ button.primary {
     box-shadow: 0px 6px 0px 0px var(--primary-button-shadow);
     color: var(--white);
 }
+button.primary.medium, button.primary.short {
+    box-shadow: 0px 4px 0px 0px var(--primary-button-shadow);
+}
 button.secondary {
     background: var(--white);
     box-shadow: 0px 6px 0px 0px var(--secondary-button-shadow);
     color: var(--black);
+}
+button.secondary.medium, button.secondary.short {
+    box-shadow: 0px 4px 0px 0px var(--secondary-button-shadow);
 }
 button.accent {
     background: var(--accent-button);
     box-shadow: 0px 6px 0px 0px var(--accent-button-shadow);
     color: var(--black);
 }
+button.accent.medium, button.accent.short {
+    box-shadow: 0px 4px 0px 0px var(--accent-button-shadow);
+}
 button.settings {
     background: var(--settings-button);
     box-shadow: 0px 6px 0px 0px var(--settings-button-shadow);
     color: var(--white);
+}
+button.settings.medium, button.settings.short {
+    box-shadow: 0px 4px 0px 0px var(--settings-button-shadow);
 }
 button.delete {
     background: var(--delete-button);
     box-shadow: 0px 6px 0px 0px var(--delete-button-shadow);
     color: var(--black);
 }
+button.delete.medium, button.delete.short {
+    box-shadow: 0px 4px 0px 0px var(--delete-button-shadow);
+}
 button.disabled {
     background: var(--disabled-button);
     box-shadow: 0px 6px 0px 0px var(--disabled-button-shadow);
     color: var(--disabled-button-text);
+}
+button.disabled.medium, button.disabled.short {
+    box-shadow: 0px 4px 0px 0px var(--disabled-button-shadow);
 }
 button.disabledDark {
     background: var(--disabled-button-dark);
     box-shadow: 0px 6px 0px 0px var(--disabled-button-dark-shadow);
     color: var(--black);
 }
+button.disabledDark.medium, button.disabledDark.short {
+    box-shadow: 0px 4px 0px 0px var(--disabled-button-dark-shadow);
+}
 button.correct {
     background: var(--correct-button);
     box-shadow: 0px 6px 0px 0px var(--correct-button-shadow);
     color: var(--black);
+}
+button.correct.medium, button.correct.short {
+    box-shadow: 0px 4px 0px 0px var(--correct-button-shadow);
 }
