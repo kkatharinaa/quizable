@@ -1,5 +1,6 @@
 
 // TODO: is this fine? or use zod?
+// This is fine. we add zod if we really need it
 
 export class QuizName {
     private constructor(public readonly value: string) {}
@@ -7,6 +8,7 @@ export class QuizName {
     static tryMake(input: string): QuizName | null {
         if (input.length === 0) return null
         // TODO: check for max characters?
+        // from input validation?
         return new QuizName(input)
     }
 }

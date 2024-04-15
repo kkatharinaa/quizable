@@ -64,6 +64,11 @@ const pagesData: RouterType[] = [
       element: <QuizSession />,
       title: "Quiz Session | Quizable"
     },
+    {
+      path: "quiz/overview",
+      element: <QuizOverview />,
+      title: "Quiz Overview | Quizable"
+    },
 ];
 
 const Router = () => {
