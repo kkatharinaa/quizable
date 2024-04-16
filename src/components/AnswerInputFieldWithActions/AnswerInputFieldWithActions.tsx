@@ -1,4 +1,4 @@
-import {FC} from "react";
+import React, {FC} from "react";
 import "./AnswerInputFieldWithActions.css"
 import {AnswerInputFieldType} from "../AnswerInputField/AnswerInputFieldExports.ts";
 import {AnswerInputField} from "../AnswerInputField/AnswerInputField.tsx";
@@ -15,9 +15,12 @@ interface AnswerInputFieldWithActionsProps {
     onChange: (newValue: string, index: number) => void
     onDelete: (index: number) => void
     onToggleCorrect: (index: number) => void
+    onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void
+    onDragOver: (e: React.DragEvent<HTMLDivElement>) => void
+    onDragDrop: (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => void
 }
 
-export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> = ({ value, type, correct, index, canBeDeleted, onChange, onDelete, onToggleCorrect}) => {
+export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> = ({ value, type, correct, index, canBeDeleted, onChange, onDelete, onToggleCorrect, onDragStart, onDragOver, onDragDrop }) => {
 
     const handleDelete = () => {
         if (canBeDeleted) onDelete(index)
@@ -27,8 +30,16 @@ export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> =
         onToggleCorrect(index)
     }
 
+    //TODO: indicate that it is able to be dragged?
+
     return (
-        <div className="answerInputFieldWithActions">
+        <div className="answerInputFieldWithActions"
+             draggable
+             onDragStart={(e) => onDragStart(e, index)}
+             onDragOver={onDragOver}
+             onDrop={(e) => onDragDrop(e, index)}
+            /*onDragEnd={onDragEnd}*/
+        >
             <AnswerInputField
                 value={value}
                 type={type}

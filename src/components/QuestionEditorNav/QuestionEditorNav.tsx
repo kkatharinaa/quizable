@@ -1,4 +1,4 @@
-import {FC} from "react";
+import React, {FC} from "react";
 import "./QuestionEditorNav.css"
 import {Question} from "../../models/Question.ts";
 import {ButtonComponent} from "../Button/Button.tsx";
@@ -11,9 +11,12 @@ interface QuestionEditorNavProps {
     currentQuestionIndex: number
     onSelect: (index: number) => void
     onAdd: () => void
+    onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void
+    onDragOver: (e: React.DragEvent<HTMLDivElement>) => void
+    onDragDrop: (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => void
 }
 
-export const QuestionEditorNav: FC<QuestionEditorNavProps> = ({ questions, currentQuestionIndex, onSelect, onAdd }) => {
+export const QuestionEditorNav: FC<QuestionEditorNavProps> = ({ questions, currentQuestionIndex, onSelect, onAdd, onDragStart, onDragOver, onDragDrop }) => {
 
     return (
         <div className="questionEditorNav">
@@ -32,6 +35,9 @@ export const QuestionEditorNav: FC<QuestionEditorNavProps> = ({ questions, curre
                         question={item}
                         isSelected={currentQuestionIndex == index}
                         onSelect={onSelect}
+                        onDragStart={onDragStart}
+                        onDragOver={onDragOver}
+                        onDragDrop={onDragDrop}
                     />
                 ))}
             </div>

@@ -1,4 +1,4 @@
-import {FC} from "react";
+import React, {FC} from "react";
 import "./QuestionEditor.css"
 import {AnswerInputFieldContainer} from "../AnswerInputFieldContainer/AnswerInputFieldContainer.tsx";
 import {QuestionInputField} from "../QuestionInputField/QuestionInputField.tsx";
@@ -19,9 +19,12 @@ interface QuestionEditorProps {
     onAnswerDelete: (index: number) => void
     onAnswerToggleCorrect: (index: number) => void
     onAnswerAdd: () => void
+    onAnswerDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void
+    onAnswerDragOver: (e: React.DragEvent<HTMLDivElement>) => void
+    onAnswerDragDrop: (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => void
 }
 
-export const QuestionEditor: FC<QuestionEditorProps> = ({ index, questionTitle, answers, canBeDeleted, onTitleChange, onSettingsClick, onDelete, onAnswerChange, onAnswerDelete, onAnswerToggleCorrect, onAnswerAdd }) => {
+export const QuestionEditor: FC<QuestionEditorProps> = ({ index, questionTitle, answers, canBeDeleted, onTitleChange, onSettingsClick, onDelete, onAnswerChange, onAnswerDelete, onAnswerToggleCorrect, onAnswerAdd, onAnswerDragStart, onAnswerDragOver, onAnswerDragDrop }) => {
     const handleQuestionDelete = () => {
         onDelete(index)
     }
@@ -73,6 +76,9 @@ export const QuestionEditor: FC<QuestionEditorProps> = ({ index, questionTitle, 
                 onDelete={onAnswerDelete}
                 onToggleCorrect={onAnswerToggleCorrect}
                 onAdd={onAnswerAdd}
+                onDragStart={onAnswerDragStart}
+                onDragOver={onAnswerDragOver}
+                onDragDrop={onAnswerDragDrop}
             />
         </div>
     )

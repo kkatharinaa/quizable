@@ -1,4 +1,4 @@
-import {FC, useState} from "react";
+import React, {FC, useState} from "react";
 import "./CreateEditor.css"
 import {Quiz} from "../../../models/Quiz.ts";
 import {QuizName} from "../../../models/ConstrainedTypes.ts";
@@ -53,7 +53,30 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
         const updatedQuestions = [...questions, Question.empty]
         setQuestions(updatedQuestions)
     }
-    // TODO: add reordering of questions
+    const handleQuestionDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+        e.dataTransfer.setData('text/plain', index.toString());
+    };
+    const handleQuestionDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+    };
+    const handleQuestionDragDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+        const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const updatedQuestions = [...questions];
+        const [draggedItem] = updatedQuestions.splice(dragIndex, 1);
+        updatedQuestions.splice(dropIndex, 0, draggedItem);
+
+        if (dragIndex == currentQuestionIndex) { // we dragged our selected question somewhere else, so the currentQuestionIndex has to be updated to the new index
+            setCurrentQuestionIndex(dropIndex)
+        } else if (dropIndex < dragIndex) { // we dragged a question which was not the selected question in front of our selected question
+            setCurrentQuestionIndex(currentQuestionIndex+1)
+        } else if (dropIndex > dragIndex) { // we dragged a question which was not the selected question to a place somewhere behind/after of our selected question
+            setCurrentQuestionIndex(currentQuestionIndex-1)
+        }
+        setQuestions(updatedQuestions);
+    };
+    /*const handleQuestionDragEnd = () => {
+        // Additional cleanup if needed
+    };*/
 
     // answer functions
     const handleAnswerInputChange = (value: string, index: number) => {
@@ -91,6 +114,22 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
         updatedQuestions[currentQuestionIndex] = {...currentQuestion, answers: newAnswers};
         setQuestions(updatedQuestions)
     }
+    const handleAnswerDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+        e.dataTransfer.setData('text/plain', index.toString());
+    };
+    const handleAnswerDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+    };
+    const handleAnswerDragDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+        const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const updatedQuestions = [...questions];
+        const [draggedItem] = updatedQuestions[currentQuestionIndex].answers.splice(dragIndex, 1);
+        updatedQuestions[currentQuestionIndex].answers.splice(dropIndex, 0, draggedItem);
+        setQuestions(updatedQuestions);
+    };
+    /*const handleAnswerDragEnd = () => {
+        // Additional cleanup if needed
+    };*/
 
     // nav functions
     const saveQuiz = () => {
@@ -117,12 +156,18 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
                     onAnswerDelete={handleAnswerDelete}
                     onAnswerToggleCorrect={handleAnswerToggleCorrect}
                     onAnswerAdd={handleAnswerAdd}
+                    onAnswerDragStart={handleAnswerDragStart}
+                    onAnswerDragOver={handleAnswerDragOver}
+                    onAnswerDragDrop={handleAnswerDragDrop}
                 />
                 <QuestionEditorNav
                     questions={questions}
                     currentQuestionIndex={currentQuestionIndex}
                     onSelect={handleQuestionSelect}
                     onAdd={handleQuestionAdd}
+                    onDragStart={handleQuestionDragStart}
+                    onDragOver={handleQuestionDragOver}
+                    onDragDrop={handleQuestionDragDrop}
                 />
             </div>
 

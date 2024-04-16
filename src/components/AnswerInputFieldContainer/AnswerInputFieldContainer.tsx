@@ -1,4 +1,4 @@
-import {FC} from "react";
+import React, {FC} from "react";
 import "./AnswerInputFieldContainer.css"
 import {getAnswerInputFieldTypeForIndex} from "../AnswerInputField/AnswerInputFieldExports.ts";
 import {AnswerInputFieldWithActions} from "../AnswerInputFieldWithActions/AnswerInputFieldWithActions.tsx";
@@ -13,9 +13,12 @@ interface AnswerInputFieldContainerProps {
     onDelete: (index: number) => void
     onToggleCorrect: (index: number) => void
     onAdd: () => void
+    onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void
+    onDragOver: (e: React.DragEvent<HTMLDivElement>) => void
+    onDragDrop: (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => void
 }
 
-export const AnswerInputFieldContainer: FC<AnswerInputFieldContainerProps> = ({ answers, onChange, onDelete, onToggleCorrect, onAdd }) => {
+export const AnswerInputFieldContainer: FC<AnswerInputFieldContainerProps> = ({ answers, onChange, onDelete, onToggleCorrect, onAdd, onDragStart, onDragOver, onDragDrop }) => {
 
     return (
         <div className="answerInputFieldContainer">
@@ -30,6 +33,9 @@ export const AnswerInputFieldContainer: FC<AnswerInputFieldContainerProps> = ({ 
                     onChange={onChange}
                     onDelete={onDelete}
                     onToggleCorrect={onToggleCorrect}
+                    onDragStart={onDragStart}
+                    onDragOver={onDragOver}
+                    onDragDrop={onDragDrop}
                 />
             ))}
             <div className="filler">
