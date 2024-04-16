@@ -11,6 +11,8 @@ import {BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExp
 import {QuestionEditor} from "../../../components/QuestionEditor/QuestionEditor.tsx";
 import {Answer} from "../../../models/Answer.ts";
 import {QuestionEditorNav} from "../../../components/QuestionEditorNav/QuestionEditorNav.tsx";
+import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
+import {PopupType} from "../../../components/Popup/PopupExports.ts";
 
 interface CreateEditorProps {
     quizID: string;
@@ -21,9 +23,22 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
     // so far we dont have firebase implemented, so just use a fake quiz
     const originalQuiz: Quiz = new Quiz(quizID, QuizName.tryMake("Untitled Quiz")!, [Question.empty], QuizOptions.default, AuthenticatedUser.default, new Date(), null)
 
+    const initialPopup: PopupProps = {
+        title: "",
+        message: null,
+        secondaryButtonText: "",
+        secondaryButtonIcon: null,
+        primaryButtonText: "",
+        primaryButtonIcon: null,
+        type: PopupType.Default
+    }
+
     //const [quiz, setQuiz] = useState<Quiz>(originalQuiz);
     const [questions, setQuestions] = useState<Question[]>(originalQuiz.questions);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+    const [popupProps, setPopupProps] = useState(initialPopup);
+    const [showingPopup, setShowingPopup] = useState(false);
 
     // question functions
     const handleQuestionTitleInputChange = (value: string) => {
@@ -40,11 +55,29 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
     };
     const handleQuestionDelete = () => {
         if (questions.length == 1) { return } // quiz has to have at least one question
-        // TODO: show popup asking for confirmation?
-        const updatedQuestions = [...questions]
-        updatedQuestions.splice(currentQuestionIndex, 1);
-        setCurrentQuestionIndex(currentQuestionIndex == 0 ? 0 : currentQuestionIndex-1)
-        setQuestions(updatedQuestions)
+
+        // TODO: adjust popup based on design
+        const deleteConfirmationPopup: PopupProps = {
+            title: "Are you sure you want to delete this question?",
+            message: "This action cannot be undone.",
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null,
+            primaryButtonText: "Yes, I Am Sure",
+            primaryButtonIcon: null,
+            type: PopupType.Default,
+            onSecondaryClick: () => {
+                setShowingPopup(false)
+            },
+            onPrimaryClick: () => {
+                // delete question
+                const updatedQuestions = [...questions]
+                updatedQuestions.splice(currentQuestionIndex, 1);
+                setCurrentQuestionIndex(currentQuestionIndex == 0 ? 0 : currentQuestionIndex-1)
+                setQuestions(updatedQuestions)
+                setShowingPopup(false)
+            },
+        }
+        showPopup(deleteConfirmationPopup)
     };
     const handleQuestionSelect = (index: number) => {
         setCurrentQuestionIndex(index)
@@ -135,9 +168,30 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
     const saveQuiz = () => {
         // TODO: turn answers and questions into actual answers and questions
         // TODO: save changed questions to firebase
+        // TODO: then go back to previous screen
     };
     const toOverview = () => {
-        // TODO: first show a popup asking for confirmation (discard changes?), if yes go back to the previous screen which has the quiz popup
+        // TODO: adjust based on design
+        const discardChangesPopup: PopupProps = {
+            title: "Are you sure you want to discard your changes?",
+            message: "This action cannot be undone.",
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null,
+            primaryButtonText: "Yes, I Am Sure",
+            primaryButtonIcon: null,
+            type: PopupType.Default,
+            onSecondaryClick: () => {
+                setShowingPopup(false)
+            },
+            onPrimaryClick: () => {
+                // TODO: go back to previous screen without saving changes
+            },
+        }
+        showPopup(discardChangesPopup)
+    }
+    const showPopup = (updatedPopup: PopupProps) => {
+        setPopupProps(updatedPopup)
+        setShowingPopup(true)
     }
 
     return (
@@ -180,6 +234,19 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
                 onSecondaryClick={toOverview}
                 onPrimaryClick={saveQuiz}
             />
+
+            { showingPopup &&
+            <Popup
+                title={popupProps.title}
+                message={popupProps.message}
+                secondaryButtonText={popupProps.secondaryButtonText}
+                secondaryButtonIcon={popupProps.secondaryButtonIcon}
+                primaryButtonText={popupProps.primaryButtonText}
+                primaryButtonIcon={popupProps.primaryButtonIcon}
+                type={popupProps.type}
+                onSecondaryClick={popupProps.onSecondaryClick}
+                onPrimaryClick={popupProps.onPrimaryClick}
+            />}
         </div>
     )
 }
