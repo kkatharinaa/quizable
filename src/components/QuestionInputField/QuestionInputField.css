@@ -1,0 +1,33 @@
+.questionInputField {
+    display: flex;
+    width: 680px;
+    padding: 26px 80px;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background: var(--black);
+}
+
+.questionInputField input {
+    width: inherit;
+    height: inherit;
+    padding: 0;
+    background: transparent;
+    border-width: 0;
+    color: var(--white);
+    font-size: 32px;
+    text-align: center;
+    font-family: 'Sansation', sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.questionInputField input::placeholder {
+    color: var(--text-field-text);
+}
+.questionInputField input:focus {
+    outline: none;
+}

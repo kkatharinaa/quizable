@@ -4,26 +4,27 @@ import {getAnswerInputFieldTypeForIndex} from "../AnswerInputField/AnswerInputFi
 import {AnswerInputFieldWithActions} from "../AnswerInputFieldWithActions/AnswerInputFieldWithActions.tsx";
 import {ButtonComponent} from "../Button/Button.tsx";
 import {ButtonStyle, ButtonType} from "../Button/ButtonExports.ts";
+import {Answer} from "../../models/Answer.ts";
+import {ADD_ICON_DARK} from "../../assets/Icons.ts";
 
 interface AnswerInputFieldContainerProps {
-    answers: string[]
-    correctIndex: number
+    answers: Answer[]
     onChange: (newValue: string, index: number) => void
     onDelete: (index: number) => void
     onToggleCorrect: (index: number) => void
     onAdd: () => void
 }
 
-export const AnswerInputFieldContainer: FC<AnswerInputFieldContainerProps> = ({ answers, correctIndex, onChange, onDelete, onToggleCorrect, onAdd }) => {
+export const AnswerInputFieldContainer: FC<AnswerInputFieldContainerProps> = ({ answers, onChange, onDelete, onToggleCorrect, onAdd }) => {
 
     return (
         <div className="answerInputFieldContainer">
             {answers.map((item, index) => (
                 <AnswerInputFieldWithActions
                     key={index}
-                    value={item}
+                    value={item.value}
                     type={getAnswerInputFieldTypeForIndex(index)}
-                    correct={(correctIndex == index)}
+                    correct={item.correct}
                     index={index}
                     canBeDeleted={(answers.length>2)}
                     onChange={onChange}
@@ -34,7 +35,7 @@ export const AnswerInputFieldContainer: FC<AnswerInputFieldContainerProps> = ({ 
             <div className="filler">
                 <ButtonComponent
                     text={"Add One More Answer"}
-                    icon={null}
+                    icon={ADD_ICON_DARK}
                     type={ButtonType.Medium}
                     style={ButtonStyle.Accent}
                     onClick={onAdd}

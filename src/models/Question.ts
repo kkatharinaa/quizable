@@ -1,4 +1,4 @@
-import {QuestionName} from "./ConstrainedTypes.ts";
+//import {QuestionName} from "./ConstrainedTypes.ts";
 import {QuestionType} from "./Enums.ts";
 import {Answer} from "./Answer.ts";
 
@@ -6,7 +6,7 @@ import {Answer} from "./Answer.ts";
 export class Question {
     // Properties
     public id: string // TODO: should this be a uuid? guid? or string?
-    public questionText: QuestionName
+    public questionText: /*QuestionName*/ string
     public answers: Answer[]
     public maxQuestionTime: number // if 0, the time allowed for this question will be unlimited, unless overridden by quiz isTimeForPoints toggle
     public questionPoints: number
@@ -14,10 +14,11 @@ export class Question {
     public questionType: QuestionType
     public showLiveStats: boolean
 
-    static default: Question = new Question("0", QuestionName.tryMake("Which colour is the sky?")!, [Answer.default, Answer.default], 0, 100, 0, QuestionType.SingleChoice, false)
+    static default: Question = new Question("0", /*QuestionName.tryMake("Which colour is the sky?")!*/"Which colour is the sky?", [Answer.default, Answer.default], 0, 100, 0, QuestionType.SingleChoice, false)
+    static empty: Question = new Question("0", /*QuestionName.tryMake("Which colour is the sky?")!*/"", [Answer.emptyButCorrect, Answer.empty], 0, 100, 0, QuestionType.SingleChoice, false)
 
     // Constructor
-    constructor(id: string, questionText: QuestionName, answers: Answer[], maxQuestionTime: number, questionPoints: number, questionPointsModifier: number, questionType: QuestionType, showLiveStats: boolean) {
+    constructor(id: string, questionText: /*QuestionName*/string, answers: Answer[], maxQuestionTime: number, questionPoints: number, questionPointsModifier: number, questionType: QuestionType, showLiveStats: boolean) {
         this.id = id
         this.questionText = questionText
         this.answers = answers

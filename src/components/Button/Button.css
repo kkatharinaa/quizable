@@ -6,25 +6,23 @@ button {
     gap: 10px;
     border-radius: 6px;
     border-width: 0;
+    --shadow-width-medium: 4px;
+    --shadow-width-long: 6px;
+    box-sizing: border-box;
 }
 /* Change ButtonType */
 button.short {
     color: var(--black);
+    margin-bottom: var(--shadow-width-medium);
 }
 button.long {
     /*width: 392px;*/
+    margin-bottom: var(--shadow-width-long);
 }
 button.medium {
     padding: 12px 14px;
     gap: 8px;
-}
-
-button:hover {
-    /* TODO */
-}
-button:focus,
-button:focus-visible {
-    /* TODO */
+    margin-bottom: var(--shadow-width-medium);
 }
 
 button img {
@@ -53,65 +51,87 @@ button.medium span {
 /* Change ButtonStyle */
 button.primary {
     background: var(--primary-button);
-    box-shadow: 0px 6px 0px 0px var(--primary-button-shadow);
+    box-shadow: 0px var(--shadow-width-long) 0px 0px var(--primary-button-shadow);
     color: var(--white);
 }
 button.primary.medium, button.primary.short {
-    box-shadow: 0px 4px 0px 0px var(--primary-button-shadow);
+    box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--primary-button-shadow);
 }
 button.secondary {
     background: var(--white);
-    box-shadow: 0px 6px 0px 0px var(--secondary-button-shadow);
+    box-shadow: 0px var(--shadow-width-long) 0px 0px var(--secondary-button-shadow);
     color: var(--black);
 }
 button.secondary.medium, button.secondary.short {
-    box-shadow: 0px 4px 0px 0px var(--secondary-button-shadow);
+    box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--secondary-button-shadow);
 }
 button.accent {
     background: var(--accent-button);
-    box-shadow: 0px 6px 0px 0px var(--accent-button-shadow);
+    box-shadow: 0px var(--shadow-width-long) 0px 0px var(--accent-button-shadow);
     color: var(--black);
 }
 button.accent.medium, button.accent.short {
-    box-shadow: 0px 4px 0px 0px var(--accent-button-shadow);
+    box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--accent-button-shadow);
 }
 button.settings {
     background: var(--settings-button);
-    box-shadow: 0px 6px 0px 0px var(--settings-button-shadow);
+    box-shadow: 0px var(--shadow-width-long) 0px 0px var(--settings-button-shadow);
     color: var(--white);
 }
 button.settings.medium, button.settings.short {
-    box-shadow: 0px 4px 0px 0px var(--settings-button-shadow);
+    box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--settings-button-shadow);
 }
 button.delete {
     background: var(--delete-button);
-    box-shadow: 0px 6px 0px 0px var(--delete-button-shadow);
+    box-shadow: 0px var(--shadow-width-long) 0px 0px var(--delete-button-shadow);
     color: var(--black);
 }
 button.delete.medium, button.delete.short {
-    box-shadow: 0px 4px 0px 0px var(--delete-button-shadow);
+    box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--delete-button-shadow);
 }
 button.disabled {
     background: var(--disabled-button);
-    box-shadow: 0px 6px 0px 0px var(--disabled-button-shadow);
+    box-shadow: 0px var(--shadow-width-long) 0px 0px var(--disabled-button-shadow);
     color: var(--disabled-button-text);
 }
 button.disabled.medium, button.disabled.short {
-    box-shadow: 0px 4px 0px 0px var(--disabled-button-shadow);
+    box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--disabled-button-shadow);
 }
 button.disabledDark {
     background: var(--disabled-button-dark);
-    box-shadow: 0px 6px 0px 0px var(--disabled-button-dark-shadow);
+    box-shadow: 0px var(--shadow-width-long) 0px 0px var(--disabled-button-dark-shadow);
     color: var(--black);
 }
 button.disabledDark.medium, button.disabledDark.short {
-    box-shadow: 0px 4px 0px 0px var(--disabled-button-dark-shadow);
+    box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--disabled-button-dark-shadow);
 }
 button.correct {
     background: var(--correct-button);
-    box-shadow: 0px 6px 0px 0px var(--correct-button-shadow);
+    box-shadow: 0px var(--shadow-width-long) 0px 0px var(--correct-button-shadow);
     color: var(--black);
 }
 button.correct.medium, button.correct.short {
-    box-shadow: 0px 4px 0px 0px var(--correct-button-shadow);
+    box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--correct-button-shadow);
+}
+/* TODO, not really working yet
+button.correct:hover {
+    margin-top: calc(var(--shadow-width-long) / 2);
+    box-shadow: 0px calc(var(--shadow-width-long) / 2) 0px 0px var(--correct-button-shadow);
+}
+button.correct.medium:hover, button.correct.short:hover {
+    margin-top: calc(var(--shadow-width-medium) / 2);
+    box-shadow: 0px calc(var(--shadow-width-medium) / 2) 0px 0px var(--correct-button-shadow);
+}*/
+
+button:focus,
+button:focus-visible, button:active {
+    margin-top: var(--shadow-width-medium);
+    margin-bottom: 0;
+    box-shadow: 0px 0px 0px 0px !important;
+}
+button.long:focus,
+button.long:focus-visible, button.long:active {
+    margin-top: var(--shadow-width-long);
+    margin-bottom: 0;
+    box-shadow: 0px 0px 0px 0px !important;
 }

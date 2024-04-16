@@ -22,3 +22,8 @@ export const TICK_ICON_DARK: Icon = {
     path: '/assets/icon-tick-dark.svg',
     alt: 'Settings',
 };
+
+export const ADD_ICON_DARK: Icon = {
+    path: '/assets/icon-add-dark.svg',
+    alt: 'Add',
+};

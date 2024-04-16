@@ -3,7 +3,7 @@
 .answerInputField {
     display: flex;
     /*width: 340px;*/align-self: stretch;
-    padding: 60px 10px;
+    padding: 60px 30px;
     justify-content: center;
     align-items: center;
     gap: 10px;
@@ -14,7 +14,7 @@
 }
 
 .answerInputField input {
-    width: fit-content;
+    width: 100%;
     height: inherit;
     padding: 0;
     background: transparent;
@@ -24,8 +24,10 @@
     text-align: center;
     font-family: 'Sansation', sans-serif;
     font-style: normal;
-    font-weight: bold;
+    font-weight: normal;
     line-height: normal;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 .answerInputField input::placeholder {
     color: var(--text-field-text);

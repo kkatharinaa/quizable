@@ -9,3 +9,11 @@
     justify-content: space-between;
     background: var(--white2);
 }
+
+.createEditor .contentAndMenu {
+    display: flex;
+    align-items: flex-start;
+    flex: 1 0 0;
+    align-self: stretch;
+    overflow: hidden;
+}

@@ -1,0 +1,28 @@
+.questionEditor {
+    display: flex;
+    padding: 100px 100px 60px 100px;
+    flex-direction: column;
+    align-items: center;
+    gap: 80px;
+    flex: 1 0 0;
+    align-self: stretch;
+    overflow-y: scroll;
+}
+
+.questionEditor .titleAndSettings {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.questionEditor .titleAndSettings .buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: fit-content;
+    align-self: center;
+}
+.questionEditor .titleAndSettings .buttons:first-of-type {
+    visibility: hidden;
+}

@@ -1,0 +1,62 @@
+.questionShortcut {
+    display: flex;
+    padding: 26px 20px;
+    align-items: flex-start;
+    gap: 10px;
+    align-self: stretch;
+}
+
+.questionShortcut.questionSelected {
+    background: var(--primary-shadow);
+}
+
+.questionShortcut .questionCard {
+    display: flex;
+    width: calc(var(--question-shortcut-text-width) + 40px*2);
+    height: calc((var(--question-shortcut-text-size))*3 + 40px*2 + 9px);
+    padding: 40px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    background: var(--white);
+    position: relative;
+    overflow: hidden;
+    --question-shortcut-text-width: 135px;
+    --question-shortcut-text-size: 18px;
+    box-sizing: border-box;
+}
+
+.questionShortcut .questionCard .questionText {
+    width: 100%;
+    max-height: 100%;
+    /*flex-shrink: 0;*/
+    color: var(--black2);
+    text-align: center;
+    font-family: 'Sansation', sans-serif;
+    font-size: var(--question-shortcut-text-size);
+    font-style: normal;
+    font-weight: bold;
+    line-height: normal;
+    z-index: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-wrap: break-word;
+    display: block; /* Fallback for non-webkit */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.questionShortcut .questionCard .questionIndex {
+    position: absolute;
+    width: 100%;
+    color: var(--grey-text);
+    text-align: center;
+    font-family: 'Sansation', sans-serif;
+    font-size: 68px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
+    display: inline-block;
+    vertical-align: middle;
+}

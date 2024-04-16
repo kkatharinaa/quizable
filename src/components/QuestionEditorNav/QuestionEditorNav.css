@@ -1,0 +1,23 @@
+.questionEditorNav {
+    display: flex;
+    padding-top: 14px;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+    align-self: stretch;
+    border-left: 3px solid var(--primary-shadow);
+    background: var(--primary-color);
+}
+
+.questionEditorNav .questionShortcuts {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1 0 0;
+    overflow-y: scroll;
+}
+
+.questionEditorNav button {
+    padding: 12px 50px;
+    gap: 10px;
+}
