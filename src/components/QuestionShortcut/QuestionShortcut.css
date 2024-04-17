@@ -12,16 +12,16 @@
 
 .questionShortcut .questionCard {
     display: flex;
-    width: calc(var(--question-shortcut-text-width) + 40px*2);
-    height: calc((var(--question-shortcut-text-size))*3 + 40px*2 + 9px);
-    padding: 40px;
+    width: calc(var(--question-shortcut-text-width) + 20px*2);
+    height: calc((var(--question-shortcut-text-size))*3 + 30px*2 + 9px);
+    padding: 30px 20px;
     justify-content: center;
     align-items: center;
     border-radius: 4px;
     background: var(--white);
     position: relative;
     overflow: hidden;
-    --question-shortcut-text-width: 135px;
+    --question-shortcut-text-width: 140px;
     --question-shortcut-text-size: 18px;
     box-sizing: border-box;
 }

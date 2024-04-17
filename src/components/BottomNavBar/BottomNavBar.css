@@ -2,7 +2,7 @@
     display: flex;
     width: inherit;
     box-sizing: border-box;
-    padding: 14px 60px 24px 60px;
+    padding: 11px 60px 18px 60px;
     justify-content: space-between;
     align-items: center;
     border-top: 3px solid var(--primary-shadow);

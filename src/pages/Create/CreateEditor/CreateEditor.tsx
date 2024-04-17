@@ -141,6 +141,7 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
         setQuestions(updatedQuestions)
     }
     const handleAnswerAdd = () => {
+        if (questions[currentQuestionIndex].answers.length == 6) { return } // max 6 answers per question
         const updatedQuestions = [...questions]
         const currentQuestion = updatedQuestions[currentQuestionIndex];
         const newAnswers = [...currentQuestion.answers, Answer.empty];

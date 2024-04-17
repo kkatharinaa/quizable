@@ -38,6 +38,8 @@ export const AnswerInputFieldContainer: FC<AnswerInputFieldContainerProps> = ({ 
                     onDragDrop={onDragDrop}
                 />
             ))}
+
+            { answers.length < 6 &&
             <div className="filler">
                 <ButtonComponent
                     text={"Add One More Answer"}
@@ -47,7 +49,8 @@ export const AnswerInputFieldContainer: FC<AnswerInputFieldContainerProps> = ({ 
                     onClick={onAdd}
                 />
             </div>
-            {answers.length % 2 == 0 &&
+            }
+            { (answers.length % 2 == 0 && answers.length < 6) &&
                 <div className="filler"></div>
             } {/* empty div for layout purposes*/}
         </div>
