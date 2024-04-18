@@ -36,7 +36,7 @@ const pagesData: RouterType[] = [
     },
     {
       path: "overview/editor",
-      element: <CreateEditor quizID={"0"}/>, // TODO: put correct quizID here or only make this route accessible from within the quiz overview
+      element: <CreateEditor/>,
       title: "Edit | Quizable"
     },
     {

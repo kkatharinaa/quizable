@@ -24,7 +24,7 @@ export const AnswerInputFieldContainer: FC<AnswerInputFieldContainerProps> = ({ 
         <div className="answerInputFieldContainer">
             {answers.map((item, index) => (
                 <AnswerInputFieldWithActions
-                    key={index}
+                    key={index} // TODO: replace with item.id once Firebase has been added
                     value={item.value}
                     type={getAnswerInputFieldTypeForIndex(index)}
                     correct={item.correct}

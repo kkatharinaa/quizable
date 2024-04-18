@@ -13,31 +13,30 @@ import {Answer} from "../../../models/Answer.ts";
 import {QuestionEditorNav} from "../../../components/QuestionEditorNav/QuestionEditorNav.tsx";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {PopupType} from "../../../components/Popup/PopupExports.ts";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 
-interface CreateEditorProps {
-    quizID: string;
-}
+export const CreateEditor: FC = () => {
 
-export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
+    // set up router stuff and getting query parameters
+    const navigate = useNavigate();
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+
+    // TODO: check that we are logged in!! else redirect to home
+
+    //const { quizID } = useParams();
+    const quizID = searchParams.get('id');
+    if (!quizID) throw new Error("No such quiz ID"); // TODO: show error page
+
     // TODO: get quiz from Firebase using the quizID - rn I assume that before we reach the quizeditor screen, there will be the quiz detail popup, in which i first choose my quiz's title and settings, and it already gets saved like that with no questions to firebase. only if i click on a button there it will take me to this editor
     // so far we dont have firebase implemented, so just use a fake quiz
     const originalQuiz: Quiz = new Quiz(quizID, QuizName.tryMake("Untitled Quiz")!, [Question.empty], QuizOptions.default, AuthenticatedUser.default, new Date(), null)
-
-    const initialPopup: PopupProps = {
-        title: "",
-        message: null,
-        secondaryButtonText: "",
-        secondaryButtonIcon: null,
-        primaryButtonText: "",
-        primaryButtonIcon: null,
-        type: PopupType.Default
-    }
 
     //const [quiz, setQuiz] = useState<Quiz>(originalQuiz);
     const [questions, setQuestions] = useState<Question[]>(originalQuiz.questions);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-    const [popupProps, setPopupProps] = useState(initialPopup);
+    const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
 
     // question functions
@@ -169,7 +168,7 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
     const saveQuiz = () => {
         // TODO: turn answers and questions into actual answers and questions
         // TODO: save changed questions to firebase
-        // TODO: then go back to previous screen
+        navigateToOverview()
     };
     const toOverview = () => {
         // TODO: adjust based on design
@@ -185,13 +184,16 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
                 setShowingPopup(false)
             },
             onPrimaryClick: () => {
-                // TODO: go back to previous screen without saving changes
+                navigateToOverview()
             },
         }
         showPopup(discardChangesPopup)
     }
-    const showPopup = (updatedPopup: PopupProps) => {
-        setPopupProps(updatedPopup)
+    const navigateToOverview = () => {
+        navigate(`/overview?showingPopupFor=${quizID}`)
+    }
+    const showPopup = (popup: PopupProps) => {
+        setPopupProps(popup)
         setShowingPopup(true)
     }
 
@@ -236,7 +238,7 @@ export const CreateEditor: FC<CreateEditorProps> = ({quizID}) => {
                 onPrimaryClick={saveQuiz}
             />
 
-            { showingPopup &&
+            { (showingPopup && popupProps != null) &&
             <Popup
                 title={popupProps.title}
                 message={popupProps.message}

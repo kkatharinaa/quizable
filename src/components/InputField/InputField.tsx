@@ -1,24 +1,26 @@
 import {ChangeEvent, FC} from "react";
-import "./QuestionInputField.css"
+import "./InputField.css"
+import {InputFieldType} from "./InputFieldExports.ts";
 
-interface QuestionInputFieldProps {
+interface InputFieldProps {
     value: string
     onChange: (newValue: string) => void
+    type: InputFieldType
 }
 
-export const QuestionInputField: FC<QuestionInputFieldProps> = ({ value, onChange}) => {
+export const InputField: FC<InputFieldProps> = ({ value, onChange, type}) => {
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         onChange(event.target.value);
     };
 
     return (
-        <div className="questionInputField">
+        <div className="inputField">
             <input
                 type="text"
                 value={value}
                 onChange={handleInputChange}
-                placeholder="Type your question here"
+                placeholder={type == InputFieldType.Question ? "Type your question here" : "Untitled Quiz"}
             />
         </div>
     )

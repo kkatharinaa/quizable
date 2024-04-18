@@ -1,4 +1,4 @@
-.questionInputField {
+.inputField {
     display: flex;
     width: 680px;
     padding: 26px 80px;
@@ -9,7 +9,7 @@
     background: var(--black);
 }
 
-.questionInputField input {
+.inputField input {
     width: inherit;
     height: inherit;
     padding: 0;
@@ -25,9 +25,9 @@
     text-overflow: ellipsis;
     overflow: hidden;
 }
-.questionInputField input::placeholder {
+.inputField input::placeholder {
     color: var(--text-field-text);
 }
-.questionInputField input:focus {
+.inputField input:focus {
     outline: none;
 }

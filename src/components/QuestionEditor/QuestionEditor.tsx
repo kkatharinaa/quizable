@@ -1,11 +1,12 @@
 import React, {FC} from "react";
 import "./QuestionEditor.css"
 import {AnswerInputFieldContainer} from "../AnswerInputFieldContainer/AnswerInputFieldContainer.tsx";
-import {QuestionInputField} from "../QuestionInputField/QuestionInputField.tsx";
+import {InputField} from "../InputField/InputField.tsx";
 import {ButtonComponent} from "../Button/Button.tsx";
 import {DELETE_ICON_DARK, DELETE_ICON_DISABLED, SETTINGS_ICON_DARK} from "../../assets/Icons.ts";
 import {ButtonStyle, ButtonType} from "../Button/ButtonExports.ts";
 import {Answer} from "../../models/Answer.ts";
+import {InputFieldType} from "../InputField/InputFieldExports.ts";
 
 interface QuestionEditorProps {
     index: number
@@ -49,9 +50,10 @@ export const QuestionEditor: FC<QuestionEditorProps> = ({ index, questionTitle, 
                         style={ButtonStyle.Disabled}
                     />
                 </div>
-                <QuestionInputField
+                <InputField
                     value={questionTitle}
                     onChange={onTitleChange}
+                    type={InputFieldType.Question}
                 />
                 <div className="buttons">
                     <ButtonComponent

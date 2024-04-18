@@ -22,7 +22,7 @@ export const QuizCardContainer: FC<QuizCardContainerProps> = ({ quizzes, onEdit,
         <div className="quizCardContainer">
             {quizzes.map((item, index) => (
                 <QuizCardWithActions
-                    key={index}
+                    key={index} // TODO: replace with item.id once Firebase has been added
                     index={index}
                     quizName={item.name.value}
                     onEdit={onEdit}

@@ -8,7 +8,7 @@ export class Question {
     public id: string // TODO: should this be a uuid? guid? or string?
     public questionText: /*QuestionName*/ string
     public answers: Answer[]
-    public maxQuestionTime: number // if 0, the time allowed for this question will be unlimited, unless overridden by quiz isTimeForPoints toggle
+    public maxQuestionTime: number // if 0, the time allowed for this question will be unlimited
     public questionPoints: number
     public questionPointsModifier: number // if 0, no points will be deducted if the user takes longer to answer
     public questionType: QuestionType
