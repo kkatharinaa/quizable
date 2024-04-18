@@ -36,6 +36,11 @@
     outline: none;
 }
 
+.answerInputField .threeDots {
+    z-index: 1;
+    position: absolute;
+}
+
 .answerInputField object:first-of-type {
     z-index: 1;
     position: absolute;

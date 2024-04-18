@@ -2,9 +2,11 @@ import React, {FC} from "react";
 import "./AnswerInputFieldWithActions.css"
 import {AnswerInputFieldType} from "../AnswerInputField/AnswerInputFieldExports.ts";
 import {AnswerInputField} from "../AnswerInputField/AnswerInputField.tsx";
-import {DELETE_ICON_DARK, TICK_ICON_DARK} from "../../assets/Icons.ts";
+import {DELETE_ICON_DARK, DELETE_ICON_DISABLED, TICK_ICON_DARK} from "../../assets/Icons.ts";
 import {ButtonStyle, ButtonType} from "../Button/ButtonExports.ts";
 import {ButtonComponent} from "../Button/Button.tsx";
+import {ThreeDotsStyle} from "../ThreeDots/ThreeDotsExports.ts";
+import {ThreeDots} from "../ThreeDots/ThreeDots.tsx";
 
 interface AnswerInputFieldWithActionsProps {
     value: string
@@ -30,8 +32,6 @@ export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> =
         onToggleCorrect(index)
     }
 
-    //TODO: indicate that it is able to be dragged?
-
     return (
         <div className="answerInputFieldWithActions"
              draggable
@@ -40,6 +40,7 @@ export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> =
              onDrop={(e) => onDragDrop(e, index)}
             /*onDragEnd={onDragEnd}*/
         >
+            <ThreeDots style={ThreeDotsStyle.TextfieldText}/>
             <AnswerInputField
                 value={value}
                 type={type}
@@ -49,9 +50,9 @@ export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> =
             <div className="buttons">
                 <ButtonComponent
                     text="Delete Answer"
-                    icon={DELETE_ICON_DARK}
+                    icon={canBeDeleted ? DELETE_ICON_DARK : DELETE_ICON_DISABLED}
                     type={ButtonType.Short}
-                    style={canBeDeleted ? ButtonStyle.Delete : ButtonStyle.DisabledDark}
+                    style={canBeDeleted ? ButtonStyle.Delete : ButtonStyle.Disabled}
                     onClick={handleDelete}
                 />
                 <ButtonComponent

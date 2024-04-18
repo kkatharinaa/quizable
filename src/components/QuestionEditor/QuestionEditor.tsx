@@ -3,7 +3,7 @@ import "./QuestionEditor.css"
 import {AnswerInputFieldContainer} from "../AnswerInputFieldContainer/AnswerInputFieldContainer.tsx";
 import {QuestionInputField} from "../QuestionInputField/QuestionInputField.tsx";
 import {ButtonComponent} from "../Button/Button.tsx";
-import {DELETE_ICON_DARK, SETTINGS_ICON_DARK} from "../../assets/Icons.ts";
+import {DELETE_ICON_DARK, DELETE_ICON_DISABLED, SETTINGS_ICON_DARK} from "../../assets/Icons.ts";
 import {ButtonStyle, ButtonType} from "../Button/ButtonExports.ts";
 import {Answer} from "../../models/Answer.ts";
 
@@ -63,9 +63,9 @@ export const QuestionEditor: FC<QuestionEditorProps> = ({ index, questionTitle, 
                     />
                     <ButtonComponent
                         text="Delete Question"
-                        icon={DELETE_ICON_DARK}
+                        icon={canBeDeleted ? DELETE_ICON_DARK : DELETE_ICON_DISABLED}
                         type={ButtonType.Short}
-                        style={canBeDeleted ? ButtonStyle.Delete : ButtonStyle.DisabledDark}
+                        style={canBeDeleted ? ButtonStyle.Delete : ButtonStyle.Disabled}
                         onClick={handleQuestionDelete}
                     />
                 </div>

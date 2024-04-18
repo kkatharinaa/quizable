@@ -4,6 +4,7 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    position: relative;
 }
 
 .buttons {
@@ -14,4 +15,10 @@
 }
 .buttons button.medium {
     flex: 1 0 0;
+}
+
+.answerInputFieldWithActions .threeDots {
+    position: absolute;
+    z-index: 1;
+    top: 10px;
 }

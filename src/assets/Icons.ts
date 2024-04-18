@@ -13,6 +13,11 @@ export const DELETE_ICON_DARK: Icon = {
     alt: 'Delete',
 };
 
+export const DELETE_ICON_DISABLED: Icon = {
+    path: '/assets/icon-trash-disabled.svg',
+    alt: 'Delete',
+};
+
 export const SETTINGS_ICON_DARK: Icon = {
     path: '/assets/icon-settings-dark.svg',
     alt: 'Settings',

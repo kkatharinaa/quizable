@@ -1,6 +1,8 @@
 import React, {FC} from "react";
 import "./QuestionShortcut.css"
 import {Question} from "../../models/Question.ts";
+import {ThreeDots} from "../ThreeDots/ThreeDots.tsx";
+import {ThreeDotsStyle} from "../ThreeDots/ThreeDotsExports.ts";
 
 interface QuestionShortcutProps {
     index: number;
@@ -18,8 +20,6 @@ export const QuestionShortcut: FC<QuestionShortcutProps> = ({ index, question, i
         onSelect(index)
     }
 
-    //TODO: indicate that it is able to be dragged?
-
     return (
         <div className={`questionShortcut ${isSelected ? 'questionSelected' : ''}`}
              onClick={handleShortcutClick}
@@ -29,6 +29,8 @@ export const QuestionShortcut: FC<QuestionShortcutProps> = ({ index, question, i
              onDrop={(e) => onDragDrop(e, index)}
              /*onDragEnd={onDragEnd}*/
         >
+            <ThreeDots style={isSelected ? ThreeDotsStyle.PrimaryColour : ThreeDotsStyle.PrimaryShadow}/>
+            
             <div className="questionCard">
                 <p className="questionText">{question.questionText === "" ? "Question" : question.questionText}</p>
                 <p className="questionIndex">{index + 1}</p>

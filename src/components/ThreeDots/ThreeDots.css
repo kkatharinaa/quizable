@@ -1,0 +1,11 @@
+.threeDots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+.threeDots img {
+    width: 6px;
+    height: 6px;
+}
