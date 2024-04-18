@@ -91,3 +91,4 @@ gcloud run deploy quizapp --region=europe-west2 --image europe-central2-docker.p
 Enjoy!
 
 
+<!-- Add how to deploy on dedicated server with docker infrastructure -->
