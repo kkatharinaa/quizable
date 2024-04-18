@@ -6,7 +6,7 @@ import { SAVE_ICON_LIGHT } from "../../assets/Icons";
 import { ButtonStyle, ButtonType } from "../../components/Button/ButtonExports";
 import { v4 as uuidv4 } from 'uuid'
 import { Quiz } from "../../models/Quiz";
-import QuizService from "../../services/QuizService";
+import QuizRepository from "../../repositories/QuizRepository";
 
 const Home: FC = () => {
 
@@ -30,7 +30,7 @@ const Home: FC = () => {
 
     // now we will go straight the quiz overview.
     const newQuiz: Quiz = Quiz.default;
-    QuizService.add(newQuiz);
+    QuizRepository.add(newQuiz);
   }
 
   return (

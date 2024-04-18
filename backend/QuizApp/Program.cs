@@ -1,3 +1,6 @@
+using Microsoft.Extensions.Logging;
+using QuizApp.Controllers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -8,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
+builder.Services.AddLogging(builder => builder.AddConsole());
 
 var port = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrEmpty(port)) {
@@ -15,6 +19,7 @@ if (!string.IsNullOrEmpty(port)) {
 }
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

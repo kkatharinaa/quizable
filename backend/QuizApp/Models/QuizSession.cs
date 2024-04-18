@@ -14,4 +14,9 @@ public class QuizSession
         State = state;
         DeviceId = deviceId;
     }
+
+    public override string ToString()
+    {
+        return $"{{{Id}, {QuizId}, {State}, {DeviceId}}}";
+    }
 }
