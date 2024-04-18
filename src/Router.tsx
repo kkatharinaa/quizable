@@ -7,7 +7,9 @@ import { QuizLobby } from "./pages/Quiz/QuizLobby/QuizLobby";
 import QuizResult from "./pages/Quiz/QuizResult/QuizResult";
 import { QuizSession } from "./pages/Quiz/QuizSession/QuizSession";
 import {CreateEditor} from "./pages/Create/CreateEditor/CreateEditor.tsx";
+import {CreateOverview} from "./pages/Create/CreateOverview/CreateOverview.tsx";
 
+// TODO: only make master routes accessible if you are logged in
 
 export interface RouterType {
     title: string;
@@ -28,14 +30,19 @@ const pagesData: RouterType[] = [
       title: "About | Quizable"
     },
     {
-      path: "create/editor",
-      element: <CreateEditor quizID={"0"}/>, // TODO: put correct quizID here or only make this route accessible from within the quiz overview
-      title: "Create / Edit | Quizable"
+        path: "overview",
+        element: <CreateOverview/>,
+        title: "Overview | Quizable"
     },
     {
-      path: "create/email",
+      path: "overview/editor",
+      element: <CreateEditor quizID={"0"}/>, // TODO: put correct quizID here or only make this route accessible from within the quiz overview
+      title: "Edit | Quizable"
+    },
+    {
+      path: "login",
       element: <CreateSendEmail />,
-      title: "Create / Edit | Quizable"
+      title: "Login | Quizable"
     },
     {
       path: "join",

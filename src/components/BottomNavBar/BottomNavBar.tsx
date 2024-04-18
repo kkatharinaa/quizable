@@ -18,7 +18,7 @@ interface BottomNavBarProps {
 export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secondaryButtonIcon, primaryButtonText, primaryButtonIcon, type, onPrimaryClick, onSecondaryClick}) => {
 
     return (
-        <div className="bottomNavBar">
+        <div className={`bottomNavBar ${type != BottomNavBarType.Default ? "centered" : ""}`}>
             { (type == BottomNavBarType.Default || type == BottomNavBarType.SecondaryOnly) &&
             <ButtonComponent
                 text={secondaryButtonText}

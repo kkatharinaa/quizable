@@ -1,0 +1,58 @@
+.quizCardWithActions {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.buttons {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    align-self: stretch;
+}
+.buttons button.medium {
+    flex: 1 0 0;
+}
+
+.quizCard {
+    display: flex;
+    padding: 67px 48px;
+    justify-content: center;
+    align-items: center;
+    align-self: stretch;
+    border-radius: 8px;
+    background: var(--white);
+    position: relative;
+}
+
+.quizCard .quizText {
+    color: var(--black2);
+    text-align: center;
+    font-family: 'Sansation', sans-serif;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: bold;
+    line-height: normal;
+    z-index: 1;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.quizCard .quizIndex {
+    position: absolute;
+    width: 100%;
+    color: var(--grey-text);
+    text-align: center;
+    font-family: 'Sansation', sans-serif;
+    font-size: 100px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+}

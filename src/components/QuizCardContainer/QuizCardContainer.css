@@ -1,0 +1,27 @@
+.quizCardContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 80px;
+    align-self: stretch;
+    flex-wrap: wrap;
+}
+
+.quizCardContainer .quizCardWithActions, .quizCardContainer .filler {
+    flex-basis: 40%;
+    max-width: 40%;
+}
+
+.quizCardContainer .filler button {
+    display: flex;
+    gap: 10px;
+    align-self: stretch;
+}
+
+.filler {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
