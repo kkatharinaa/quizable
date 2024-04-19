@@ -1,14 +1,13 @@
-
-// TODO: move somewhere else? / adjust so it fits everyone's needs
 import {Email} from "./ConstrainedTypes.ts";
+import {v4 as uuid} from "uuid";
 
 export class AuthenticatedUser {
     // Properties
-    public id: string // TODO: should this be a uuid? guid? or string?
+    public id: string
     public email: Email
     public autoSendLog: boolean
 
-    static default = new AuthenticatedUser("0", Email.tryMake("user@email.com")!, true)
+    static default = new AuthenticatedUser(uuid(), Email.tryMake("user@email.com")!, true)
 
     // Constructor
     constructor(id: string, email: Email, autoSendLog: boolean) {

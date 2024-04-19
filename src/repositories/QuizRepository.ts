@@ -10,6 +10,7 @@ const toJson = (instance: unknown) => {
     return JSON.parse(JSON.stringify(instance))
 }
 
+// TODO: has to be refactored to have a different structure within firebase once the login gets added, so you only get the quizzes of a specifc user
 export default class QuizRepository {
     static quizCollection = collection(db, 'quiz');
     static getQuizDocument = (path?: string) => doc(this.quizCollection, path ?? uuid())
@@ -27,7 +28,10 @@ export default class QuizRepository {
         return quizzes;
     }
 
-    static getById = async (quizSessionId: string) => {
-        await query(this.quizCollection, where('id','==',quizSessionId))
+    static getById = async (id: string): Promise<Quiz> => {
+        const docRef = doc(this.quizCollection.firestore, this.quizCollection.path, id)
+        const docSnap = await getDoc(docRef);
+
+        return docSnap.data() as Quiz;
     }
 }

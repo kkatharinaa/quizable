@@ -8,8 +8,8 @@ import {QuizCardWithActions} from "../QuizCardWithActions/QuizCardWithActions.ts
 
 interface QuizCardContainerProps {
     quizzes: Quiz[]
-    onEdit: (index: number) => void
-    onPlay: (index: number) => void
+    onEdit: (id: string) => void
+    onPlay: (id: string) => void
     onAdd: () => void
     /*onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void
     onDragOver: (e: React.DragEvent<HTMLDivElement>) => void
@@ -22,8 +22,9 @@ export const QuizCardContainer: FC<QuizCardContainerProps> = ({ quizzes, onEdit,
         <div className="quizCardContainer">
             {quizzes.map((item, index) => (
                 <QuizCardWithActions
-                    key={index} // TODO: replace with item.id once Firebase has been added
+                    key={item.id}
                     index={index}
+                    id={item.id}
                     quizName={item.name.value}
                     onEdit={onEdit}
                     onPlay={onPlay}

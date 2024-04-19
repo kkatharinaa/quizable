@@ -1,9 +1,6 @@
-import React, {FC, useState} from "react";
+import React, {FC, useEffect, useState} from "react";
 import "./CreateEditor.css"
 import {Quiz} from "../../../models/Quiz.ts";
-import {QuizName} from "../../../models/ConstrainedTypes.ts";
-import {QuizOptions} from "../../../models/QuizOptions.ts";
-import {AuthenticatedUser} from "../../../models/AuthenticatedUser.ts";
 import {Question} from "../../../models/Question.ts";
 import {SAVE_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
@@ -13,7 +10,8 @@ import {Answer} from "../../../models/Answer.ts";
 import {QuestionEditorNav} from "../../../components/QuestionEditorNav/QuestionEditorNav.tsx";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {PopupType} from "../../../components/Popup/PopupExports.ts";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
+import QuizRepository from "../../../repositories/QuizRepository.ts";
 
 export const CreateEditor: FC = () => {
 
@@ -28,19 +26,29 @@ export const CreateEditor: FC = () => {
     const quizID = searchParams.get('id');
     if (!quizID) throw new Error("No such quiz ID"); // TODO: show error page
 
-    // TODO: get quiz from Firebase using the quizID - rn I assume that before we reach the quizeditor screen, there will be the quiz detail popup, in which i first choose my quiz's title and settings, and it already gets saved like that with no questions to firebase. only if i click on a button there it will take me to this editor
-    // so far we dont have firebase implemented, so just use a fake quiz
-    const originalQuiz: Quiz = new Quiz(quizID, QuizName.tryMake("Untitled Quiz")!, [Question.empty], QuizOptions.default, AuthenticatedUser.default, new Date(), null)
-
-    //const [quiz, setQuiz] = useState<Quiz>(originalQuiz);
-    const [questions, setQuestions] = useState<Question[]>(originalQuiz.questions);
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-
+    const [originalQuiz, setOriginalQuiz] = useState<Quiz | null>(null) // only needed for saving
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number | null>(null);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
 
+    // get quiz from Firebase using the quizID
+    const setQuizFromFirestore = async () => {
+        const quizFromFirestore: Quiz = await QuizRepository.getById(quizID)
+        setQuestions(quizFromFirestore.questions)
+        setCurrentQuestionIndex(0)
+        setOriginalQuiz(quizFromFirestore)
+    }
+
+    useEffect(() => {
+        setQuizFromFirestore()
+    }, []);
+
+    // TODO: refacter index stuff for questions and answers to id stuff
+
     // question functions
     const handleQuestionTitleInputChange = (value: string) => {
+        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
         const updatedQuestions = [...questions]
         // create a copy of the question we want to update, change the value we want to change and reassign it to the state copy (updatedquestions)
         updatedQuestions[currentQuestionIndex] = {
@@ -69,6 +77,7 @@ export const CreateEditor: FC = () => {
             },
             onPrimaryClick: () => {
                 // delete question
+                if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
                 const updatedQuestions = [...questions]
                 updatedQuestions.splice(currentQuestionIndex, 1);
                 setCurrentQuestionIndex(currentQuestionIndex == 0 ? 0 : currentQuestionIndex-1)
@@ -82,7 +91,7 @@ export const CreateEditor: FC = () => {
         setCurrentQuestionIndex(index)
     }
     const handleQuestionAdd = () => {
-        const updatedQuestions = [...questions, Question.empty]
+        const updatedQuestions = [...questions, Question.default]
         setQuestions(updatedQuestions)
     }
     const handleQuestionDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
@@ -97,6 +106,7 @@ export const CreateEditor: FC = () => {
         const [draggedItem] = updatedQuestions.splice(dragIndex, 1);
         updatedQuestions.splice(dropIndex, 0, draggedItem);
 
+        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
         if (dragIndex == currentQuestionIndex) { // we dragged our selected question somewhere else, so the currentQuestionIndex has to be updated to the new index
             setCurrentQuestionIndex(dropIndex)
         } else if (dropIndex < dragIndex) { // we dragged a question which was not the selected question in front of our selected question
@@ -112,6 +122,7 @@ export const CreateEditor: FC = () => {
 
     // answer functions
     const handleAnswerInputChange = (value: string, index: number) => {
+        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
         const updatedQuestions = [...questions]
         updatedQuestions[currentQuestionIndex] = {
             ...updatedQuestions[currentQuestionIndex],
@@ -126,11 +137,13 @@ export const CreateEditor: FC = () => {
         setQuestions(updatedQuestions)
     };
     const handleAnswerDelete = (index: number) => {
+        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
         const updatedQuestions = [...questions]
         updatedQuestions[currentQuestionIndex].answers.splice(index, 1);
         setQuestions(updatedQuestions)
     }
     const handleAnswerToggleCorrect = (index: number) => {
+        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
         const updatedQuestions = [...questions]
         // set only the answer at the specified index to true
         updatedQuestions[currentQuestionIndex].answers = updatedQuestions[currentQuestionIndex].answers.map((answer, i) => ({
@@ -140,10 +153,11 @@ export const CreateEditor: FC = () => {
         setQuestions(updatedQuestions)
     }
     const handleAnswerAdd = () => {
+        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
         if (questions[currentQuestionIndex].answers.length == 6) { return } // max 6 answers per question
         const updatedQuestions = [...questions]
         const currentQuestion = updatedQuestions[currentQuestionIndex];
-        const newAnswers = [...currentQuestion.answers, Answer.empty];
+        const newAnswers = [...currentQuestion.answers, Answer.default];
         updatedQuestions[currentQuestionIndex] = {...currentQuestion, answers: newAnswers};
         setQuestions(updatedQuestions)
     }
@@ -154,6 +168,7 @@ export const CreateEditor: FC = () => {
         e.preventDefault();
     };
     const handleAnswerDragDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
         const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
         const updatedQuestions = [...questions];
         const [draggedItem] = updatedQuestions[currentQuestionIndex].answers.splice(dragIndex, 1);
@@ -166,8 +181,11 @@ export const CreateEditor: FC = () => {
 
     // nav functions
     const saveQuiz = () => {
-        // TODO: turn answers and questions into actual answers and questions
-        // TODO: save changed questions to firebase
+        if (originalQuiz == null) throw new Error("error saving quiz") // TODO: display error
+        if (!Question.areEqual(originalQuiz.questions, questions)) {
+            const updatedQuiz = {...originalQuiz, questions: questions}
+            QuizRepository.add(updatedQuiz)
+        }
         navigateToOverview()
     };
     const toOverview = () => {
@@ -201,6 +219,7 @@ export const CreateEditor: FC = () => {
         <div className="createEditor">
 
             <div className="contentAndMenu">
+                { currentQuestionIndex != null &&
                 <QuestionEditor
                     index={currentQuestionIndex}
                     questionTitle={questions[currentQuestionIndex].questionText}
@@ -216,7 +235,8 @@ export const CreateEditor: FC = () => {
                     onAnswerDragStart={handleAnswerDragStart}
                     onAnswerDragOver={handleAnswerDragOver}
                     onAnswerDragDrop={handleAnswerDragDrop}
-                />
+                />}
+                { currentQuestionIndex != null &&
                 <QuestionEditorNav
                     questions={questions}
                     currentQuestionIndex={currentQuestionIndex}
@@ -225,7 +245,7 @@ export const CreateEditor: FC = () => {
                     onDragStart={handleQuestionDragStart}
                     onDragOver={handleQuestionDragOver}
                     onDragDrop={handleQuestionDragDrop}
-                />
+                />}
             </div>
 
             <BottomNavBar

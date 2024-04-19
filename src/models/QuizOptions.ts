@@ -1,6 +1,5 @@
 import {ColourScheme} from "./Enums.ts";
 
-// TODO: move somewhere else? / adjust so it fits everyone's needs
 export class QuizOptions {
     // Properties
     public isLeaderboardBetween: boolean

@@ -30,7 +30,7 @@ export const QuestionEditorNav: FC<QuestionEditorNavProps> = ({ questions, curre
             <div className="questionShortcuts">
                 {questions.map((item, index) => (
                     <QuestionShortcut
-                        key={index} // TODO: replace with item.id once Firebase has been added
+                        key={item.id}
                         index={index}
                         question={item}
                         isSelected={currentQuestionIndex == index}

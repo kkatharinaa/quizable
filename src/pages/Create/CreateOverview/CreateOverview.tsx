@@ -1,14 +1,14 @@
-import {FC, useState} from "react";
+import {FC, useEffect, useState} from "react";
 import "./CreateOverview.css"
 import {useLocation, useNavigate} from 'react-router-dom';
 import {Quiz} from "../../../models/Quiz.ts";
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
 import {BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {QuizCardContainer} from "../../../components/QuizCardContainer/QuizCardContainer.tsx";
-import {QuizName} from "../../../models/ConstrainedTypes.ts";
 import {QuizSettingsPopup} from "../../../components/QuizSettingsPopup/QuizSettingsPopup.tsx";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {PopupType} from "../../../components/Popup/PopupExports.ts";
+import QuizRepository from "../../../repositories/QuizRepository.ts";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -16,85 +16,99 @@ export const CreateOverview: FC = () => {
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
 
-    // TODO: check if we are logged in!! else redirect to home
-
-    // TODO: get all of this user's quizzes from firebase
-    // so far we dont have firebase implemented, so just use a fake collection of quizzes for testing purposes
-    const originalQuizzes: Quiz[] = [{...Quiz.default, id: "3", name: QuizName.tryMake("this is a suuuuuuper long quiz name which was also created yesterday")!, createdOn: new Date(new Date().setDate(new Date().getDate() - 1))}, {...Quiz.default, id: "1"}, {...Quiz.default, id: "2"}]
-
-    // TODO: sort quizzes by createdOn date, and display newest at the start or at the end (currently: newest at the end)? or allow reordering?
-    const sortByCreatedOn = (a: Quiz, b: Quiz) => {
-        if (a.createdOn < b.createdOn) { return -1 }
-        if (a.createdOn > b.createdOn) { return 1 }
-        return 0
-    };
-    const sortedQuizzes = originalQuizzes.slice().sort(sortByCreatedOn)
-
-    // if we just came back from somewhere and we still want to see the quiz settings, do so based on the query parameter
-    const showingPopupForID = searchParams.get('showingPopupFor');
-    let initialQuizSettingsPopupProps: [index: number, quiz: Quiz] | null = null
-    let initalShowingQuizSettingsPopup = false
-    if (showingPopupForID) {
-        const showingPopupForQuiz = sortedQuizzes.find(quiz => quiz.id === showingPopupForID)
-        if (showingPopupForQuiz) {
-            const index = sortedQuizzes.indexOf(showingPopupForQuiz)
-            if (index >= 0) {
-                initialQuizSettingsPopupProps = [index, showingPopupForQuiz]
-                initalShowingQuizSettingsPopup = true
-            }
-        }
-    }
-
     // setup states and other stuff
-    const [quizzes, setQuizzes] = useState<Quiz[]>(sortedQuizzes);
-    const [quizSettingsPopupProps, setQuizSettingsPopupProps] = useState<[index: number, quiz: Quiz] | null>(initialQuizSettingsPopupProps);
-    const [showingQuizSettingsPopup, setShowingQuizSettingsPopup] = useState(initalShowingQuizSettingsPopup);
+    const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+    const [quizSettingsPopupProps, setQuizSettingsPopupProps] = useState<Quiz | null>(null);
+    const [showingQuizSettingsPopup, setShowingQuizSettingsPopup] = useState(false);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
 
+    // TODO: check if we are logged in!! else redirect to home
+
+    // get all of this user's quizzes from firebase TODO: only get it from the logged in user!
+    const setQuizzesFromFirestore = async () => {
+        const quizzesFromFirestore: Quiz[] = await QuizRepository.getAll()
+
+        // TODO: sort quizzes by createdOn date, and display newest at the start or at the end (currently: newest at the end)? or allow reordering?
+        const sortByCreatedOn = (a: Quiz, b: Quiz) => {
+            if (a.createdOn < b.createdOn) { return -1 }
+            if (a.createdOn > b.createdOn) { return 1 }
+            return 0
+        };
+        const sortedQuizzes = quizzesFromFirestore.slice().sort(sortByCreatedOn)
+        setQuizzes(sortedQuizzes)
+    }
+
+    // if we just came back from somewhere and we still want to see the quiz settings, do so based on the query parameter
+    const showPopupForQuery = () => {
+        const showingPopupForID = searchParams.get('showingPopupFor');
+        if (showingPopupForID == null) return
+        const showingPopupForQuiz = quizzes.find(quiz => quiz.id === showingPopupForID)
+        if (showingPopupForQuiz == null) return
+        setQuizSettingsPopupProps(showingPopupForQuiz)
+        setShowingQuizSettingsPopup(true)
+    }
+
+    useEffect(() => {
+        setQuizzesFromFirestore()
+    }, []);
+    useEffect(() => {
+        showPopupForQuery()
+    }, [quizzes]);
+
     // quiz functions
+    const findQuizByID = (id: string): Quiz | undefined => {
+        return quizzes.find(quiz => quiz.id === id)
+    }
     const handleAddQuiz = () => {
         // open new quiz settings popup which will create a quiz and update the quizzes state when closed, or when clicked on "edit questions" button
-        setQuizSettingsPopupProps([-1, Quiz.default])
+        const newQuiz = Quiz.default
+        setQuizzes([...quizzes, newQuiz]) // if we change for the newest quiz to be at the top, the quiz has to be inserted at the front of the quizzes array
+        setQuizSettingsPopupProps(newQuiz)
         setShowingQuizSettingsPopup(true)
     };
-    const handleEditQuiz = (index: number) => {
-        const quizToBeEdited = quizzes[index]
-        setQuizSettingsPopupProps([index, quizToBeEdited])
+    const handleEditQuiz = (id: string) => {
+        const quizToBeEdited = findQuizByID(id)
+        if (quizToBeEdited == undefined) throw new Error("could not find quiz in array") // TODO: display error
+        setQuizSettingsPopupProps(quizToBeEdited)
         setShowingQuizSettingsPopup(true)
     };
-    const handlePlayQuiz = (index: number) => {
-        const quizToBePlayed = quizzes[index]
+    const handlePlayQuiz = (id: string) => {
+        const quizToBePlayed = findQuizByID(id)
         // TODO: start playing quiz
     };
 
     //quiz settings popup functions
-    const handleEditQuizSave = (index: number, updatedQuiz: Quiz) => {
+    const handleEditQuizSave = (id: string, updatedQuiz: Quiz) => {
+        const previousQuiz = findQuizByID(id)
+        if (previousQuiz == undefined) throw new Error("error saving quiz") // TODO: display error
+
         // create quiz in firebase if it didn't exist before
-        if (index == -1) {
-            // TODO: save quiz to firebase and update the quiz's id with the id from firebase
-            setQuizzes([...quizzes, updatedQuiz])
-            return quizzes.length-1 // TODO: wait for the set state to finish!!! also if we change for the newest quiz to be at the top, this has to be 0 and before that all quizzes need to be resorted
+        if (quizzes.findIndex(quiz => quiz.id == id) == quizzes.length-1) {
+            // save quiz to firebase - we already added it to our quizzes state
+            QuizRepository.add(updatedQuiz);
+            return
         }
 
-        // else update the quiz if it existed before and it was changed
-        const previousQuiz = quizzes[index]
-        // if the title or any settings changed, save the changes
-        if (previousQuiz.name != updatedQuiz.name || !previousQuiz.options.isEqual(updatedQuiz.options)) {
+        // else update the quiz if it existed before and its title or settings were changed
+        if (previousQuiz.name.value != updatedQuiz.name.value || !previousQuiz.options.isEqual(updatedQuiz.options)) {
             const updatedQuizzes = [...quizzes]
+            const index = updatedQuizzes.indexOf(previousQuiz)
+            if (index < 0) throw new Error("error updating quiz") // TODO: display error
             updatedQuizzes[index] = updatedQuiz
             setQuizzes(updatedQuizzes)
-            // TODO: save changes to firebase
-            return index
+            QuizRepository.add(updatedQuiz)
         }
     }
     const handleEditQuizClose = () => {
         setQuizSettingsPopupProps(null)
         setShowingQuizSettingsPopup(false)
-        if (showingPopupForID) navigate('/overview') // hack to remove the search parameter so the popup does not keep reappearing if the user refreshes the page
+        if (searchParams.get('showingPopupFor')) navigate('/overview') // hack to remove the search parameter so the popup does not keep reappearing if the user refreshes the page
     };
-    const handleEditQuizEditQuestions = (index: number) => {
-        navigateToEditor(quizzes[index].id)
+    const handleEditQuizEditQuestions = (id: string) => {
+        const currentQuiz = findQuizByID(id)
+        if (currentQuiz == undefined) throw new Error("could not find current quiz") // TODO: display error
+        navigateToEditor(currentQuiz.id)
     };
     const handleQuizDelete = () => {
         // TODO: delete quiz from firebase and from quizzes state
@@ -154,8 +168,7 @@ export const CreateOverview: FC = () => {
 
             { (showingQuizSettingsPopup && quizSettingsPopupProps != null) &&
                 <QuizSettingsPopup
-                    index={quizSettingsPopupProps[0]}
-                    selectedQuiz={quizSettingsPopupProps[1]}
+                    selectedQuiz={quizSettingsPopupProps}
                     onSave={handleEditQuizSave}
                     onClose={handleEditQuizClose}
                     onEditQuestions={handleEditQuizEditQuestions}

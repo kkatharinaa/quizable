@@ -5,22 +5,23 @@ import {ButtonComponent} from "../Button/Button.tsx";
 
 interface QuizCardWithActionsProps {
     index: number
+    id: string
     quizName: string
-    onEdit: (index: number) => void
-    onPlay: (index: number) => void
+    onEdit: (id: string) => void
+    onPlay: (id: string) => void
     /*onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void
     onDragOver: (e: React.DragEvent<HTMLDivElement>) => void
     onDragDrop: (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => void*/
 }
 
-export const QuizCardWithActions: FC<QuizCardWithActionsProps> = ({ index, quizName, onEdit, onPlay, /*onDragStart, onDragOver, onDragDrop*/ }) => {
+export const QuizCardWithActions: FC<QuizCardWithActionsProps> = ({ index, id, quizName, onEdit, onPlay, /*onDragStart, onDragOver, onDragDrop*/ }) => {
 
     const handleEdit = () => {
-        onEdit(index)
+        onEdit(id)
     }
 
     const handlePlay = () => {
-        onPlay(index)
+        onPlay(id)
     }
 
     return (
