@@ -5,8 +5,7 @@ export default class QuizSessionService{
     static port: number = 5296
     static url: string = `http://localhost:${this.port}`
 
-
-    public static async setSession(quizSession: QuizSession): Promise<number> {
+    public static async addSession(quizSession: QuizSession): Promise<> {
         console.log(JSON.stringify(quizSession))
         return (await fetch(`${this.url}/api/session`, 
         {

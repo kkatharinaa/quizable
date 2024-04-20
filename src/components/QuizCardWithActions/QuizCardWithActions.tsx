@@ -62,9 +62,16 @@ export const QuizCardWithActions: FC<QuizCardWithActionsProps> = ({ index, id, q
                 <ButtonComponent
                     text="Edit Quiz"
                     icon={null}
-                    type={ButtonType.Medium}
+                    type={ButtonType.Long}
                     style={ButtonStyle.Settings}
                     onClick={handleEdit}
+                />
+                <ButtonComponent
+                    text="Play Quiz"
+                    icon={null}
+                    type={ButtonType.Long}
+                    style={ButtonStyle.Primary}
+                    onClick={handlePlay}
                 />
             </div>
         </div>

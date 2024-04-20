@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using QuizApp.Models;
+using QuizApp.Services;
+using QuizApp.Services.Interface;
 
 namespace QuizApp.Controllers;
 
 [ApiController]
 [Route("/api/session")]
-public class QuizSessionController(ILogger<QuizSessionController> logger) : Controller
+public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizSessionService quizSessionService) : Controller
 {
 
     [HttpGet]
@@ -18,8 +20,7 @@ public class QuizSessionController(ILogger<QuizSessionController> logger) : Cont
     [HttpPost]
     public IActionResult Set(QuizSession quizSession)
     {
-        logger.LogInformation(quizSession.ToString());
-        return Ok("");
+        return Ok(quizSessionService.AddQuizSession(quizSession));
     }
     
 }

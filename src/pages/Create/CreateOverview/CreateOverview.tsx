@@ -8,6 +8,10 @@ import {QuizCardContainer} from "../../../components/QuizCardContainer/QuizCardC
 import {QuizSettingsPopup} from "../../../components/QuizSettingsPopup/QuizSettingsPopup.tsx";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
+import QuizSessionService from "../../../services/QuizSessionService.ts";
+import {v4 as uuid} from "uuid";
+import { getDeviceId } from "../../../helper/DeviceHelper.ts";
+import QuizSession from "../../../models/QuizSession.ts";
 import {QuizOptions} from "../../../models/QuizOptions.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
@@ -75,9 +79,26 @@ export const CreateOverview: FC = () => {
         setQuizSettingsPopupProps([quizToBeEdited, false])
         setShowingQuizSettingsPopup(true)
     };
-    const handlePlayQuiz = (id: string) => {
-        const quizToBePlayed = findQuizByID(id)
-        // TODO: start playing quiz
+    const handlePlayQuiz = async (id: string) => {
+        const quizToBePlayed: Quiz = findQuizByID(id)
+
+        // create a new quiz session
+        const quizSessionPlay: QuizSession = {
+            id: uuid(),
+            quizId: quizToBePlayed.id, 
+            deviceId: await getDeviceId(), 
+            state: {
+                currentQuestionId: quizToBePlayed.questions[0].id,
+                usersStats: [ /**keep it empty at the beginning */],
+                currentQuizState: "start"
+            }
+        };
+
+        // send the quiz session to the backend
+        await QuizSessionService.addSession(quizSessionPlay)
+
+        // navigate to the lobby page
+        navigate('/quiz/lobby', {state: {quizSessionId: quizSessionPlay.id}})
     };
 
     //quiz settings popup functions

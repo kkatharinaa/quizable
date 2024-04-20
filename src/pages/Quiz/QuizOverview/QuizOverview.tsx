@@ -2,13 +2,15 @@ import { Button } from "react-bootstrap";
 import { Quiz } from "../../../models/Quiz";
 import QuizRepository from "../../../repositories/QuizRepository";
 import './QuizOverview.css'
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import QuizSession from "../../../models/QuizSession";
 import QuizSessionRepository from "../../../repositories/QuizSessionRepository";
 import QuizSessionService from "../../../services/QuizSessionService";
 import * as SignalR from "@microsoft/signalr";
 
+
+// ONLY USED for testing!!!!
 export const QuizOverview = () => {
     const [quiz, setQuiz] = useState([] as Quiz[])
 
@@ -32,7 +34,7 @@ export const QuizOverview = () => {
 
     const uploadBackend = () => {
         console.log("Upload to backend")
-        QuizSessionService.setSession({id: "someID", quizId: "quizId", deviceId: "deviceId", state: {
+        QuizSessionService.addSession({id: "someID", quizId: "quizId", deviceId: "deviceId", state: {
             currentQuestionId: "",
             usersStats: [],
             currentQuizState: ""
@@ -54,7 +56,6 @@ export const QuizOverview = () => {
             console.log("Backend Message from: " + message)
         })
 
-
         connection.start()
             .then(() => {
                 console.log("Sending to the master")
@@ -63,7 +64,7 @@ export const QuizOverview = () => {
             .catch((err) => console.error(err))
     }
 
-    useMemo(() => {
+    useEffect(() => {
         setQuizzesFromFirestore()
         setupSignalRConnection()
     }, [])
