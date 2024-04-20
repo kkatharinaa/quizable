@@ -8,6 +8,7 @@ import QuizResult from "./pages/Quiz/QuizResult/QuizResult";
 import { QuizSession } from "./pages/Quiz/QuizSession/QuizSession";
 import {CreateEditor} from "./pages/Create/CreateEditor/CreateEditor.tsx";
 import {CreateOverview} from "./pages/Create/CreateOverview/CreateOverview.tsx";
+import { QuizOverview } from "./pages/Quiz/QuizOverview/QuizOverview.tsx";
 
 // TODO: only make master routes accessible if you are logged in
 

@@ -12,12 +12,11 @@ public class QuizSessionController(ILogger<QuizSessionController> logger) : Cont
     [HttpGet]
     public IActionResult Get()
     {
-        
         return Ok("");
     }
     
     [HttpPost]
-    public IActionResult Set([FromBody]QuizSession quizSession)
+    public IActionResult Set(QuizSession quizSession)
     {
         logger.LogInformation(quizSession.ToString());
         return Ok("");

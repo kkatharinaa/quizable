@@ -2,12 +2,12 @@ import { Button } from "react-bootstrap";
 import { Quiz } from "../../../models/Quiz";
 import QuizRepository from "../../../repositories/QuizRepository";
 import './QuizOverview.css'
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import QuizSession from "../../../models/QuizSession";
 import QuizSessionRepository from "../../../repositories/QuizSessionRepository";
 import QuizSessionService from "../../../services/QuizSessionService";
-
+import * as SignalR from "@microsoft/signalr";
 
 export const QuizOverview = () => {
     const [quiz, setQuiz] = useState([] as Quiz[])
@@ -39,8 +39,33 @@ export const QuizOverview = () => {
         }})
     }
 
-    useEffect(() => {
+    const setupSignalRConnection = () => {
+        const port: number = 5296
+        const url: string = `http://localhost:${port}`
+
+        const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
+            .withUrl(url + "/master", {
+                skipNegotiation: true,
+                transport: SignalR.HttpTransportType.WebSockets
+              })
+            .build();
+
+        connection.on("userId1", (message) => {
+            console.log("Backend Message from: " + message)
+        })
+
+
+        connection.start()
+            .then(() => {
+                console.log("Sending to the master")
+                connection.send("newMessage", "userId1", "Hello World from frontend!")
+            })
+            .catch((err) => console.error(err))
+    }
+
+    useMemo(() => {
         setQuizzesFromFirestore()
+        setupSignalRConnection()
     }, [])
 
     return (

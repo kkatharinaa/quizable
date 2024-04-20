@@ -2,16 +2,8 @@ namespace QuizApp.Models;
 
 public class QuizSessionUserStatsAnswer
 {
-    private string QuestionId { get; set; }
-    private string AnswerId { get; set; }
-    private int PointsReceived { get; set; }
-    private int TimeTaken { get; set; }
-
-    public QuizSessionUserStatsAnswer(string questionId, string answerId, int pointsReceived, int timeTaken)
-    {
-        QuestionId = questionId;
-        AnswerId = answerId;
-        PointsReceived = pointsReceived;
-        TimeTaken = timeTaken;
-    }
+    public string QuestionId { get; set; }
+    public string AnswerId { get; set; }
+    public int PointsReceived { get; set; }
+    public int TimeTaken { get; set; }
 }

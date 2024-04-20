@@ -1,5 +1,8 @@
 using Microsoft.Extensions.Logging;
 using QuizApp.Controllers;
+using QuizApp.Hubs;
+using QuizApp.Services;
+using QuizApp.Services.Interface;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,8 @@ builder.Services.AddSwaggerGen();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Services.AddLogging(builder => builder.AddConsole());
+builder.Services.AddSingleton<IQuizSessionService, QuizSessionService>();
+builder.Services.AddSignalR();
 
 var port = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrEmpty(port)) {
@@ -20,6 +25,8 @@ if (!string.IsNullOrEmpty(port)) {
 
 var app = builder.Build();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -27,8 +34,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();     
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
@@ -40,5 +45,8 @@ app.UseCors(options =>
 });
 
 app.MapControllers();
+
+app.MapHub<SlaveHub>("/slave");
+app.MapHub<MasterHub>("/master");
 
 app.Run();

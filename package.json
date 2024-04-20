@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^4.2.2",
+    "@microsoft/signalr": "^8.0.0",
+    "@types/node": "^20.12.7",
     "dotenv": "^16.4.5",
     "firebase": "^10.9.0",
     "firebase-functions": "^4.8.2",

@@ -16,7 +16,9 @@ export const ButtonComponent: FC<ButtonProps> = ({ text, icon, type, style , onC
 
     return (
         <button className={`${type} ${style} ${className}`} onClick={onClick}>
-            <img src={icon.path} alt={icon.alt}/>
+            {icon != null &&
+                <img src={icon.path} alt={icon.alt}/>
+            }
             {type == ButtonType.Long && <span>{text}</span>}
         </button>
     )
