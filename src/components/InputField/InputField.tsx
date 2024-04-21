@@ -14,13 +14,15 @@ export const InputField: FC<InputFieldProps> = ({ value, onChange, type}) => {
         onChange(event.target.value);
     };
 
+    // TODO for inputs: when clicking on input jump to end of input
+
     return (
         <div className="inputField">
             <input
                 type="text"
                 value={value}
                 onChange={handleInputChange}
-                placeholder={type == InputFieldType.Question ? "Type your question here" : "Untitled Quiz"}
+                placeholder={type == InputFieldType.Question ? "Type your question here" : "Add a title (mandatory)"}
             />
         </div>
     )

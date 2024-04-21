@@ -4,7 +4,7 @@ import {ButtonComponent} from "../Button/Button.tsx";
 import {ButtonStyle, ButtonType} from "../Button/ButtonExports.ts";
 import {Quiz} from "../../models/Quiz.ts";
 import {BottomNavBar} from "../BottomNavBar/BottomNavBar.tsx";
-import {BottomNavBarType} from "../BottomNavBar/BottomNavBarExports.ts";
+import {BottomNavBarStyle, BottomNavBarType} from "../BottomNavBar/BottomNavBarExports.ts";
 import {QuizName} from "../../models/ConstrainedTypes.ts";
 import {InputField} from "../InputField/InputField.tsx";
 import {InputFieldType} from "../InputField/InputFieldExports.ts";
@@ -72,6 +72,7 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                         primaryButtonText={""}
                         primaryButtonIcon={null}
                         type={BottomNavBarType.SecondaryOnly}
+                        style={BottomNavBarStyle.Medium}
                         onSecondaryClick={handleClose}
                     />
                 </div>

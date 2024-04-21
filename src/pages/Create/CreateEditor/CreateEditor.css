@@ -7,7 +7,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    background: var(--white2);
 }
 
 .createEditor .contentAndMenu {
@@ -16,4 +15,16 @@
     flex: 1 0 0;
     align-self: stretch;
     overflow: hidden;
+}
+
+.createEditor .contentAndMenu .quizName {
+    position: absolute;
+    left: 60px;
+    top: 20px;
+    color: var(--dark-grey-text);
+    font-family: 'Sansation', sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
 }

@@ -1,7 +1,7 @@
 import {FC} from "react";
 import "./BottomNavBar.css"
 import {Icon} from "../../assets/Icons.ts";
-import {BottomNavBarType} from "./BottomNavBarExports.ts";
+import {BottomNavBarStyle, BottomNavBarType} from "./BottomNavBarExports.ts";
 import {ButtonStyle, ButtonType} from "../Button/ButtonExports.ts";
 import {ButtonComponent} from "../Button/Button.tsx";
 
@@ -11,19 +11,20 @@ interface BottomNavBarProps {
     primaryButtonText: string
     primaryButtonIcon: Icon | null
     type: BottomNavBarType
+    style: BottomNavBarStyle
     onSecondaryClick?: () => void
     onPrimaryClick?: () => void
 }
 
-export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secondaryButtonIcon, primaryButtonText, primaryButtonIcon, type, onPrimaryClick, onSecondaryClick}) => {
+export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secondaryButtonIcon, primaryButtonText, primaryButtonIcon, type, style, onPrimaryClick, onSecondaryClick}) => {
 
     return (
-        <div className={`bottomNavBar ${type != BottomNavBarType.Default ? "centered" : ""}`}>
+        <div className={`bottomNavBar ${type != BottomNavBarType.Default ? "centered" : ""} ${style == BottomNavBarStyle.Medium ? "navForPopup" : ""}`}>
             { (type == BottomNavBarType.Default || type == BottomNavBarType.SecondaryOnly) &&
             <ButtonComponent
                 text={secondaryButtonText}
                 icon={secondaryButtonIcon}
-                type={ButtonType.Long}
+                type={BottomNavBarStyle.Long ? ButtonType.Long: ButtonType.Medium}
                 style={ButtonStyle.Secondary}
                 onClick={onSecondaryClick}
             />
@@ -32,7 +33,7 @@ export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secon
             <ButtonComponent
                 text={primaryButtonText}
                 icon={primaryButtonIcon}
-                type={ButtonType.Long}
+                type={BottomNavBarStyle.Long ? ButtonType.Long: ButtonType.Medium}
                 style={ButtonStyle.Primary}
                 onClick={onPrimaryClick}
             />

@@ -21,12 +21,12 @@ export class QuizOptions {
         this.colourScheme = colourScheme
     }
 
-    public isEqual(other: QuizOptions): boolean {
-        return this.isLeaderboardBetween === other.isLeaderboardBetween
-            && this.maxQuestionTime === other.maxQuestionTime
-            && this.questionPoints === other.questionPoints
-            && this.questionPointsModifier === other.questionPointsModifier
-            && this.showLiveStats === other.showLiveStats
-            && this.colourScheme === other.colourScheme
+    static isEqual(a: QuizOptions, b: QuizOptions): boolean {
+        return a.isLeaderboardBetween === b.isLeaderboardBetween
+            && a.maxQuestionTime === b.maxQuestionTime
+            && a.questionPoints === b.questionPoints
+            && a.questionPointsModifier === b.questionPointsModifier
+            && a.showLiveStats === b.showLiveStats
+            && a.colourScheme === b.colourScheme
     }
 }

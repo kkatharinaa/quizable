@@ -3,3 +3,8 @@ export enum BottomNavBarType {
     SecondaryOnly,
     PrimaryOnly
 }
+
+export enum BottomNavBarStyle {
+    Long,
+    Medium,
+}

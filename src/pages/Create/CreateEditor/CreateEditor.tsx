@@ -4,14 +4,15 @@ import {Quiz} from "../../../models/Quiz.ts";
 import {Question} from "../../../models/Question.ts";
 import {SAVE_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
-import {BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
+import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {QuestionEditor} from "../../../components/QuestionEditor/QuestionEditor.tsx";
 import {Answer} from "../../../models/Answer.ts";
 import {QuestionEditorNav} from "../../../components/QuestionEditorNav/QuestionEditorNav.tsx";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
-import {PopupType} from "../../../components/Popup/PopupExports.ts";
 import {useLocation, useNavigate} from "react-router-dom";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
+import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
+import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 
 export const CreateEditor: FC = () => {
 
@@ -21,6 +22,8 @@ export const CreateEditor: FC = () => {
     const searchParams = new URLSearchParams(location.search);
 
     // TODO: check that we are logged in!! else redirect to home
+
+    // TODO generally: 3 lines for answers and restrict characters to input field so no overflow with ellipsis allowed, set max characters for quizname and questionname and answers, adjust quiz overview screen, update quiz settings popup ui (also simply disable save buttons if title is empty)
 
     //const { quizID } = useParams();
     const quizID = searchParams.get('id');
@@ -71,7 +74,7 @@ export const CreateEditor: FC = () => {
             secondaryButtonIcon: null,
             primaryButtonText: "Yes, I Am Sure",
             primaryButtonIcon: null,
-            type: PopupType.Default,
+            type: BottomNavBarType.Default,
             onSecondaryClick: () => {
                 setShowingPopup(false)
             },
@@ -197,7 +200,7 @@ export const CreateEditor: FC = () => {
             secondaryButtonIcon: null,
             primaryButtonText: "Yes, I Am Sure",
             primaryButtonIcon: null,
-            type: PopupType.Default,
+            type: BottomNavBarType.Default,
             onSecondaryClick: () => {
                 setShowingPopup(false)
             },
@@ -217,8 +220,12 @@ export const CreateEditor: FC = () => {
 
     return (
         <div className="createEditor">
+            <BackgroundGems type={BackgroundGemsType.Grey}/>
 
             <div className="contentAndMenu">
+                { originalQuiz != null &&
+                <p className="quizName">{`Quiz / ${originalQuiz.name.value}`}</p>
+                }
                 { currentQuestionIndex != null &&
                 <QuestionEditor
                     index={currentQuestionIndex}
@@ -254,6 +261,7 @@ export const CreateEditor: FC = () => {
                 primaryButtonText="Save Quiz"
                 primaryButtonIcon={SAVE_ICON_LIGHT}
                 type={BottomNavBarType.Default}
+                style={BottomNavBarStyle.Long}
                 onSecondaryClick={toOverview}
                 onPrimaryClick={saveQuiz}
             />

@@ -1,0 +1,44 @@
+.backgroundGemsContainer {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    max-width: 100vw;
+    max-height: 100vh;
+    position: absolute;
+    filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: -1;
+}
+
+.backgroundGemsBackground {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    max-width: 100vw;
+    max-height: 100vh;
+    position: absolute;
+    z-index: -2;
+}
+
+.backgroundGemsBackground.gemsPrimary {
+    background: var(--primary-color);
+}
+.backgroundGemsBackground.gemsGrey {
+    background: var(--white2);
+}
+
+.backgroundGems {
+    flex: 0;
+}
+
+.backgroundGems.gemsPrimary {
+    height: 90%;
+    max-height: 90vh;
+    padding-bottom: 7vh;
+}
+
+.backgroundGems.gemsGrey {
+    padding-top: 10vh;
+}

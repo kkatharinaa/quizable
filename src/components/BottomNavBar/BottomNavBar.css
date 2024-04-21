@@ -19,3 +19,11 @@
 .bottomNavBar button.long {
     padding: 14px 30px;
 }
+
+.bottomNavBar.navForPopup {
+    padding: 11px 60px 20px 60px;
+}
+
+.bottomNavBar.navForPopup button.medium {
+    padding: 12px 30px;
+}

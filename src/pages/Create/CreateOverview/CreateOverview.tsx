@@ -3,12 +3,14 @@ import "./CreateOverview.css"
 import {useLocation, useNavigate} from 'react-router-dom';
 import {Quiz} from "../../../models/Quiz.ts";
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
-import {BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
+import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {QuizCardContainer} from "../../../components/QuizCardContainer/QuizCardContainer.tsx";
 import {QuizSettingsPopup} from "../../../components/QuizSettingsPopup/QuizSettingsPopup.tsx";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
-import {PopupType} from "../../../components/Popup/PopupExports.ts";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
+import {QuizOptions} from "../../../models/QuizOptions.ts";
+import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
+import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -91,7 +93,7 @@ export const CreateOverview: FC = () => {
         }
 
         // else update the quiz if it existed before and its title or settings were changed
-        if (previousQuiz.name.value != updatedQuiz.name.value || !previousQuiz.options.isEqual(updatedQuiz.options)) {
+        if (previousQuiz.name.value != updatedQuiz.name.value || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
             const updatedQuizzes = [...quizzes]
             const index = updatedQuizzes.indexOf(previousQuiz)
             if (index < 0) throw new Error("error updating quiz") // TODO: display error
@@ -129,7 +131,7 @@ export const CreateOverview: FC = () => {
             secondaryButtonIcon: null,
             primaryButtonText: "Yes, I Am Sure",
             primaryButtonIcon: null,
-            type: PopupType.Default,
+            type: BottomNavBarType.Default,
             onSecondaryClick: () => {
                 setShowingPopup(false)
             },
@@ -146,7 +148,7 @@ export const CreateOverview: FC = () => {
 
     return (
         <div className="createOverview">
-
+            <BackgroundGems type={BackgroundGemsType.Primary}/>
             <div className="content">
                 <h1>Welcome, User</h1>
                 <QuizCardContainer
@@ -163,6 +165,7 @@ export const CreateOverview: FC = () => {
                 primaryButtonText=""
                 primaryButtonIcon={null}
                 type={BottomNavBarType.SecondaryOnly}
+                style={BottomNavBarStyle.Long}
                 onSecondaryClick={logOut}
             />
 
