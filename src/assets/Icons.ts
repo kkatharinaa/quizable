@@ -32,3 +32,8 @@ export const ADD_ICON_DARK: Icon = {
     path: '/assets/icon-add-dark.svg',
     alt: 'Add',
 };
+
+export const PLAY_ICON_LIGHT: Icon = {
+    path: '/assets/icon-play-light.svg',
+    alt: 'Play',
+};

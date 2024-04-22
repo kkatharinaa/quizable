@@ -1,5 +1,5 @@
 import app from "../firebase/config";
-import {DocumentSnapshot, QueryDocumentSnapshot, QuerySnapshot, collection, doc, getDoc, getDocs, getFirestore, query, setDoc, where} from "firebase/firestore"
+import {QueryDocumentSnapshot, QuerySnapshot, collection, doc, getDoc, getDocs, getFirestore, setDoc, deleteDoc} from "firebase/firestore"
 import "firebase/firestore";
 import { Quiz } from "../models/Quiz";
 import { v4 as uuid } from "uuid";
@@ -10,7 +10,7 @@ const toJson = (instance: unknown) => {
     return JSON.parse(JSON.stringify(instance))
 }
 
-// TODO: has to be refactored to have a different structure within firebase once the login gets added, so you only get the quizzes of a specifc user
+// TODO: has to be refactored to have a different structure within firebase once the login gets added, so you only get the quizzes of a specific user
 export default class QuizRepository {
     static quizCollection = collection(db, 'quiz');
     static getQuizDocument = (path?: string) => doc(this.quizCollection, path ?? uuid())
@@ -33,5 +33,10 @@ export default class QuizRepository {
         const docSnap = await getDoc(docRef);
 
         return docSnap.data() as Quiz;
+    }
+
+    static delete = async (id: string): Promise<void> => {
+        const docRef = doc(this.quizCollection.firestore, this.quizCollection.path, id)
+        return await deleteDoc(docRef)
     }
 }

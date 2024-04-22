@@ -112,10 +112,32 @@ export const CreateOverview: FC = () => {
         if (currentQuiz == undefined) throw new Error("could not find current quiz") // TODO: display error
         navigateToEditor(currentQuiz.id)
     };
-    const handleQuizDelete = () => {
-        // TODO: delete quiz from firebase and from quizzes state
-        // TODO: close popup if popup was open
-        // TODO: implement in UI
+    const handleDeleteQuiz = (id: string) => {
+        // popup for confirmation
+        const deletePopup: PopupProps = {
+            title: "Are you sure you want to delete this quiz?",
+            message: "This action cannot be undone.",
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null,
+            primaryButtonText: "Yes, I Am Sure",
+            primaryButtonIcon: null,
+            type: BottomNavBarType.Default,
+            onSecondaryClick: () => {
+                setShowingPopup(false)
+            },
+            onPrimaryClick: () => {
+                // delete quiz from firebase and quizzes state
+                QuizRepository.delete(id).then(() => {
+                    if (showingQuizSettingsPopup) handleEditQuizClose()
+                    const updatedQuizzes = [...quizzes]
+                    const index = updatedQuizzes.findIndex(quiz => quiz.id == id)
+                    updatedQuizzes.splice(index, 1);
+                    setQuizzes(updatedQuizzes)
+                    setShowingPopup(false)
+                })
+            },
+        }
+        showPopup(deletePopup)
     };
 
     // nav functions
@@ -123,7 +145,6 @@ export const CreateOverview: FC = () => {
         navigate(`/overview/editor?id=${id}`)
     }
     const logOut = () => {
-        // TODO: adjust based on design
         const logOutPopup: PopupProps = {
             title: "Are you sure you want to log out?",
             message: null,
@@ -156,6 +177,7 @@ export const CreateOverview: FC = () => {
                     onEdit={handleEditQuiz}
                     onPlay={handlePlayQuiz}
                     onAdd={handleAddQuiz}
+                    onDelete={handleDeleteQuiz}
                 />
             </div>
 

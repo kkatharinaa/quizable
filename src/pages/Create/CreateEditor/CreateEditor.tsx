@@ -23,7 +23,7 @@ export const CreateEditor: FC = () => {
 
     // TODO: check that we are logged in!! else redirect to home
 
-    // TODO generally: 3 lines for answers and restrict characters to input field so no overflow with ellipsis allowed, set max characters for quizname and questionname and answers, adjust quiz overview screen, update quiz settings popup ui (also simply disable save buttons if title is empty)
+    // TODO generally: 3 lines for answers and restrict characters to input field so no overflow with ellipsis allowed, set max characters for quizname and questionname and answers, update quiz settings popup ui (also simply disable save buttons if title is empty)
 
     //const { quizID } = useParams();
     const quizID = searchParams.get('id');
@@ -46,8 +46,6 @@ export const CreateEditor: FC = () => {
     useEffect(() => {
         setQuizFromFirestore()
     }, []);
-
-    // TODO: refacter index stuff for questions and answers to id stuff
 
     // question functions
     const handleQuestionTitleInputChange = (value: string) => {

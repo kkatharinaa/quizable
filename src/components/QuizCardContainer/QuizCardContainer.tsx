@@ -11,12 +11,13 @@ interface QuizCardContainerProps {
     onEdit: (id: string) => void
     onPlay: (id: string) => void
     onAdd: () => void
+    onDelete: (id: string) => void
     /*onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void
     onDragOver: (e: React.DragEvent<HTMLDivElement>) => void
     onDragDrop: (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => void*/
 }
 
-export const QuizCardContainer: FC<QuizCardContainerProps> = ({ quizzes, onEdit, onPlay, onAdd, /*onDragStart, onDragOver, onDragDrop*/ }) => {
+export const QuizCardContainer: FC<QuizCardContainerProps> = ({ quizzes, onEdit, onPlay, onAdd, onDelete, /*onDragStart, onDragOver, onDragDrop*/ }) => {
 
     return (
         <div className="quizCardContainer">
@@ -28,6 +29,7 @@ export const QuizCardContainer: FC<QuizCardContainerProps> = ({ quizzes, onEdit,
                     quizName={item.name.value}
                     onEdit={onEdit}
                     onPlay={onPlay}
+                    onDelete={onDelete}
                     /*onDragStart={onDragStart}
                     onDragOver={onDragOver}
                     onDragDrop={onDragDrop}#*/
@@ -43,9 +45,12 @@ export const QuizCardContainer: FC<QuizCardContainerProps> = ({ quizzes, onEdit,
                     onClick={onAdd}
                 />
             </div>
-            {(quizzes.length % 2 == 0) &&
+            {(((quizzes.length-1) % 3 == 0) || quizzes.length % 3 == 0) &&
                 <div className="filler"></div>
             } {/* empty div for layout purposes*/}
+            {(quizzes.length % 3 == 0) &&
+                <div className="filler"></div>
+            } {/* second empty div for layout purposes*/}
         </div>
     )
 }

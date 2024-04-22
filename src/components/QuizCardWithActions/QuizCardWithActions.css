@@ -16,13 +16,25 @@
     flex: 1 0 0;
 }
 
+.quizCardWithPlay {
+    display: flex;
+    align-items: flex-start;
+    align-self: stretch;
+}
+
+.quizCardWithPlay button {
+    align-self: stretch;
+    border-radius: 0 8px 8px 0;
+}
+
 .quizCard {
     display: flex;
-    padding: 67px 48px;
+    padding: 50px 20px;
     justify-content: center;
     align-items: center;
+    flex: 1 0 0;
     align-self: stretch;
-    border-radius: 8px;
+    border-radius: 8px 0 0 8px;
     background: var(--white);
     position: relative;
 }
@@ -40,6 +52,8 @@
     overflow: hidden;
     white-space: nowrap;
     margin: 0;
+    width: 212px;
+    padding: 20px 0;
 }
 
 .quizCard .quizIndex {
