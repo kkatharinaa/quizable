@@ -7,6 +7,14 @@ export const SAVE_ICON_LIGHT: Icon = {
     path: '/assets/icon-save-light.svg',
     alt: 'Save',
 };
+export const SAVE_ICON_DARK: Icon = {
+    path: '/assets/icon-save-dark.svg',
+    alt: 'Save',
+};
+export const SAVE_ICON_DISABLED: Icon = {
+    path: '/assets/icon-save-disabled.svg',
+    alt: 'Save',
+};
 
 export const DELETE_ICON_DARK: Icon = {
     path: '/assets/icon-trash-dark.svg',

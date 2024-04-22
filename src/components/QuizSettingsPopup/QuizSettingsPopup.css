@@ -7,19 +7,60 @@
 .quizSettingsPopupField {
     justify-content: space-between;
     flex: 1 0 0;
-    align-self: stretch;
-    max-width: 100%;
+    width: 800px;
+    max-width: 800px;
     padding: 0;
 }
 
-.quizSettings {
+.quizSettingsContent {
     display: flex;
-    padding: 40px 40px 0px 40px;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    flex: 1 0 0;
+    align-self: stretch;
+}
+
+.quizSettingsContent .quizTitleAndText {
+    display: flex;
+    padding: 24px 40px 14px 40px;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    align-self: stretch;
+    border-bottom: 3px solid var(--primary-shadow);
+}
+
+.quizSettingsContent .quizTitleAndText .inputField {
+    width: 100%;
+}
+
+.quizSettingsContent .quizTitleAndText .quizText {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    align-self: stretch;
+}
+.quizSettingsContent .quizTitleAndText .quizText p {
+    color: var(--white);
+    font-family: 'Sansation', sans-serif;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
+    margin: 0;
+    padding: 0;
+}
+
+.quizSettingsContent .quizSettingsAll {
+    display: flex;
+    padding: 0 40px;
     flex-direction: column;
     align-items: center;
     gap: 40px;
     flex: 1 0 0;
     align-self: stretch;
+    overflow-y: scroll;
 }
 
 .quizSettingsNav {

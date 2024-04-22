@@ -14,9 +14,11 @@ interface BottomNavBarProps {
     style: BottomNavBarStyle
     onSecondaryClick?: () => void
     onPrimaryClick?: () => void
+    alternativeSecondaryButtonStyle?: ButtonStyle
+    alternativePrimaryButtonStyle?: ButtonStyle
 }
 
-export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secondaryButtonIcon, primaryButtonText, primaryButtonIcon, type, style, onPrimaryClick, onSecondaryClick}) => {
+export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secondaryButtonIcon, primaryButtonText, primaryButtonIcon, type, style, onPrimaryClick, onSecondaryClick, alternativeSecondaryButtonStyle, alternativePrimaryButtonStyle}) => {
 
     return (
         <div className={`bottomNavBar ${type != BottomNavBarType.Default ? "centered" : ""} ${style == BottomNavBarStyle.Medium ? "navForPopup" : ""}`}>
@@ -25,7 +27,7 @@ export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secon
                 text={secondaryButtonText}
                 icon={secondaryButtonIcon}
                 type={BottomNavBarStyle.Long ? ButtonType.Long: ButtonType.Medium}
-                style={ButtonStyle.Secondary}
+                style={alternativeSecondaryButtonStyle ?? ButtonStyle.Secondary}
                 onClick={onSecondaryClick}
             />
             }
@@ -34,7 +36,7 @@ export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secon
                 text={primaryButtonText}
                 icon={primaryButtonIcon}
                 type={BottomNavBarStyle.Long ? ButtonType.Long: ButtonType.Medium}
-                style={ButtonStyle.Primary}
+                style={alternativePrimaryButtonStyle ?? ButtonStyle.Primary}
                 onClick={onPrimaryClick}
             />
             }

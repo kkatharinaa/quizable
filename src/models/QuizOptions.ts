@@ -1,4 +1,7 @@
-import {ColourScheme} from "./Enums.ts";
+export enum ColourScheme {
+    Default,
+    Professional
+}
 
 export class QuizOptions {
     // Properties

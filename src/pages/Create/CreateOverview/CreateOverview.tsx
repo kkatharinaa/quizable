@@ -85,15 +85,8 @@ export const CreateOverview: FC = () => {
         const previousQuiz = findQuizByID(id)
         if (previousQuiz == undefined) throw new Error("error saving quiz") // TODO: display error
 
-        // create quiz in firebase if it didn't exist before
-        if (quizzes.findIndex(quiz => quiz.id == id) == quizzes.length-1) {
-            // save quiz to firebase - we already added it to our quizzes state
-            QuizRepository.add(updatedQuiz);
-            return
-        }
-
         // else update the quiz if it existed before and its title or settings were changed
-        if (previousQuiz.name.value != updatedQuiz.name.value || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
+        if (previousQuiz.name != updatedQuiz.name || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
             const updatedQuizzes = [...quizzes]
             const index = updatedQuizzes.indexOf(previousQuiz)
             if (index < 0) throw new Error("error updating quiz") // TODO: display error

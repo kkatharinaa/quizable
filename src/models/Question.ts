@@ -1,7 +1,10 @@
 //import {QuestionName} from "./ConstrainedTypes.ts";
-import {QuestionType} from "./Enums.ts";
 import {Answer} from "./Answer.ts";
 import { v4 as uuid } from "uuid";
+
+export enum QuestionType {
+    SingleChoice,
+}
 
 export class Question {
     // Properties
