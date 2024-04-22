@@ -13,6 +13,23 @@
     background: var(--primary-color);
 }
 
+.quizSlaveSessionLobbyTitle {
+    position: fixed;
+    color: var(--white);
+    text-align: center;
+    font-size: 68px;
+    font-style: normal;
+    font-weight: bold;
+    line-height: normal;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+}
+
 .content {
     display: flex;
     padding: 100px;
@@ -45,23 +62,4 @@
     font-size: 50px;
     font-weight: 600;
     margin: 0%;
-}
-
-.quizUserLobby {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex: 2;
-    flex-wrap: wrap;
-}
-
-.quizUserLobbyUser {
-    display: flex;
-    width: 680px;
-    padding: 30px 40px;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
-    border-radius: 8px;
-    background: var(--black);
 }

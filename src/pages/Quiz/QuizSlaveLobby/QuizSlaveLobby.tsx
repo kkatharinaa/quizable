@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react"
-import "./QuizLobby.css"
+import "./QuizSlaveLobby.css"
 import { useLocation } from "react-router-dom";
 import QuizSession from "../../../models/QuizSession";
 import { BottomNavBar } from "../../../components/BottomNavBar/BottomNavBar";
@@ -7,15 +7,14 @@ import { BottomNavBarStyle, BottomNavBarType } from "../../../components/BottomN
 import * as SignalR from "@microsoft/signalr";
 
 
-export const QuizLobby: FC = () => {
+export const QuizSlaveLobby: FC = () => {
     const {state} = useLocation();
-    const quizSessionId: QuizSession = state.quizSessionId; // Read values passed on state    
+    const quizSessionId: QuizSession = state.quizSessionId; // Read values passed on state  
+    const userName: string = state.userName; // Read values passed on state      
 
-    const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
-    const [quizEntryId, setQuizEntryId] = useState<string | null>(null);
 
     const killQuizSession = () => {
-
+        
     }
 
     useEffect(() => {
@@ -26,24 +25,23 @@ export const QuizLobby: FC = () => {
         const url: string = `http://localhost:${port}`
 
         const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
-            .withUrl(url + "/master", {
+            .withUrl(url + "/slave", {
                 skipNegotiation: true,
                 transport: SignalR.HttpTransportType.WebSockets
               })
             .build();
 
-        connection.on("userId1", (quizEntryId: string, message: QuizSession) => {
+        connection.on(userName, () => {
             // Get the entry id
             // and quizSession back
-            console.log("Backend Message from: " + quizEntryId)
 
-            setQuizEntryId(quizEntryId);
-            setQuizSession(message)
+            //setQuizEntryId(quizEntryId);
+            //setQuizSession(message)
         })
 
         connection.start()
             .then(() => {
-                connection.send("requestQuizSession", "userId1", quizSessionId)
+                connection.send("enterSlaveQuizSession", userName, quizSessionId)
             })
             .catch((err) => console.error(err))
     }, [])
@@ -51,20 +49,8 @@ export const QuizLobby: FC = () => {
     return (
         <div className="page_styling">
             <div className="content">
-                {(quizSession != null && quizEntryId != null) && 
-                    <div>
-                        <div className="entryIdContent">
-                            <p className="entryIdContentTitle">Game code</p>
-                            <p className="entryIdContentGameCode">{quizEntryId}</p>
-                        </div>
-                        <div className="quizUserLobby">
-                            
-                        </div>
-                    </div>
-                }
+                <h1 className="quizSlaveSessionLobbyTitle">Waiting for players.</h1>
             </div>
-
-            
 
             <BottomNavBar
                 secondaryButtonText="Logout"

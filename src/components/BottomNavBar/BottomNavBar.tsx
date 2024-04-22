@@ -26,7 +26,7 @@ export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secon
             <ButtonComponent
                 text={secondaryButtonText}
                 icon={secondaryButtonIcon}
-                type={BottomNavBarStyle.Long ? ButtonType.Long: ButtonType.Medium}
+                type={style == BottomNavBarStyle.Long ? ButtonType.Long: ButtonType.Medium}
                 style={alternativeSecondaryButtonStyle ?? ButtonStyle.Secondary}
                 onClick={onSecondaryClick}
             />
@@ -35,7 +35,7 @@ export const BottomNavBar: FC<BottomNavBarProps> = ({ secondaryButtonText, secon
             <ButtonComponent
                 text={primaryButtonText}
                 icon={primaryButtonIcon}
-                type={BottomNavBarStyle.Long ? ButtonType.Long: ButtonType.Medium}
+                type={style == BottomNavBarStyle.Long ? ButtonType.Long: ButtonType.Medium}
                 style={alternativePrimaryButtonStyle ?? ButtonStyle.Primary}
                 onClick={onPrimaryClick}
             />

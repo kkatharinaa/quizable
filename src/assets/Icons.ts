@@ -36,11 +36,19 @@ export const TICK_ICON_DARK: Icon = {
     alt: 'Settings',
 };
 
+export const ADD_ICON_LIGHT: Icon = {
+    path: '/assets/icon-add-light.svg',
+    alt: 'Add',
+};
+
 export const ADD_ICON_DARK: Icon = {
     path: '/assets/icon-add-dark.svg',
     alt: 'Add',
 };
 
+export const QUIZ_CREATE_DARK: Icon = {
+    path: '/assets/create-quiz-dark.svg',
+    alt: 'Add',
 export const PLAY_ICON_LIGHT: Icon = {
     path: '/assets/icon-play-light.svg',
     alt: 'Play',

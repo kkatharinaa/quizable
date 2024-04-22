@@ -13,7 +13,6 @@ interface ButtonProps {
 }
 
 export const ButtonComponent: FC<ButtonProps> = ({ text, icon, type, style , onClick, className}) => {
-
     return (
         <button className={`${type} ${style} ${className}`} onClick={onClick}>
             {icon != null &&

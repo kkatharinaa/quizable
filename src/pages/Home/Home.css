@@ -1,5 +1,23 @@
 .home {
     display: flex;
+    width: 100vw;
+    height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.quizableTitle {
+    position: fixed;
+    color: var(--white);
+    text-align: center;
+    font-family: "Inika", serif;
+    font-size: 68px;
+    font-style: normal;
+    font-weight: bold;
+    line-height: normal;
+    margin: 0;
+    display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -7,6 +25,18 @@
     height: 100vh;
 }
 
-.button_spacing{
-    margin-bottom: 10px;
+.buttons {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    top: 65%;
+}
+
+.buttonStyle{
+    width: 380px;
+    align-self: center;
+    margin-top: 20px;
 }

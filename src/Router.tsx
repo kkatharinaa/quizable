@@ -9,6 +9,7 @@ import { QuizSession } from "./pages/Quiz/QuizSession/QuizSession";
 import {CreateEditor} from "./pages/Create/CreateEditor/CreateEditor.tsx";
 import {CreateOverview} from "./pages/Create/CreateOverview/CreateOverview.tsx";
 import { QuizOverview } from "./pages/Quiz/QuizOverview/QuizOverview.tsx";
+import { QuizSlaveLobby } from "./pages/Quiz/QuizSlaveLobby/QuizSlaveLobby.tsx";
 
 // TODO: only make master routes accessible if you are logged in
 
@@ -31,9 +32,9 @@ const pagesData: RouterType[] = [
       title: "About | Quizable"
     },
     {
-        path: "overview",
-        element: <CreateOverview/>,
-        title: "Overview | Quizable"
+      path: "overview",
+      element: <CreateOverview/>,
+      title: "Overview | Quizable"
     },
     {
       path: "overview/editor",
@@ -49,6 +50,11 @@ const pagesData: RouterType[] = [
       path: "join",
       element: <Join />,
       title: "Join Quiz | Quizable"
+    },
+    {
+      path: "quiz/slave/lobby",
+      element: <QuizSlaveLobby />,
+      title: "Quiz Lobby | Quizable"
     },
     {
       path: "quiz/lobby",

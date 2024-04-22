@@ -23,4 +23,20 @@ public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizS
         return Ok(quizSessionService.AddQuizSession(quizSession));
     }
     
+    /// <summary>
+    /// Returns quizSessionId if the quiz code is valid
+    /// </summary>
+    /// <param name="code"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [Route("validate/{code}")]
+    public IActionResult ValidateQuizCode(string code)
+    {
+        QuizSession? quizSession = quizSessionService.GetQuizSessionByEntryId(code);
+
+        if (quizSession is not null)
+            return Ok(quizSession.Id);
+        
+        return Ok("");
+    }
 }
