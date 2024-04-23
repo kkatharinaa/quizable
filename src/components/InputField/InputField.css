@@ -7,6 +7,22 @@
     box-sizing: border-box;
     border-radius: 8px;
     background: var(--black);
+    position: relative;
+}
+
+.inputField .characterCount {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    margin: 0;
+    padding: 0;
+    color: var(--text-field-text);
+    text-align: right;
+    font-family: 'Sansation', sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
 }
 
 .inputField input {

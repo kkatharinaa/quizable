@@ -34,18 +34,20 @@ export const AnswerInputField: FC<AnswerInputFieldProps> = ({ value, type, index
             return '';
     }
 
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const maxCharacters = 100
+    const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
         onChange(event.target.value, index);
     };
 
     return (
         <div className="answerInputField">
             <object type="image/svg+xml" data={gemsPath}></object>
-            <input
-                type="text"
-                value={value}
+            <p className="characterCount">{`${value.length}/${maxCharacters}`}</p>
+            <textarea
                 onChange={handleInputChange}
                 placeholder="Answer"
+                maxLength={maxCharacters}
+                value={value}
             />
             <object type="image/svg+xml" data={gemsPath}></object>
         </div>

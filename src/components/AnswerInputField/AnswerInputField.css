@@ -1,9 +1,8 @@
-/* TODO: what should happen if the answer is super long? */
-
 .answerInputField {
     display: flex;
     /*width: 340px;*/align-self: stretch;
-    padding: 60px 30px;
+    height: calc((var(--answer-input-text-size))*3 + 30px*2 + 9px);
+    padding: 30px;
     justify-content: center;
     align-items: center;
     gap: 10px;
@@ -11,12 +10,29 @@
     background: var(--black);
     position: relative; /* Set parent div as the reference for absolute positioning */
     box-sizing: border-box;
+    overflow: hidden;
+    --answer-input-text-size: 24px;
 }
 
-.answerInputField input {
-    width: 100%;
-    height: inherit;
+.answerInputField .characterCount {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    margin: 0;
     padding: 0;
+    color: var(--text-field-text);
+    text-align: right;
+    font-family: 'Sansation', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
+}
+
+.answerInputField textarea {
+    width: 100%;
+    height: 100%;
+    padding: 24px 0;
     background: transparent;
     border-width: 0;
     color: var(--white);
@@ -26,13 +42,14 @@
     font-style: normal;
     font-weight: normal;
     line-height: normal;
-    text-overflow: ellipsis;
+    box-sizing: border-box;
+    resize: none;
     overflow: hidden;
 }
-.answerInputField input::placeholder {
+.answerInputField textarea::placeholder {
     color: var(--text-field-text);
 }
-.answerInputField input:focus {
+.answerInputField textarea:focus {
     outline: none;
 }
 

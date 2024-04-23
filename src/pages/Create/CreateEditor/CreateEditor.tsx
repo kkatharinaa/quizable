@@ -23,7 +23,7 @@ export const CreateEditor: FC = () => {
 
     // TODO: check that we are logged in!! else redirect to home
 
-    // TODO generally: 3 lines for answers and restrict characters to input field so no overflow with ellipsis allowed, set max characters for quizname and questionname and answers, implement question settings popup
+    // TODO generally: implement question settings popup
 
     //const { quizID } = useParams();
     const quizID = searchParams.get('id');
