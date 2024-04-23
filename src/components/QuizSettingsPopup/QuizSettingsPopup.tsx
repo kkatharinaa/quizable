@@ -13,18 +13,21 @@ import {SAVE_ICON_DARK, SAVE_ICON_DISABLED, SAVE_ICON_LIGHT} from "../../assets/
 import {formattedDate} from "../../helper/DateFormatter.ts";
 import {SettingsField} from "../SettingsField/SettingsField.tsx";
 import {SettingsFieldType} from "../SettingsField/SettingsFieldExports.ts";
+import {Question} from "../../models/Question.ts";
 
 export interface QuizSettingsPopupProps {
     selectedQuiz: Quiz
-    onSave: (id: string, updatedQuiz: Quiz) => void
+    onSave: (id: string, updatedQuiz: Quiz, revertedOverrides: boolean) => void
     onClose: () => void
     onEditQuestions: (id: string) => void
+    revertAllOverridesPreselected: boolean
 }
 
-export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, onSave, onClose, onEditQuestions}) => {
+export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, onSave, onClose, onEditQuestions, revertAllOverridesPreselected}) => {
 
     const [quizOptions, setQuizOptions] = useState<QuizOptions>(selectedQuiz.options);
     const [quizName, setQuizName] = useState(selectedQuiz.name)
+    const [revertAllOverrides, setRevertAllOverrides] = useState(revertAllOverridesPreselected)
 
     const handleClose = () => {
         if (handleSave()) onClose()
@@ -39,11 +42,24 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
             // TODO: show error
             return false
         }
-        const updatedQuiz = {...selectedQuiz, name: name.value, options: quizOptions}
+        const updatedQuestions = handleRevertOverrides()
+        const updatedQuiz = {...selectedQuiz, name: name.value, options: quizOptions, questions: updatedQuestions}
         //setQuiz(updatedQuiz)
-        onSave(selectedQuiz.id, updatedQuiz)
+        onSave(selectedQuiz.id, updatedQuiz, revertAllOverrides)
         return true
     }
+    const handleRevertOverrides = (): Question[] => {
+        if (!revertAllOverrides) return selectedQuiz.questions
+        const updatedQuestions = [... selectedQuiz.questions]
+        updatedQuestions.forEach((question) => {
+            question.maxQuestionTime = quizOptions.maxQuestionTime
+            question.questionPoints = quizOptions.questionPoints
+            question.questionPointsModifier = quizOptions.questionPointsModifier
+            question.showLiveStats = quizOptions.showLiveStats
+        })
+        return updatedQuestions
+    }
+
     const handleQuizNameInputChange = (value: string) => {
         setQuizName(value)
     };
@@ -80,6 +96,9 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
         // currently only a toggle, because we only have 2 colour schemes, but could be customised even more
         const newValue = quizOptions.colourScheme == 0 ? 1 : 0
         handleColourSchemeInputChange(newValue)
+    }
+    const handleRevertAllOverridesToggle = () => {
+        setRevertAllOverrides(!revertAllOverrides)
     }
 
     return (
@@ -136,6 +155,12 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                             type={SettingsFieldType.Toggle}
                             currentValue={quizOptions.colourScheme}
                             onChange={handleColourSchemeToggle}
+                            placeholder={null}/>
+                        <SettingsField
+                            text="Revert all individual question setting overrides"
+                            type={SettingsFieldType.Toggle}
+                            currentValue={revertAllOverrides}
+                            onChange={handleRevertAllOverridesToggle}
                             placeholder={null}/>
                     </div>
                 </div>

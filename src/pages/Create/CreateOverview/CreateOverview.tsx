@@ -20,7 +20,7 @@ export const CreateOverview: FC = () => {
 
     // setup states and other stuff
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-    const [quizSettingsPopupProps, setQuizSettingsPopupProps] = useState<Quiz | null>(null);
+    const [quizSettingsPopupProps, setQuizSettingsPopupProps] = useState<[Quiz, boolean] | null>(null);
     const [showingQuizSettingsPopup, setShowingQuizSettingsPopup] = useState(false);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
@@ -47,7 +47,7 @@ export const CreateOverview: FC = () => {
         if (showingPopupForID == null) return
         const showingPopupForQuiz = quizzes.find(quiz => quiz.id === showingPopupForID)
         if (showingPopupForQuiz == null) return
-        setQuizSettingsPopupProps(showingPopupForQuiz)
+        setQuizSettingsPopupProps([showingPopupForQuiz, false])
         setShowingQuizSettingsPopup(true)
     }
 
@@ -66,13 +66,13 @@ export const CreateOverview: FC = () => {
         // open new quiz settings popup which will create a quiz and update the quizzes state when closed, or when clicked on "edit questions" button
         const newQuiz = Quiz.default
         setQuizzes([...quizzes, newQuiz]) // if we change for the newest quiz to be at the top, the quiz has to be inserted at the front of the quizzes array
-        setQuizSettingsPopupProps(newQuiz)
+        setQuizSettingsPopupProps([newQuiz, true])
         setShowingQuizSettingsPopup(true)
     };
     const handleEditQuiz = (id: string) => {
         const quizToBeEdited = findQuizByID(id)
         if (quizToBeEdited == undefined) throw new Error("could not find quiz in array") // TODO: display error
-        setQuizSettingsPopupProps(quizToBeEdited)
+        setQuizSettingsPopupProps([quizToBeEdited, false])
         setShowingQuizSettingsPopup(true)
     };
     const handlePlayQuiz = (id: string) => {
@@ -81,12 +81,12 @@ export const CreateOverview: FC = () => {
     };
 
     //quiz settings popup functions
-    const handleEditQuizSave = (id: string, updatedQuiz: Quiz) => {
+    const handleEditQuizSave = (id: string, updatedQuiz: Quiz, revertedOverrides: boolean) => {
         const previousQuiz = findQuizByID(id)
         if (previousQuiz == undefined) throw new Error("error saving quiz") // TODO: display error
 
         // else update the quiz if it existed before and its title or settings were changed
-        if (previousQuiz.name != updatedQuiz.name || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
+        if (revertedOverrides || previousQuiz.name != updatedQuiz.name || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
             const updatedQuizzes = [...quizzes]
             const index = updatedQuizzes.indexOf(previousQuiz)
             if (index < 0) throw new Error("error updating quiz") // TODO: display error
@@ -186,10 +186,11 @@ export const CreateOverview: FC = () => {
 
             { (showingQuizSettingsPopup && quizSettingsPopupProps != null) &&
                 <QuizSettingsPopup
-                    selectedQuiz={quizSettingsPopupProps}
+                    selectedQuiz={quizSettingsPopupProps[0]}
                     onSave={handleEditQuizSave}
                     onClose={handleEditQuizClose}
                     onEditQuestions={handleEditQuizEditQuestions}
+                    revertAllOverridesPreselected={quizSettingsPopupProps[1]}
                 />
             }
             { (showingPopup && popupProps != null) &&

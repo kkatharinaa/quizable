@@ -13,6 +13,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
+import {QuestionSettingsPopup} from "../../../components/QuestionSettingsPopup/QuestionSettingsPopup.tsx";
 
 export const CreateEditor: FC = () => {
 
@@ -23,7 +24,7 @@ export const CreateEditor: FC = () => {
 
     // TODO: check that we are logged in!! else redirect to home
 
-    // TODO generally: implement question settings popup
+    // TODO generally: adjust question settings popup
 
     //const { quizID } = useParams();
     const quizID = searchParams.get('id');
@@ -32,6 +33,7 @@ export const CreateEditor: FC = () => {
     const [originalQuiz, setOriginalQuiz] = useState<Quiz | null>(null) // only needed for saving
     const [questions, setQuestions] = useState<Question[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number | null>(null);
+    const [showingQuestionSettingsPopup, setShowingQuestionSettingsPopup] = useState(false);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
 
@@ -59,8 +61,15 @@ export const CreateEditor: FC = () => {
         setQuestions(updatedQuestions)
     };
     const handleQuestionSettingsClick = () => {
-        // TODO: open settings editor popup for current question
+        setShowingQuestionSettingsPopup(true)
     };
+    const handleQuestionSettingsClose = (updatedQuestion: Question) => {
+        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+        const updatedQuestions = [...questions];
+        updatedQuestions[currentQuestionIndex] = updatedQuestion
+        setQuestions(updatedQuestions);
+        setShowingQuestionSettingsPopup(false)
+    }
     const handleQuestionDelete = () => {
         if (questions.length == 1) { return } // quiz has to have at least one question
 
@@ -92,7 +101,14 @@ export const CreateEditor: FC = () => {
         setCurrentQuestionIndex(index)
     }
     const handleQuestionAdd = () => {
-        const updatedQuestions = [...questions, Question.default]
+        const newQuestion = Question.default
+        if (originalQuiz != null) {
+            newQuestion.maxQuestionTime = originalQuiz.options.maxQuestionTime
+            newQuestion.questionPoints = originalQuiz.options.questionPoints
+            newQuestion.questionPointsModifier = originalQuiz.options.questionPointsModifier
+            newQuestion.showLiveStats = originalQuiz.options.showLiveStats
+        }
+        const updatedQuestions = [...questions, newQuestion]
         setQuestions(updatedQuestions)
     }
     const handleQuestionDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
@@ -263,6 +279,14 @@ export const CreateEditor: FC = () => {
                 onSecondaryClick={toOverview}
                 onPrimaryClick={saveQuiz}
             />
+
+            { (showingQuestionSettingsPopup && currentQuestionIndex != null && originalQuiz != null) &&
+                <QuestionSettingsPopup
+                    selectedQuestion={questions[currentQuestionIndex]}
+                    onClose={handleQuestionSettingsClose}
+                    quiz={originalQuiz}
+                />
+            }
 
             { (showingPopup && popupProps != null) &&
             <Popup

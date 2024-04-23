@@ -1,0 +1,54 @@
+.questionSettingsPopup {
+    padding: 100px 340px;
+    gap: /*10px*/0;
+    box-sizing: border-box;
+}
+
+.questionSettingsPopupField {
+    justify-content: space-between;
+    flex: 1 0 0;
+    width: 800px;
+    max-width: 800px;
+    padding: 0;
+}
+
+.questionSettingsContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: /*60px*/0;
+    flex: 1 0 0;
+    align-self: stretch;
+    padding-top: 54px;
+}
+
+.questionSettingsContent .questionSettingsTitle {
+    color: var(--white);
+    font-family: 'Sansation', sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
+    margin: 0;
+    padding: 24px 40px /*14px*/0 40px;
+    text-align: center;
+    align-self: stretch;
+}
+
+.questionSettingsContent .questionSettingsAll {
+    display: flex;
+    padding: 0 40px;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    flex: 1 0 0;
+    align-self: stretch;
+    overflow-y: scroll;
+}
+
+.questionSettingsNav {
+    width: 100%;
+}
+.questionSettingsNav .bottomNavBar {
+    background: transparent;
+}

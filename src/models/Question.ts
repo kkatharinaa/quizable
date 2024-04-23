@@ -17,7 +17,7 @@ export class Question {
     public questionType: QuestionType
     public showLiveStats: boolean
 
-    static default: Question = new Question(uuid(), /*QuestionName.tryMake("Which colour is the sky?")!*/"", [Answer.defaultCorrect, Answer.default], 0, 100, 0, QuestionType.SingleChoice, false)
+    static default: Question = new Question(uuid(), /*QuestionName.tryMake("Which colour is the sky?")!*/"", [Answer.defaultCorrect, Answer.default], 60, 100, 0, QuestionType.SingleChoice, false)
 
     // Constructor
     constructor(id: string, questionText: /*QuestionName*/string, answers: Answer[], maxQuestionTime: number, questionPoints: number, questionPointsModifier: number, questionType: QuestionType, showLiveStats: boolean) {
