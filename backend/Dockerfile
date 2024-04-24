@@ -5,7 +5,7 @@ WORKDIR /App
 COPY . ./
 
 # Restore as distinct layers
-RUN dotnet restore 
+RUN dotnet restore
 # Build and publish a release
 RUN dotnet publish -c Release -o out
 
@@ -16,6 +16,6 @@ COPY --from=build-env /App/out .
 
 ENV ASPNETCORE_hostBuilder__reloadConfigOnChange=false
 
-EXPOSE 8080
+EXPOSE 5296
 
 ENTRYPOINT ["dotnet", "QuizApp.dll"]

@@ -70,7 +70,7 @@ export const Join: FC = () => {
 
     const validateText = (text: string) => {
         // invalid characters as regex
-        const invalidChars = /[`!@#$%^&*()_+-=[\]{};':"\\|,.<>/?~]/;
+        const invalidChars = /[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~]/;
 
         let newValidationState: ValidationState = {
             valid: true,

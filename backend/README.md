@@ -76,8 +76,6 @@ gcloud builds submit --region=us-west2 --config ./deploy/cloudbuild.yaml
 gcloud run deploy quizapp --region=europe-west2 --image europe-central2-docker.pkg.dev/quizzabletest/hello-repo/quizapp-image:quizapp
 ```
 
-w
-
 ## Full list of commands
 
 ```shell 
