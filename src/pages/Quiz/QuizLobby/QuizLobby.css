@@ -21,7 +21,6 @@
     gap: 100px;
     flex: 1 0 0;
     align-self: stretch;
-    overflow-y: scroll;
 }
 
 .entryIdContent {
@@ -64,4 +63,37 @@
     box-sizing: border-box;
     border-radius: 8px;
     background: var(--black);
+}
+
+.joinedUserSection {
+    display: flex;
+    height: 100%;
+    min-height: 100%;
+    width: 100vw;
+    min-width: 100vw;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+
+.joinedUserSection h4 {
+    color: var(--white);
+    font-size: 32px;
+    text-align: center;
+}
+
+.joinedUserSection .joinedUserSectionCards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--black);
+    border-radius: 20px;
+    width: 386px;
+    height: 90px;
+}
+
+.joinedUserSection .joinedUserSectionCards p {
+    color: var(--white);
+    font-size: 32px;
 }

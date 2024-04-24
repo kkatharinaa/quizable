@@ -65,12 +65,12 @@ export const Join: FC = () => {
     }
 
     const joinQuiz = () => {
-        navigate("/quiz/slave/lobby", {state: {quizSessionId: validQuizCode.quizSessionId}})
+        navigate("/quiz/slave/lobby", {state: {quizSessionId: validQuizCode.quizSessionId, userName: inputValue}})
     }
 
     const validateText = (text: string) => {
         // invalid characters as regex
-        const invalidChars = /[ `!@#$%^&*()_+-=[\]{};':"\\|,.<>/?~]/;
+        const invalidChars = /[`!@#$%^&*()_+-=[\]{};':"\\|,.<>/?~]/;
 
         let newValidationState: ValidationState = {
             valid: true,
@@ -97,13 +97,13 @@ export const Join: FC = () => {
             }
         }
 
-        // check if the string contains any invalid characters
+       /*  // check if the string contains any invalid characters
         if(invalidChars.test(text)){
             newValidationState = {
                 valid: false, 
                 validationText: "Quiz code is invalid, not special characters allowed!"
             }
-        }        
+        }         */
 
         setValidation(newValidationState)
     }

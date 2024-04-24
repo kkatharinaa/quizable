@@ -5,7 +5,18 @@ import QuizSession from "../../../models/QuizSession";
 import { BottomNavBar } from "../../../components/BottomNavBar/BottomNavBar";
 import { BottomNavBarStyle, BottomNavBarType } from "../../../components/BottomNavBar/BottomNavBarExports";
 import * as SignalR from "@microsoft/signalr";
+import QuizUser from "../../../models/QuizUser";
+import {v4 as uuid} from "uuid"
+import { getDeviceId } from "../../../helper/DeviceHelper";
+import { ADD_ICON_DARK, ADD_ICON_LIGHT } from "../../../assets/Icons";
+import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGems";
+import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
 
+
+interface QuizMasterMessage {
+    notifyQuizSession?: QuizSession,
+    notifyNewQuizUser?: QuizUser
+}
 
 export const QuizLobby: FC = () => {
     const {state} = useLocation();
@@ -13,6 +24,7 @@ export const QuizLobby: FC = () => {
 
     const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
     const [quizEntryId, setQuizEntryId] = useState<string | null>(null);
+    const [joinedQuizUser, setJoinedQuizUser] = useState<QuizUser[]>([])
 
     const killQuizSession = () => {
 
@@ -20,6 +32,8 @@ export const QuizLobby: FC = () => {
 
     useEffect(() => {
         console.log("Quiz session in Quiz Lobby: ", quizSessionId)
+
+        const starterUserId: string = "userId1"
 
         // start websocket connection
         const port: number = 5296
@@ -32,7 +46,7 @@ export const QuizLobby: FC = () => {
               })
             .build();
 
-        connection.on("userId1", (quizEntryId: string, message: QuizSession) => {
+        connection.on(starterUserId, (quizEntryId: string, message: QuizSession) => {
             // Get the entry id
             // and quizSession back
             console.log("Backend Message from: " + quizEntryId)
@@ -41,9 +55,22 @@ export const QuizLobby: FC = () => {
             setQuizSession(message)
         })
 
+        connection.on(`message:${starterUserId}`, (masterMessage: QuizMasterMessage) => {
+            // Get the entry id
+            // and quizSession backs
+            console.log(masterMessage.notifyNewQuizUser)
+            joinedQuizUser.push(masterMessage.notifyNewQuizUser ?? {id: "", identifier: "", deviceId: ""})
+            setJoinedQuizUser([...joinedQuizUser]);
+        })
+
         connection.start()
-            .then(() => {
-                connection.send("requestQuizSession", "userId1", quizSessionId)
+            .then(async () => {
+                const quizUser: QuizUser = {
+                    id: uuid(),
+                    identifier: starterUserId,
+                    deviceId: await getDeviceId()
+                }
+                connection.send("requestQuizSession", quizUser, quizSessionId)
             })
             .catch((err) => console.error(err))
     }, [])
@@ -62,16 +89,24 @@ export const QuizLobby: FC = () => {
                         </div>
                     </div>
                 }
+                {joinedQuizUser.length >= 1 &&
+                    <div className="joinedUserSection">
+                        <h4>{joinedQuizUser.length} joined</h4>
+                        {joinedQuizUser.map((quizUser) => (
+                            <div className="joinedUserSectionCards" key={quizUser.deviceId+":"+quizUser.identifier}>
+                                <p>{quizUser.identifier}</p>
+                            </div>
+                        ))}                        
+                    </div>
+                }
             </div>
 
-            
-
             <BottomNavBar
-                secondaryButtonText="Logout"
-                secondaryButtonIcon={null}
-                primaryButtonText=""
-                primaryButtonIcon={null}
-                type={BottomNavBarType.SecondaryOnly}
+                secondaryButtonText="Start Quiz"
+                secondaryButtonIcon={ADD_ICON_DARK}
+                primaryButtonText="End Quiz"
+                primaryButtonIcon={ADD_ICON_LIGHT}
+                type={BottomNavBarType.Default}
                 onSecondaryClick={killQuizSession} 
                 style={BottomNavBarStyle.Long}/>
         </div>

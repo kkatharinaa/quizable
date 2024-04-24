@@ -2,7 +2,7 @@ namespace QuizApp.Models;
 
 public class QuizUser
 {
-    private string Id { get; set; }
-    private string Identifier { get; set; }
-    private string DeviceId { get; set; }
+    public string Id { get; set; }
+    public string Identifier { get; set; }
+    public string DeviceId { get; set; }
 }

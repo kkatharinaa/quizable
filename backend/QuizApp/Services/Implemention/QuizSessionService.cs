@@ -7,6 +7,7 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
 {
     private Dictionary<string, QuizSession> QuizSessions = new();
     
+    
     /// <summary>
     /// Add new quiz session
     /// </summary>

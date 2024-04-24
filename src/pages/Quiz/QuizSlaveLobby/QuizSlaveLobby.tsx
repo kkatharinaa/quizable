@@ -5,13 +5,15 @@ import QuizSession from "../../../models/QuizSession";
 import { BottomNavBar } from "../../../components/BottomNavBar/BottomNavBar";
 import { BottomNavBarStyle, BottomNavBarType } from "../../../components/BottomNavBar/BottomNavBarExports";
 import * as SignalR from "@microsoft/signalr";
+import { getDeviceId } from "../../../helper/DeviceHelper";
+import { v4 as uuid } from "uuid"
+import QuizUser from "../../../models/QuizUser";
 
 
 export const QuizSlaveLobby: FC = () => {
     const {state} = useLocation();
     const quizSessionId: QuizSession = state.quizSessionId; // Read values passed on state  
     const userName: string = state.userName; // Read values passed on state      
-
 
     const killQuizSession = () => {
         
@@ -40,8 +42,15 @@ export const QuizSlaveLobby: FC = () => {
         })
 
         connection.start()
-            .then(() => {
-                connection.send("enterSlaveQuizSession", userName, quizSessionId)
+            .then(async () => {
+                const quizUser: QuizUser = {
+                    id: uuid(),
+                    identifier: userName,
+                    deviceId: await getDeviceId()
+                }
+
+                console.log("Quiz user new: " + quizUser)
+                connection.send("EnterSlaveQuizSession", quizUser, quizSessionId)
             })
             .catch((err) => console.error(err))
     }, [])

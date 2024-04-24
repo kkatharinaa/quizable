@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SignalR;
 using QuizApp.Models;
 
 namespace QuizApp.Services.Interface;
