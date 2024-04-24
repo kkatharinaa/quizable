@@ -80,7 +80,8 @@ export const CreateOverview: FC = () => {
         setShowingQuizSettingsPopup(true)
     };
     const handlePlayQuiz = async (id: string) => {
-        const quizToBePlayed: Quiz = findQuizByID(id)
+        const quizToBePlayed: Quiz | undefined = findQuizByID(id)
+        if (quizToBePlayed == undefined) throw new Error("quiz could not be found") // TODO: display error
 
         // create a new quiz session
         const quizSessionPlay: QuizSession = {
@@ -171,7 +172,8 @@ export const CreateOverview: FC = () => {
                 setShowingPopup(false)
             },
             onPrimaryClick: () => {
-                // TODO: log out, move back to homescreen
+                // TODO: log out from firebase auth
+                navigate(`/`)
             },
         }
         showPopup(logOutPopup)

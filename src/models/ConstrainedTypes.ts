@@ -1,14 +1,12 @@
 
-// TODO: is this fine? or use zod?
-// This is fine. we add zod if we really need it
+// we add zod if we really need it
 
 export class QuizName {
     private constructor(public readonly value: string) {}
 
     static tryMake(input: string): QuizName | null {
         if (input.length === 0) return null
-        // TODO: check for max characters?
-        // from input validation?
+        // max characters are handled in input validation
         return new QuizName(input)
     }
 }
@@ -19,7 +17,7 @@ export class QuestionName {
 
     static tryMake(input: string): QuestionName | null {
         if (input.length === 0) return null
-        // TODO: check for max characters
+        // max characters are handled in input validation
         return new QuestionName(input)
     }
 }
@@ -30,7 +28,7 @@ export class AnswerValue {
 
     static tryMake(input: string): AnswerValue | null {
         if (input.length === 0) return null
-        // TODO: check for max characters
+        // max characters are handled in input validation
         return new AnswerValue(input)
     }
 }

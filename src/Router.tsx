@@ -8,7 +8,6 @@ import QuizResult from "./pages/Quiz/QuizResult/QuizResult";
 import { QuizSession } from "./pages/Quiz/QuizSession/QuizSession";
 import {CreateEditor} from "./pages/Create/CreateEditor/CreateEditor.tsx";
 import {CreateOverview} from "./pages/Create/CreateOverview/CreateOverview.tsx";
-import { QuizOverview } from "./pages/Quiz/QuizOverview/QuizOverview.tsx";
 import { QuizSlaveLobby } from "./pages/Quiz/QuizSlaveLobby/QuizSlaveLobby.tsx";
 
 // TODO: only make master routes accessible if you are logged in
@@ -70,11 +69,6 @@ const pagesData: RouterType[] = [
       path: "quiz/session",
       element: <QuizSession />,
       title: "Quiz Session | Quizable"
-    },
-    {
-      path: "quiz/overview",
-      element: <QuizOverview />,
-      title: "Quiz Overview | Quizable"
     },
 ];
 

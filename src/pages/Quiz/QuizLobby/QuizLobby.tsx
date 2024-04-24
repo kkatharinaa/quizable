@@ -8,7 +8,6 @@ import * as SignalR from "@microsoft/signalr";
 import QuizUser from "../../../models/QuizUser";
 import {v4 as uuid} from "uuid"
 import { getDeviceId } from "../../../helper/DeviceHelper";
-import { ADD_ICON_DARK, ADD_ICON_LIGHT } from "../../../assets/Icons";
 import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
 
@@ -78,8 +77,8 @@ export const QuizLobby: FC = () => {
 
     return (
         <div className="page_styling">
-            <div className="content">
-                <BackgroundGems type={BackgroundGemsType.Primary}/>
+            <BackgroundGems type={BackgroundGemsType.Primary}/>
+            <div className="lobbyContent">
                 {(quizSession != null && quizEntryId != null) && 
                     <div>
                         <div className="entryIdContent">
@@ -104,10 +103,10 @@ export const QuizLobby: FC = () => {
             </div>
 
             <BottomNavBar
-                secondaryButtonText="Start Quiz"
-                secondaryButtonIcon={ADD_ICON_DARK}
-                primaryButtonText="End Quiz"
-                primaryButtonIcon={ADD_ICON_LIGHT}
+                secondaryButtonText="End Quiz"
+                secondaryButtonIcon={null}
+                primaryButtonText="Start Quiz"
+                primaryButtonIcon={null}
                 type={BottomNavBarType.Default}
                 onSecondaryClick={killQuizSession} 
                 style={BottomNavBarStyle.Long}/>

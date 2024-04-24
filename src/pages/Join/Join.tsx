@@ -1,7 +1,6 @@
 import { FC, useState } from "react";
 import { BottomNavBar } from "../../components/BottomNavBar/BottomNavBar";
 import { BottomNavBarStyle, BottomNavBarType } from "../../components/BottomNavBar/BottomNavBarExports";
-import { ADD_ICON_DARK, ADD_ICON_LIGHT } from "../../assets/Icons";
 import { BackgroundGems } from "../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../components/BackgroundGems/BackgroundGemsExports";
 import "./Join.css"
@@ -143,9 +142,9 @@ export const Join: FC = () => {
             
             <BottomNavBar
                 secondaryButtonText="Back to home"
-                secondaryButtonIcon={ADD_ICON_DARK}
+                secondaryButtonIcon={null}
                 primaryButtonText={validQuizCode.code.length == 0 ? "Enter code" : "Join quiz"}
-                primaryButtonIcon={ADD_ICON_LIGHT}
+                primaryButtonIcon={null}
                 type={BottomNavBarType.Default}
                 style={BottomNavBarStyle.Long}
                 onPrimaryClick={validQuizCode.code.length == 0 ? validateQuizCode : joinQuiz}

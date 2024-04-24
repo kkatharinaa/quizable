@@ -9,11 +9,9 @@
     align-items: center;
     flex-direction: column;
     justify-content: space-between;
-
-    background: var(--primary-color);
 }
 
-.content {
+.lobbyContent {
     display: flex;
     padding: 100px;
     flex-direction: column;
@@ -21,6 +19,7 @@
     gap: 100px;
     flex: 1 0 0;
     align-self: stretch;
+    overflow-x: hidden;
 }
 
 .entryIdContent {

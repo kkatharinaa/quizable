@@ -234,6 +234,7 @@ export const CreateEditor: FC = () => {
 
     return (
         <div className="createEditor">
+            <BackgroundGems type={BackgroundGemsType.Grey}/>
             <div className="contentAndMenu">
                 { originalQuiz != null &&
                 <p className="quizName">{`Quiz / ${originalQuiz.name}`}</p>
@@ -273,9 +274,9 @@ export const CreateEditor: FC = () => {
                 primaryButtonText="Save Quiz"
                 primaryButtonIcon={SAVE_ICON_LIGHT}
                 type={BottomNavBarType.Default}
+                style={BottomNavBarStyle.Long}
                 onSecondaryClick={toOverview}
                 onPrimaryClick={saveQuiz}
-                style={BottomNavBarStyle.Long}
             />
 
             { (showingQuestionSettingsPopup && currentQuestionIndex != null && originalQuiz != null) &&
