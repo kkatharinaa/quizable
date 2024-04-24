@@ -78,6 +78,7 @@ export const QuizLobby: FC = () => {
     return (
         <div className="page_styling">
             <div className="content">
+                <BackgroundGems type={BackgroundGemsType.Primary}/>
                 {(quizSession != null && quizEntryId != null) && 
                     <div>
                         <div className="entryIdContent">

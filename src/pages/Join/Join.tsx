@@ -97,13 +97,13 @@ export const Join: FC = () => {
             }
         }
 
-       /*  // check if the string contains any invalid characters
+        // check if the string contains any invalid characters
         if(invalidChars.test(text)){
             newValidationState = {
                 valid: false, 
                 validationText: "Quiz code is invalid, not special characters allowed!"
             }
-        }         */
+        }
 
         setValidation(newValidationState)
     }

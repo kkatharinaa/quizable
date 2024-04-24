@@ -8,6 +8,8 @@ import * as SignalR from "@microsoft/signalr";
 import { getDeviceId } from "../../../helper/DeviceHelper";
 import { v4 as uuid } from "uuid"
 import QuizUser from "../../../models/QuizUser";
+import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGems";
+import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
 
 
 export const QuizSlaveLobby: FC = () => {
@@ -57,10 +59,10 @@ export const QuizSlaveLobby: FC = () => {
 
     return (
         <div className="page_styling">
+            <BackgroundGems type={BackgroundGemsType.Primary}/>
             <div className="content">
                 <h1 className="quizSlaveSessionLobbyTitle">Waiting for players.</h1>
             </div>
-
             <BottomNavBar
                 secondaryButtonText="Logout"
                 secondaryButtonIcon={null}

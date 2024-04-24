@@ -25,14 +25,19 @@
     height: 100vh;
 }
 
-.buttons {
+.homeButtons {
     position: fixed;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    gap: 20px;
     width: 100%;
     top: 65%;
+}
+
+.homeButtons button {
+    width: 380px;
 }
 
 .buttonStyle{

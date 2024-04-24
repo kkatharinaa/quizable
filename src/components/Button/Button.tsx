@@ -8,17 +8,15 @@ interface ButtonProps {
     icon: Icon | null
     type: ButtonType
     style: ButtonStyle
-    onClick?: () => void,
-    className?: string
+    onClick?: () => void
 }
 
-export const ButtonComponent: FC<ButtonProps> = ({ text, icon, type, style , onClick, className}) => {
+export const ButtonComponent: FC<ButtonProps> = ({ text, icon, type, style , onClick}) => {
+
     return (
-        <button className={`${type} ${style} ${className}`} onClick={onClick}>
-            {icon != null &&
-                <img src={icon.path} alt={icon.alt}/>
-            }
-            {type == ButtonType.Long && <span>{text}</span>}
+        <button className={`${type} ${style}`} onClick={onClick}>
+            {icon != null && <img src={icon.path} alt={icon.alt}/>}
+            {type != ButtonType.Short && <span>{text}</span>}
         </button>
     )
 }

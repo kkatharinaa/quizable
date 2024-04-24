@@ -35,10 +35,9 @@ const Home: FC = () => {
     <div className="home">
       <BackgroundGems type={BackgroundGemsType.Primary}/>
       <h1 className="quizableTitle">Quizable</h1>
-      <div className="buttons">
+      <div className="homeButtons">
         <ButtonComponent
           text="Join Quiz"
-          className="buttonStyle"
           icon={ADD_ICON_LIGHT}
           type={ButtonType.Long}
           style={ButtonStyle.Primary}
@@ -46,7 +45,6 @@ const Home: FC = () => {
         />
         <ButtonComponent
           text="Create Quiz"
-          className="buttonStyle"
           icon={QUIZ_CREATE_DARK}
           type={ButtonType.Long}
           style={ButtonStyle.Secondary}
