@@ -27,7 +27,7 @@ export const QuizOverview = () => {
     }
 
     const uploadDefaultQuiz = () => {
-        const newQuiz: Quiz = Quiz.default;
+        const newQuiz: Quiz = new Quiz();
         QuizRepository.add(newQuiz);
         setQuizzesFromFirestore()
     }

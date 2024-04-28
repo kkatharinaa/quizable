@@ -7,13 +7,10 @@ export class Answer {
     public value: /*AnswerValue*/string
     public correct: boolean
 
-    static default =  new Answer(uuid(), /*AnswerValue.tryMake("Green")!*/"", false)
-    static defaultCorrect =  new Answer(uuid(), /*AnswerValue.tryMake("Green")!*/"", true)
-
     // Constructor
-    constructor(id: string, value: /*AnswerValue*/string, correct: boolean) {
-        this.id = id
-        this.value = value
+    constructor(correct: boolean, id?: string, value?: /*AnswerValue*/string) {
+        this.id = id ?? uuid()
+        this.value = value ?? ""
         this.correct = correct
     }
 

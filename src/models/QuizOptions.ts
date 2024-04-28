@@ -12,16 +12,14 @@ export class QuizOptions {
     public showLiveStats: boolean
     public colourScheme: ColourScheme
 
-    static default: QuizOptions = new QuizOptions(true, 60, 100, 0, false, ColourScheme.Default)
-
     // Constructor
-    constructor(isLeaderboardBetween: boolean, maxQuestionTime: number, questionPoints: number, questionPointsModifier: number, showLiveStats: boolean, colourScheme: ColourScheme) {
-        this.isLeaderboardBetween = isLeaderboardBetween
-        this.maxQuestionTime = maxQuestionTime
-        this.questionPoints = questionPoints
-        this.questionPointsModifier = questionPointsModifier
-        this.showLiveStats = showLiveStats
-        this.colourScheme = colourScheme
+    constructor(isLeaderboardBetween?: boolean, maxQuestionTime?: number, questionPoints?: number, questionPointsModifier?: number, showLiveStats?: boolean, colourScheme?: ColourScheme) {
+        this.isLeaderboardBetween = isLeaderboardBetween ?? true
+        this.maxQuestionTime = maxQuestionTime ?? 60
+        this.questionPoints = questionPoints ?? 100
+        this.questionPointsModifier = questionPointsModifier ?? 0
+        this.showLiveStats = showLiveStats ?? false
+        this.colourScheme = colourScheme ?? ColourScheme.Default
     }
 
     static isEqual(a: QuizOptions, b: QuizOptions): boolean {

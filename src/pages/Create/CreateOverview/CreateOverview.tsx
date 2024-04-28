@@ -69,7 +69,7 @@ export const CreateOverview: FC = () => {
     }
     const handleAddQuiz = () => {
         // open new quiz settings popup which will create a quiz and update the quizzes state when closed, or when clicked on "edit questions" button
-        const newQuiz = Quiz.default
+        const newQuiz = new Quiz()
         setQuizzes([...quizzes, newQuiz]) // if we change for the newest quiz to be at the top, the quiz has to be inserted at the front of the quizzes array
         setQuizSettingsPopupProps([newQuiz, true])
         setShowingQuizSettingsPopup(true)

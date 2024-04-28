@@ -17,18 +17,16 @@ export class Question {
     public questionType: QuestionType
     public showLiveStats: boolean
 
-    static default: Question = new Question(uuid(), /*QuestionName.tryMake("Which colour is the sky?")!*/"", [Answer.defaultCorrect, Answer.default], 60, 100, 0, QuestionType.SingleChoice, false)
-
     // Constructor
-    constructor(id: string, questionText: /*QuestionName*/string, answers: Answer[], maxQuestionTime: number, questionPoints: number, questionPointsModifier: number, questionType: QuestionType, showLiveStats: boolean) {
-        this.id = id
-        this.questionText = questionText
-        this.answers = answers
-        this.maxQuestionTime = maxQuestionTime
-        this.questionPoints = questionPoints
-        this.questionPointsModifier = questionPointsModifier
-        this.questionType = questionType
-        this.showLiveStats = showLiveStats
+    constructor(id?: string, questionText?: /*QuestionName*/string, answers?: Answer[], maxQuestionTime?: number, questionPoints?: number, questionPointsModifier?: number, questionType?: QuestionType, showLiveStats?: boolean) {
+        this.id = id ?? uuid()
+        this.questionText = questionText ?? ""
+        this.answers = answers ?? [new Answer(true), new Answer(false)]
+        this.maxQuestionTime = maxQuestionTime ?? 60
+        this.questionPoints = questionPoints ?? 100
+        this.questionPointsModifier = questionPointsModifier ?? 0
+        this.questionType = questionType ?? QuestionType.SingleChoice
+        this.showLiveStats = showLiveStats ?? false
     }
 
     static isEqual(a: Question, b: Question): boolean {

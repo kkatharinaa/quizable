@@ -14,16 +14,14 @@ export class Quiz {
     public createdOn: Date
     public lastTimePlayed: Date | null
 
-    static default: Quiz = new Quiz(uuid(), /*QuizName.tryMake("Untitled Quiz")!*/"", [Question.default], QuizOptions.default, AuthenticatedUser.default, new Date(), null)
-
     // Constructor
-    constructor(id: string, name: /*QuizName*/string, questions: Question[], options: QuizOptions, quizUser: AuthenticatedUser, createdOn: Date, lastTimePlayed: Date | null) {
-        this.id = id
-        this.name = name
-        this.questions = questions
-        this.options = options
-        this.quizUser = quizUser
-        this.createdOn = createdOn
-        this.lastTimePlayed = lastTimePlayed
+    constructor(id?: string, name?: /*QuizName*/string, questions?: Question[], options?: QuizOptions, quizUser?: AuthenticatedUser, createdOn?: Date, lastTimePlayed?: Date | null) {
+        this.id = id ?? uuid()
+        this.name = name ?? ""
+        this.questions = questions ?? [new Question()]
+        this.options = options ?? new QuizOptions()
+        this.quizUser = quizUser ?? AuthenticatedUser.default // TODO: remove default when authentication gets added
+        this.createdOn = createdOn ?? new Date()
+        this.lastTimePlayed = lastTimePlayed ?? null
     }
 }

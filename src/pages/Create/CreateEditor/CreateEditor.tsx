@@ -101,7 +101,7 @@ export const CreateEditor: FC = () => {
         setCurrentQuestionIndex(index)
     }
     const handleQuestionAdd = () => {
-        const newQuestion = Question.default
+        const newQuestion = new Question()
         if (originalQuiz != null) {
             newQuestion.maxQuestionTime = originalQuiz.options.maxQuestionTime
             newQuestion.questionPoints = originalQuiz.options.questionPoints
@@ -174,7 +174,7 @@ export const CreateEditor: FC = () => {
         if (questions[currentQuestionIndex].answers.length == 6) { return } // max 6 answers per question
         const updatedQuestions = [...questions]
         const currentQuestion = updatedQuestions[currentQuestionIndex];
-        const newAnswers = [...currentQuestion.answers, Answer.default];
+        const newAnswers = [...currentQuestion.answers, new Answer(false)];
         updatedQuestions[currentQuestionIndex] = {...currentQuestion, answers: newAnswers};
         setQuestions(updatedQuestions)
     }
