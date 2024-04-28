@@ -2,7 +2,7 @@ import React, {FC, useEffect, useState} from "react";
 import "./CreateEditor.css"
 import {Quiz} from "../../../models/Quiz.ts";
 import {Question} from "../../../models/Question.ts";
-import {SAVE_ICON_LIGHT} from "../../../assets/Icons.ts";
+import {RETURN_ICON_DARK, SAVE_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {QuestionEditor} from "../../../components/QuestionEditor/QuestionEditor.tsx";
@@ -270,7 +270,7 @@ export const CreateEditor: FC = () => {
 
             <BottomNavBar
                 secondaryButtonText="To Overview"
-                secondaryButtonIcon={null}
+                secondaryButtonIcon={RETURN_ICON_DARK}
                 primaryButtonText="Save Quiz"
                 primaryButtonIcon={SAVE_ICON_LIGHT}
                 type={BottomNavBarType.Default}

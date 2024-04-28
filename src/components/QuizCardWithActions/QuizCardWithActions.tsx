@@ -2,7 +2,7 @@ import {FC} from "react";
 import "./QuizCardWithActions.css"
 import {ButtonStyle, ButtonType} from "../Button/ButtonExports.ts";
 import {ButtonComponent} from "../Button/Button.tsx";
-import {DELETE_ICON_DARK, PLAY_ICON_LIGHT} from "../../assets/Icons.ts";
+import {DELETE_ICON_DARK, PLAY_ICON_LIGHT, SETTINGS_ICON_LIGHT} from "../../assets/Icons.ts";
 
 interface QuizCardWithActionsProps {
     index: number
@@ -61,7 +61,7 @@ export const QuizCardWithActions: FC<QuizCardWithActionsProps> = ({ index, id, q
                 />
                 <ButtonComponent
                     text="Edit Quiz"
-                    icon={null}
+                    icon={SETTINGS_ICON_LIGHT}
                     type={ButtonType.Medium}
                     style={ButtonStyle.Settings}
                     onClick={handleEdit}

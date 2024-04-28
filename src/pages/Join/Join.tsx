@@ -6,6 +6,7 @@ import { BackgroundGemsType } from "../../components/BackgroundGems/BackgroundGe
 import "./Join.css"
 import { useNavigate } from "react-router-dom";
 import QuizSessionService from "../../services/QuizSessionService";
+import {RETURN_ICON_DARK} from "../../assets/Icons.ts";
 
 interface ValidationState {
     valid: boolean, 
@@ -141,9 +142,9 @@ export const Join: FC = () => {
             </div>
             
             <BottomNavBar
-                secondaryButtonText="Back to home"
-                secondaryButtonIcon={null}
-                primaryButtonText={validQuizCode.code.length == 0 ? "Enter code" : "Join quiz"}
+                secondaryButtonText="Back to Home"
+                secondaryButtonIcon={RETURN_ICON_DARK}
+                primaryButtonText={validQuizCode.code.length == 0 ? "Enter Code" : "Join Quiz"}
                 primaryButtonIcon={null}
                 type={BottomNavBarType.Default}
                 style={BottomNavBarStyle.Long}

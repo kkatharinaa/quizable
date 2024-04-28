@@ -1,7 +1,7 @@
 import { FC, useEffect } from "react";
 import "./Home.css"
 import { ButtonComponent } from "../../components/Button/Button";
-import { QUIZ_CREATE_DARK } from "../../assets/Icons";
+import {CREATE_ICON_DARK, ENTER_ICON_LIGHT} from "../../assets/Icons";
 import { ButtonStyle, ButtonType } from "../../components/Button/ButtonExports";
 import { BackgroundGems } from "../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../components/BackgroundGems/BackgroundGemsExports";
@@ -34,14 +34,14 @@ const Home: FC = () => {
       <div className="homeButtons">
         <ButtonComponent
           text="Join Quiz"
-          icon={null}
+          icon={ENTER_ICON_LIGHT}
           type={ButtonType.Long}
           style={ButtonStyle.Primary}
           onClick={navigateJoinQuiz}
         />
         <ButtonComponent
           text="Create Quiz"
-          icon={QUIZ_CREATE_DARK}
+          icon={CREATE_ICON_DARK}
           type={ButtonType.Long}
           style={ButtonStyle.Secondary}
           onClick={navigateCreateQuiz}

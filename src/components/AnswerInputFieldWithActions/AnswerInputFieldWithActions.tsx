@@ -2,7 +2,7 @@ import React, {FC} from "react";
 import "./AnswerInputFieldWithActions.css"
 import {AnswerInputFieldType} from "../AnswerInputField/AnswerInputFieldExports.ts";
 import {AnswerInputField} from "../AnswerInputField/AnswerInputField.tsx";
-import {DELETE_ICON_DARK, DELETE_ICON_DISABLED, TICK_ICON_DARK} from "../../assets/Icons.ts";
+import {DELETE_ICON_DARK, DELETE_ICON_DISABLED, TICK_ICON_DARK, X_ICON_DISABLED} from "../../assets/Icons.ts";
 import {ButtonStyle, ButtonType} from "../Button/ButtonExports.ts";
 import {ButtonComponent} from "../Button/Button.tsx";
 import {ThreeDotsStyle} from "../ThreeDots/ThreeDotsExports.ts";
@@ -57,7 +57,7 @@ export const AnswerInputFieldWithActions: FC<AnswerInputFieldWithActionsProps> =
                 />
                 <ButtonComponent
                     text={correct ? "Correct Answer" : "Correct Answer?"}
-                    icon={correct ? TICK_ICON_DARK : null}
+                    icon={correct ? TICK_ICON_DARK : X_ICON_DISABLED}
                     type={ButtonType.Medium}
                     style={correct ? ButtonStyle.Correct : ButtonStyle.Disabled}
                     onClick={handleToggleCorrect}

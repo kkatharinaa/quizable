@@ -10,6 +10,7 @@ import { v4 as uuid } from "uuid"
 import QuizUser from "../../../models/QuizUser";
 import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
+import {LEAVE_ICON_DARK} from "../../../assets/Icons.ts";
 
 
 export const QuizSlaveLobby: FC = () => {
@@ -67,7 +68,7 @@ export const QuizSlaveLobby: FC = () => {
             </div>
             <BottomNavBar
                 secondaryButtonText="Logout"
-                secondaryButtonIcon={null}
+                secondaryButtonIcon={LEAVE_ICON_DARK}
                 primaryButtonText=""
                 primaryButtonIcon={null}
                 type={BottomNavBarType.SecondaryOnly}

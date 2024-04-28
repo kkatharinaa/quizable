@@ -15,6 +15,7 @@ import QuizSession from "../../../models/QuizSession.ts";
 import {QuizOptions} from "../../../models/QuizOptions.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
+import {LEAVE_ICON_DARK} from "../../../assets/Icons.ts";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -199,7 +200,7 @@ export const CreateOverview: FC = () => {
 
             <BottomNavBar
                 secondaryButtonText="Logout"
-                secondaryButtonIcon={null}
+                secondaryButtonIcon={LEAVE_ICON_DARK}
                 primaryButtonText=""
                 primaryButtonIcon={null}
                 type={BottomNavBarType.SecondaryOnly}
