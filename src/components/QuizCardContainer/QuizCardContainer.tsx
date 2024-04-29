@@ -21,6 +21,16 @@ export const QuizCardContainer: FC<QuizCardContainerProps> = ({ quizzes, onEdit,
 
     return (
         <div className="quizCardContainer">
+            <div className="filler">
+                <ButtonComponent
+                    text={"Add A Quiz"}
+                    icon={ADD_ICON_DARK}
+                    type={ButtonType.Medium}
+                    style={ButtonStyle.Accent}
+                    onClick={onAdd}
+                />
+            </div>
+
             {quizzes.map((item, index) => (
                 <QuizCardWithActions
                     key={item.id}
@@ -36,15 +46,6 @@ export const QuizCardContainer: FC<QuizCardContainerProps> = ({ quizzes, onEdit,
                 />
             ))}
 
-            <div className="filler">
-                <ButtonComponent
-                    text={"Add A Quiz"}
-                    icon={ADD_ICON_DARK}
-                    type={ButtonType.Medium}
-                    style={ButtonStyle.Accent}
-                    onClick={onAdd}
-                />
-            </div>
             {(((quizzes.length-1) % 3 == 0) || quizzes.length % 3 == 0) &&
                 <div className="filler"></div>
             } {/* empty div for layout purposes*/}

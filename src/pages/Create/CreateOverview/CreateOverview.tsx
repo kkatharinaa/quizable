@@ -36,10 +36,10 @@ export const CreateOverview: FC = () => {
     const setQuizzesFromFirestore = async () => {
         const quizzesFromFirestore: Quiz[] = await QuizRepository.getAll()
 
-        // TODO: sort quizzes by createdOn date, and display newest at the start or at the end (currently: newest at the end)? or allow reordering?
+        // sort quizzes by createdOn date, and display newest at the start
         const sortByCreatedOn = (a: Quiz, b: Quiz) => {
-            if (a.createdOn < b.createdOn) { return -1 }
-            if (a.createdOn > b.createdOn) { return 1 }
+            if (a.createdOn < b.createdOn) { return 1 }
+            if (a.createdOn > b.createdOn) { return -1 }
             return 0
         };
         const sortedQuizzes = quizzesFromFirestore.slice().sort(sortByCreatedOn)
@@ -70,7 +70,7 @@ export const CreateOverview: FC = () => {
     const handleAddQuiz = () => {
         // open new quiz settings popup which will create a quiz and update the quizzes state when closed, or when clicked on "edit questions" button
         const newQuiz = new Quiz()
-        setQuizzes([...quizzes, newQuiz]) // if we change for the newest quiz to be at the top, the quiz has to be inserted at the front of the quizzes array
+        setQuizzes([newQuiz, ...quizzes])
         setQuizSettingsPopupProps([newQuiz, true])
         setShowingQuizSettingsPopup(true)
     };

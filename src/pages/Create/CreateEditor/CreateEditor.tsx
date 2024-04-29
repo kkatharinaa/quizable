@@ -269,7 +269,7 @@ export const CreateEditor: FC = () => {
             </div>
 
             <BottomNavBar
-                secondaryButtonText="To Overview"
+                secondaryButtonText="Back"
                 secondaryButtonIcon={RETURN_ICON_DARK}
                 primaryButtonText="Save Quiz"
                 primaryButtonIcon={SAVE_ICON_LIGHT}

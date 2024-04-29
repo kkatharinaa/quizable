@@ -4,7 +4,7 @@ import {ButtonStyle} from "../Button/ButtonExports.ts";
 import {Quiz} from "../../models/Quiz.ts";
 import {BottomNavBar} from "../BottomNavBar/BottomNavBar.tsx";
 import {BottomNavBarStyle, BottomNavBarType} from "../BottomNavBar/BottomNavBarExports.ts";
-import {SAVE_ICON_DARK} from "../../assets/Icons.ts";
+import {SAVE_ICON_LIGHT} from "../../assets/Icons.ts";
 import {SettingsField} from "../SettingsField/SettingsField.tsx";
 import {SettingsFieldType} from "../SettingsField/SettingsFieldExports.ts";
 import {Question} from "../../models/Question.ts";
@@ -91,15 +91,15 @@ export const QuestionSettingsPopup: FC<QuestionSettingsPopupProps> = ({ selected
                 </div>
                 <div className="questionSettingsNav">
                     <BottomNavBar
-                        secondaryButtonText={"Close"}
-                        secondaryButtonIcon={SAVE_ICON_DARK}
-                        primaryButtonText={"Revert Overrides"}
-                        primaryButtonIcon={null}
+                        secondaryButtonText={"Reset"}
+                        secondaryButtonIcon={null}
+                        primaryButtonText={"Close"}
+                        primaryButtonIcon={SAVE_ICON_LIGHT}
                         type={BottomNavBarType.Default}
                         style={BottomNavBarStyle.Medium}
-                        onSecondaryClick={handleClose}
-                        onPrimaryClick={handleRevert}
-                        alternativePrimaryButtonStyle={questionSettingsAreTheSameAsQuizSettings() ? ButtonStyle.Disabled : ButtonStyle.Secondary}
+                        onSecondaryClick={handleRevert}
+                        onPrimaryClick={handleClose}
+                        alternativeSecondaryButtonStyle={questionSettingsAreTheSameAsQuizSettings() ? ButtonStyle.Disabled : ButtonStyle.Secondary}
                     />
                 </div>
             </div>
