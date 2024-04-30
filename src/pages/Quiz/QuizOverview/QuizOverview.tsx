@@ -75,7 +75,7 @@ export const QuizOverview = () => {
             {quiz.map((quiz: Quiz) => (
                 <div key={quiz.id + "_key"} className="quizOverviewListItem">
                     <div className="quizOverviewListItemCard">
-                        <h3>{quiz.name.value}</h3>
+                        <h3>{quiz.name}</h3>
                     </div>
                     <div className="quizOverviewListItemActions">
                         <Button disabled={true}>Edit Quiz</Button>

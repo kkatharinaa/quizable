@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect } from "react"
 import "./QuizSlaveLobby.css"
 import { useLocation } from "react-router-dom";
 import QuizSession from "../../../models/QuizSession";
@@ -25,7 +25,7 @@ export const QuizSlaveLobby: FC = () => {
         console.log("Quiz session in Quiz Lobby: ", quizSessionId)
 
         // start websocket connection
-        const port: number = 5296
+        // const port: number = 5296
         // const url: string = `http://localhost:${port}`
         const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
 

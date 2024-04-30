@@ -8,5 +8,9 @@ service cloud.firestore {
       allow create, update, delete: if request.auth != null && request.auth.uid == userId;
     }
     
+    match /{document=**} {
+      allow read;
+      allow write, create, update, delete: if true
+    }
   }
 }

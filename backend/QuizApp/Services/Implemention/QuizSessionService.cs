@@ -5,8 +5,10 @@ namespace QuizApp.Services;
 
 public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessionService
 {
-    private Dictionary<string, QuizSession> QuizSessions = new();
-    
+    /// <summary>
+    /// Quiz Sessions Dictionary. Key is the Entry ID
+    /// </summary>
+    private Dictionary<string, QuizSession> QuizSessions { get; set; } = new();
     
     /// <summary>
     /// Add new quiz session
@@ -47,4 +49,102 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         KeyValuePair<string, QuizSession?> quizSessionEntryId = QuizSessions.FirstOrDefault(kvP => kvP.Value.Id == quizSessionId, new ("", null));
         return (quizSessionEntryId.Value, quizSessionEntryId.Key);
     }
+    
+
+    /// <summary>
+    /// Add new quiz user to the session
+    /// </summary>
+    /// <param name="quizSessionId">Quiz session id to add</param>
+    /// <param name="quizUser"></param>
+    public void AddUserToQuizSession(string quizSessionId, QuizUser quizUser)
+    {
+        QuizSessions = QuizSessions
+            .Select(quizSession =>
+            {
+                if (quizSession.Value.Id.Equals(quizSessionId))
+                {
+                    var newQuizSessionState = new QuizSessionUserStats
+                    {
+                        User = quizUser,
+                        Score = 0,
+                        Answers = []
+                    };
+
+                    quizSession.Value.State.UsersStats.Add(newQuizSessionState);
+                }
+                return quizSession;
+            }).ToDictionary();
+    }
+
+    /// <summary>
+    /// Get the user stats from the quiz user ID
+    /// </summary>
+    /// <param name="quizUserId">The quiz user Id</param>
+    public QuizSessionUserStats? GetQuizSessionUserStats(string quizUserId)
+    {
+        return QuizSessions
+            .Select(session => 
+                session.Value.State.UsersStats.FirstOrDefault(userStats => userStats.User.Id == quizUserId))
+            .FirstOrDefault();
+    }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="quizUserId">Quiz User ID to set the quiz user score</param>
+    /// <param name="newScore">new score</param>
+    public void UpdateUserScore(string quizUserId, int newScore)
+    {
+        QuizSessions = QuizSessions
+            .Select(session =>
+                {
+                    session.Value.State.UsersStats = session.Value.State.UsersStats.Select(stats =>
+                    {
+                        if (stats.User.Id == quizUserId)
+                            stats.Score = newScore;
+                        
+                        return stats;
+                    }).ToList();
+                    
+                    return session;
+                }
+            ).ToDictionary();
+    }
+
+    /// <summary>
+    /// Add Users Answers
+    /// </summary>
+    /// <param name="quizUserId">The Id of the Quiz user</param>
+    /// <param name="answer">The answer to add</param>
+    public void AddUserAnswers(string quizUserId, QuizSessionUserStatsAnswer answer)
+    {
+        QuizSessions = QuizSessions
+            .Select(session =>
+                {
+                    session.Value.State.UsersStats = session.Value.State.UsersStats.Select(stat =>
+                    {
+                        if (stat.User.Id == quizUserId)
+                            stat.Answers.Add(answer);
+                        return stat;
+                    }).ToList();
+
+                    return session;
+                }
+            ).ToDictionary();
+    }
+
+    /*
+    public List<QuizSessionUserStats> GetLeaderboard(string quizSessionId)
+    {
+        return QuizSessions
+            .Where(session => session.Value.Id.Equals(quizSessionId))
+            .Select(quizSession =>
+            {
+                if (quizSession.Value.Id.Equals(quizSessionId))
+                {
+                    return quizSession.Value.State.UsersStats.OrderBy(s => s.Score);
+                }
+            }).ToList();
+    }
+    */
 }

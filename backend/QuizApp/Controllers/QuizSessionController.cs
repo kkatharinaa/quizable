@@ -37,6 +37,6 @@ public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizS
         if (quizSession is not null)
             return Ok(quizSession.Id);
         
-        return Ok("");
+        return NotFound("Code is not valid.");
     }
 }
