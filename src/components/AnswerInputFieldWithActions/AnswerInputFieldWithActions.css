@@ -7,6 +7,13 @@
     position: relative;
 }
 
+.answerInputFieldWithActions:hover {
+    cursor: grab;
+}
+.answerInputFieldWithActions:active {
+    cursor: grabbing; /* TODO: somehow switches back to default cursor once the cursor is moved while dragging */
+}
+
 .buttons {
     display: flex;
     align-items: flex-start;

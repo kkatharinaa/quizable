@@ -7,6 +7,14 @@
     align-self: stretch;
 }
 
+.questionShortcut:hover {
+    cursor: grab;
+}
+.questionShortcut:active {
+    cursor: grabbing; /* TODO: somehow switches back to default cursor once the cursor is moved while dragging */
+}
+
+
 .questionShortcut.questionSelected {
     background: var(--primary-shadow);
 }
