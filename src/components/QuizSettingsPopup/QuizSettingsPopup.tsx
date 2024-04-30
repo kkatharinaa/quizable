@@ -127,11 +127,14 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                             onChange={handleSettingLeaderboardToggle}
                             placeholder={null}/>
                         <SettingsField
-                            text="Max time to answer per question (0s = unlimited)"
+                            text="Max time to answer per question"
                             type={SettingsFieldType.NumberInput}
                             currentValue={quizOptions.maxQuestionTime}
                             onChange={handleSettingMaxQuestionTimeInputChange}
-                            placeholder={"0 sec"}/>
+                            placeholder={"0 sec"}
+                            unitText={"sec"}
+                            unlimitedAtO={true}
+                        />
                         <SettingsField
                             text="Available points per question"
                             type={SettingsFieldType.NumberInput}

@@ -8,9 +8,11 @@ interface SettingsFieldProps {
     currentValue: number | boolean
     onChange: (value?: number) => void
     placeholder: string | null
+    unitText?: string
+    unlimitedAtO?: boolean
 }
 
-export const SettingsField: FC<SettingsFieldProps> = ({ text, type, currentValue, onChange, placeholder }) => {
+export const SettingsField: FC<SettingsFieldProps> = ({ text, type, currentValue, onChange, placeholder, unitText, unlimitedAtO }) => {
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         const inputValue = event.target.value;
@@ -36,10 +38,13 @@ export const SettingsField: FC<SettingsFieldProps> = ({ text, type, currentValue
                 <div className="numberInputField">
                     <input
                         type="text"
-                        value={currentValue.toString()}
+                        value={(unlimitedAtO === true && currentValue === 0) ? "" : currentValue.toString()}
                         onChange={handleInputChange}
-                        placeholder={placeholder ?? ""}
+                        placeholder={(unlimitedAtO === true) ? "∞" : placeholder ?? ""}
                     />
+                    {unitText != undefined &&
+                        <span>{unitText}</span>
+                    }
                 </div>
             }
         </div>

@@ -31,7 +31,7 @@
 }
 
 .settingsField .numberInputField input {
-    width: 100px;
+    width: 80px;
     color: var(--white);
     text-align: center;
     font-family: 'Sansation', sans-serif;
@@ -49,4 +49,11 @@
 }
 .settingsField .numberInputField input:focus {
     outline: none;
+}
+
+.settingsField .numberInputField span {
+    font-size: 24px;
+    color: var(--text-field-text);
+    padding: 0;
+    margin: 0;
 }

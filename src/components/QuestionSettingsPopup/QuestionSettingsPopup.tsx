@@ -63,11 +63,14 @@ export const QuestionSettingsPopup: FC<QuestionSettingsPopupProps> = ({ selected
                 <div className="questionSettingsContent">
                     <div className="questionSettingsAll">
                         <SettingsField
-                            text="Max time to answer this question (0s = unlimited)"
+                            text="Max time to answer this question"
                             type={SettingsFieldType.NumberInput}
                             currentValue={question.maxQuestionTime}
                             onChange={handleSettingMaxQuestionTimeInputChange}
-                            placeholder={"0 sec"}/>
+                            placeholder={"0 sec"}
+                            unitText={"sec"}
+                            unlimitedAtO={true}
+                        />
                         <SettingsField
                             text="Available points for this question"
                             type={SettingsFieldType.NumberInput}

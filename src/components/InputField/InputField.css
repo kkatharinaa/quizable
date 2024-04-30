@@ -1,7 +1,6 @@
 .inputField {
     display: flex;
     width: 680px;
-    padding: 30px 40px;
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
@@ -28,7 +27,7 @@
 .inputField input {
     width: inherit;
     height: inherit;
-    padding: 0;
+    padding: 30px 40px;
     background: transparent;
     border-width: 0;
     color: var(--white);
