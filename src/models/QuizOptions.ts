@@ -30,4 +30,10 @@ export class QuizOptions {
             && a.showLiveStats === b.showLiveStats
             && a.colourScheme === b.colourScheme
     }
+    static isEqualForQuestions(a: QuizOptions, b: QuizOptions): boolean {
+        return a.maxQuestionTime === b.maxQuestionTime
+            && a.questionPoints === b.questionPoints
+            && a.questionPointsModifier === b.questionPointsModifier
+            && a.showLiveStats === b.showLiveStats
+    }
 }

@@ -104,12 +104,12 @@ export const CreateOverview: FC = () => {
     };
 
     //quiz settings popup functions
-    const handleEditQuizSave = (id: string, updatedQuiz: Quiz, revertedOverrides: boolean) => {
+    const handleEditQuizSave = (id: string, updatedQuiz: Quiz) => {
         const previousQuiz = findQuizByID(id)
         if (previousQuiz == undefined) throw new Error("error saving quiz") // TODO: display error
 
         // else update the quiz if it existed before and its title or settings were changed
-        if (revertedOverrides || previousQuiz.name != updatedQuiz.name || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
+        if (previousQuiz.name != updatedQuiz.name || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
             const updatedQuizzes = [...quizzes]
             const index = updatedQuizzes.indexOf(previousQuiz)
             if (index < 0) throw new Error("error updating quiz") // TODO: display error
@@ -122,6 +122,7 @@ export const CreateOverview: FC = () => {
         setQuizSettingsPopupProps(null)
         setShowingQuizSettingsPopup(false)
         if (searchParams.get('showingPopupFor')) navigate('/overview') // hack to remove the search parameter so the popup does not keep reappearing if the user refreshes the page
+        setQuizzesFromFirestore() // reload quizzes
     };
     const handleEditQuizEditQuestions = (id: string) => {
         const currentQuiz = findQuizByID(id)
@@ -139,7 +140,7 @@ export const CreateOverview: FC = () => {
             primaryButtonIcon: null,
             type: BottomNavBarType.Default,
             onSecondaryClick: () => {
-                setShowingPopup(false)
+                hidePopup()
             },
             onPrimaryClick: () => {
                 // delete quiz from firebase and quizzes state
@@ -149,7 +150,7 @@ export const CreateOverview: FC = () => {
                     const index = updatedQuizzes.findIndex(quiz => quiz.id == id)
                     updatedQuizzes.splice(index, 1);
                     setQuizzes(updatedQuizzes)
-                    setShowingPopup(false)
+                    hidePopup()
                 })
             },
         }
@@ -170,7 +171,7 @@ export const CreateOverview: FC = () => {
             primaryButtonIcon: null,
             type: BottomNavBarType.Default,
             onSecondaryClick: () => {
-                setShowingPopup(false)
+                hidePopup()
             },
             onPrimaryClick: () => {
                 // TODO: log out from firebase auth
@@ -182,6 +183,9 @@ export const CreateOverview: FC = () => {
     const showPopup = (popup: PopupProps) => {
         setPopupProps(popup)
         setShowingPopup(true)
+    }
+    const hidePopup = () => {
+        setShowingPopup(false)
     }
 
     return (
@@ -214,7 +218,9 @@ export const CreateOverview: FC = () => {
                     onSave={handleEditQuizSave}
                     onClose={handleEditQuizClose}
                     onEditQuestions={handleEditQuizEditQuestions}
-                    revertAllOverridesPreselected={quizSettingsPopupProps[1]}
+                    showPopup={showPopup}
+                    hidePopup={hidePopup}
+                    newlyAdded={quizSettingsPopupProps[1]}
                 />
             }
             { (showingPopup && popupProps != null) &&

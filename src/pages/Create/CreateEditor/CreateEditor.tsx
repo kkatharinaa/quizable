@@ -206,7 +206,11 @@ export const CreateEditor: FC = () => {
         navigateToOverview()
     };
     const toOverview = () => {
-        // TODO: adjust based on design
+        // check if sth has been changed, if no simply go back, if yes show a popup
+        if (originalQuiz != null && Question.areEqual(originalQuiz.questions, questions)) {
+            navigateToOverview()
+            return
+        }
         const discardChangesPopup: PopupProps = {
             title: "Are you sure you want to discard your changes?",
             message: "This action cannot be undone.",
