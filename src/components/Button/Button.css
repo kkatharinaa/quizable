@@ -123,14 +123,12 @@ button.correct.medium:hover, button.correct.short:hover {
     box-shadow: 0px calc(var(--shadow-width-medium) / 2) 0px 0px var(--correct-button-shadow);
 }*/
 
-button:focus,
-button:focus-visible, button:active {
+button:active {
     margin-top: var(--shadow-width-medium);
     margin-bottom: 0;
     box-shadow: 0px 0px 0px 0px !important;
 }
-button.long:focus,
-button.long:focus-visible, button.long:active {
+button.long:active {
     margin-top: var(--shadow-width-long);
     margin-bottom: 0;
     box-shadow: 0px 0px 0px 0px !important;

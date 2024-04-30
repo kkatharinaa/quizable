@@ -70,7 +70,6 @@ export const CreateOverview: FC = () => {
     const handleAddQuiz = () => {
         // open new quiz settings popup which will create a quiz and update the quizzes state when closed, or when clicked on "edit questions" button
         const newQuiz = new Quiz()
-        setQuizzes([newQuiz, ...quizzes])
         setQuizSettingsPopupProps([newQuiz, true])
         setShowingQuizSettingsPopup(true)
     };
@@ -104,9 +103,15 @@ export const CreateOverview: FC = () => {
     };
 
     //quiz settings popup functions
-    const handleEditQuizSave = (id: string, updatedQuiz: Quiz) => {
+    const handleEditQuizSave = async (id: string, updatedQuiz: Quiz): Promise<void> => {
         const previousQuiz = findQuizByID(id)
-        if (previousQuiz == undefined) throw new Error("error saving quiz") // TODO: display error
+
+        // if the quiz does not exist yet, we likely just created it and we have to add it
+        if (previousQuiz == undefined) {
+            setQuizzes([updatedQuiz, ...quizzes])
+            await QuizRepository.add(updatedQuiz)
+            return
+        }
 
         // else update the quiz if it existed before and its title or settings were changed
         if (previousQuiz.name != updatedQuiz.name || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
@@ -115,7 +120,7 @@ export const CreateOverview: FC = () => {
             if (index < 0) throw new Error("error updating quiz") // TODO: display error
             updatedQuizzes[index] = updatedQuiz
             setQuizzes(updatedQuizzes)
-            QuizRepository.add(updatedQuiz)
+            await QuizRepository.add(updatedQuiz)
         }
     }
     const handleEditQuizClose = () => {
@@ -125,9 +130,7 @@ export const CreateOverview: FC = () => {
         setQuizzesFromFirestore() // reload quizzes
     };
     const handleEditQuizEditQuestions = (id: string) => {
-        const currentQuiz = findQuizByID(id)
-        if (currentQuiz == undefined) throw new Error("could not find current quiz") // TODO: display error
-        navigateToEditor(currentQuiz.id)
+        navigateToEditor(id)
     };
     const handleDeleteQuiz = (id: string) => {
         // popup for confirmation

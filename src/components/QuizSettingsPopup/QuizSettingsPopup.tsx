@@ -16,7 +16,7 @@ import {PopupProps} from "../Popup/Popup.tsx";
 
 export interface QuizSettingsPopupProps {
     selectedQuiz: Quiz
-    onSave: (id: string, updatedQuiz: Quiz) => void
+    onSave: (id: string, updatedQuiz: Quiz) => Promise<void>
     onClose: () => void
     onEditQuestions: (id: string) => void
     showPopup: (popup: PopupProps) => void
@@ -54,8 +54,9 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                 onClose()
             }, () => {
                 // close settings popup WITH saving
-                handleSave()
-                onClose()
+                handleSave().then(() => {
+                    onClose()
+                })
             })
         }
     }
@@ -70,8 +71,9 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                 primaryButtonIcon: null,
                 type: BottomNavBarType.PrimaryOnly,
                 onPrimaryClick: () => {
-                    handleSave()
-                    onEditQuestions(selectedQuiz.id)
+                    handleSave().then(() => {
+                        onEditQuestions(selectedQuiz.id)
+                    })
                 },
             }
             showPopup(popup)
@@ -81,15 +83,16 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                 onEditQuestions(selectedQuiz.id)
             }, () => {
                 // proceed WITH saving
-                handleSave()
-                onEditQuestions(selectedQuiz.id)
+                handleSave().then(() => {
+                    onEditQuestions(selectedQuiz.id)
+                })
             })
         }
     }
-    const handleSave = () => {
+    const handleSave = async (): Promise<void> => {
         const updatedQuestions = handleRevertOverrides()
         const updatedQuiz = {...selectedQuiz, name: quizName, options: quizOptions, questions: updatedQuestions}
-        onSave(selectedQuiz.id, updatedQuiz)
+        return await onSave(selectedQuiz.id, updatedQuiz)
     }
     const handleRevertOverrides = (): Question[] => {
         const updatedQuestions = [... selectedQuiz.questions]
