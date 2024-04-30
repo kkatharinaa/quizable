@@ -11,8 +11,6 @@ import {QuestionEditorNav} from "../../../components/QuestionEditorNav/QuestionE
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
-import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
-import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {QuestionSettingsPopup} from "../../../components/QuestionSettingsPopup/QuestionSettingsPopup.tsx";
 import {
     ErrorPageLinkedTo,
