@@ -6,7 +6,7 @@ interface AnswerInputFieldProps {
     value: string
     type: AnswerInputFieldType
     index: number
-    onChange: (newValue: string, index: number) => void
+    onChange: ((newValue: string, index: number) => void) | null
 }
 
 export const AnswerInputField: FC<AnswerInputFieldProps> = ({ value, type, index, onChange}) => {
@@ -36,19 +36,28 @@ export const AnswerInputField: FC<AnswerInputFieldProps> = ({ value, type, index
 
     const maxCharacters = 100
     const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-        onChange(event.target.value, index);
+        if (onChange != null) {
+            onChange(event.target.value, index);
+        }
     };
 
     return (
         <div className="answerInputField">
             <object type="image/svg+xml" data={gemsPath}></object>
-            <p className="characterCount">{`${value.length}/${maxCharacters}`}</p>
-            <textarea
-                onChange={handleInputChange}
-                placeholder="Answer"
-                maxLength={maxCharacters}
-                value={value}
-            />
+            { onChange != null &&
+                <p className="characterCount">{`${value.length}/${maxCharacters}`}</p>
+            }
+            {onChange != null &&
+                <textarea
+                    onChange={handleInputChange}
+                    placeholder="Answer"
+                    maxLength={maxCharacters}
+                    value={value}
+                />
+            }
+            {onChange == null &&
+                <p className="fixedValue">{value}</p>
+            }
             <object type="image/svg+xml" data={gemsPath}></object>
         </div>
     )

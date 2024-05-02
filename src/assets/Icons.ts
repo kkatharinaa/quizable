@@ -82,3 +82,18 @@ export const SEND_ICON_LIGHT: Icon = {
     path: '/assets/icon-send-light.svg',
     alt: 'Send',
 };
+
+export const SKIP_ICON_LIGHT: Icon = {
+    path: '/assets/icon-skip-light.svg',
+    alt: 'Skip',
+};
+
+export const POWER_ICON_DARK: Icon = {
+    path: '/assets/icon-power-dark.svg',
+    alt: 'End',
+};
+
+export const USER_ICON_LIGHT: Icon = {
+    path: '/assets/icon-user-light.svg',
+    alt: 'User',
+};

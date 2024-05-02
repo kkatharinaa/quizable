@@ -5,7 +5,7 @@ import { CreateSendEmail } from "./pages/Create/CreateSendEmail/CreateSendEmail"
 import { Join } from "./pages/Join/Join";
 import { QuizLobby } from "./pages/Quiz/QuizLobby/QuizLobby";
 import QuizResult from "./pages/Quiz/QuizResult/QuizResult";
-import { QuizSession } from "./pages/Quiz/QuizSession/QuizSession";
+import {QuizSessionQuestion} from "./pages/Quiz/QuizSessionQuestion/QuizSessionQuestion.tsx";
 import {CreateEditor} from "./pages/Create/CreateEditor/CreateEditor.tsx";
 import {CreateOverview} from "./pages/Create/CreateOverview/CreateOverview.tsx";
 import { QuizSlaveLobby } from "./pages/Quiz/QuizSlaveLobby/QuizSlaveLobby.tsx";
@@ -67,7 +67,7 @@ const pagesData: RouterType[] = [
     },
     {
       path: "quiz/session",
-      element: <QuizSession />,
+      element: <QuizSessionQuestion />,
       title: "Quiz Session | Quizable"
     },
 ];

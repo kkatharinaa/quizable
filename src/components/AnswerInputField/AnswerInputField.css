@@ -53,6 +53,22 @@
     outline: none;
 }
 
+.answerInputField .fixedValue {
+    width: 100%;
+    padding: 24px 0;
+    background: transparent;
+    margin: 0;
+    color: var(--white);
+    font-size: 24px;
+    text-align: center;
+    font-family: 'Sansation', sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
 .answerInputField .threeDots {
     z-index: 1;
     position: absolute;
