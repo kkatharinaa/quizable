@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from "react"
 import "./QuizLobby.css"
-import { useLocation } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import QuizSession from "../../../models/QuizSession";
 import { BottomNavBar } from "../../../components/BottomNavBar/BottomNavBar";
 import { BottomNavBarStyle, BottomNavBarType } from "../../../components/BottomNavBar/BottomNavBarExports";
@@ -10,6 +10,7 @@ import {v4 as uuid} from "uuid"
 import { getDeviceId } from "../../../helper/DeviceHelper";
 import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
+import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
 
 
 interface QuizMasterMessage {
@@ -18,8 +19,9 @@ interface QuizMasterMessage {
 }
 
 export const QuizLobby: FC = () => {
+    const navigate = useNavigate();
     const {state} = useLocation();
-    const quizSessionId: QuizSession = state.quizSessionId; // Read values passed on state    
+    const quizSessionId: QuizSession | null = state ? state.quizSessionId : null; // Read values passed on state
 
     const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
     const [quizEntryId, setQuizEntryId] = useState<string | null>(null);
@@ -31,6 +33,12 @@ export const QuizLobby: FC = () => {
 
     useEffect(() => {
         console.log("Quiz session in Quiz Lobby: ", quizSessionId)
+
+        const quizSessionIsRunning = quizSessionId != null
+        const userIsHost = true // TODO: check here if 1) user is authenticated 2) authenticated user is owner of the quiz that is played rn
+        if (!quizSessionIsRunning || !userIsHost) {
+            showErrorQuizSessionNotRunning(navigate, userIsHost)
+        }
 
         const starterUserId: string = "userId1"
 
