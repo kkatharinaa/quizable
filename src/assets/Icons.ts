@@ -61,10 +61,6 @@ export const CREATE_ICON_DARK: Icon = {
     path: '/assets/icon-create-dark.svg',
     alt: 'Create',
 }; 
-export const QUIZ_CREATE_DARK: Icon = {
-    path: '/assets/create-quiz-dark.svg',
-    alt: 'Add',
-};
 
 export const PLAY_ICON_LIGHT: Icon = {
     path: '/assets/icon-play-light.svg',
@@ -79,6 +75,8 @@ export const CHEVRON_UP: Icon = {
 export const CHEVRON_DOWN: Icon = {
     path: '/assets/icon-chevron-down.svg',
     alt: 'ChevronDown',
+};
+
 export const ENTER_ICON_LIGHT: Icon = {
     path: '/assets/icon-enter-light.svg',
     alt: 'Join',
@@ -97,6 +95,16 @@ export const RETURN_ICON_DARK: Icon = {
 export const SEND_ICON_LIGHT: Icon = {
     path: '/assets/icon-send-light.svg',
     alt: 'Send',
+};
+
+export const TURN_OFF_DARK: Icon = {
+    path: '/assets/icon-turnoff-dark.svg',
+    alt: 'Turn Off Icon'
+};
+
+export const ICON_USER_FILLED: Icon = {
+    path: '/assets/icon-user-filled.svg',
+    alt: 'Turn Off Icon'
 };
 
 export const SKIP_ICON_LIGHT: Icon = {

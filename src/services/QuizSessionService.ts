@@ -3,8 +3,8 @@ import QuizSession from "../models/QuizSession";
 
 export default class QuizSessionService{
     static port: number = 5296
-    // static url: string = `http://localhost:${this.port}`
-    static url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+    static url: string = `http://localhost:${this.port}`
+    // static url: string = `https://quizapp-rueasghvla-nw.a.run.app`
 
     public static async addSession(quizSession: QuizSession): Promise<string> {
         return (await fetch(`${this.url}/api/session`, 

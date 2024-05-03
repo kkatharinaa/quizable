@@ -11,7 +11,6 @@
     justify-content: space-between;
     overflow-y: hidden;
 
-    background: var(--primary-color);
 }
 
 .lobbyContent {
@@ -21,7 +20,8 @@
     flex: 1 0 0;
     align-self: stretch;
     height: 100%;
-    overflow-x: hidden;
+    margin-top: 40px;   
+    gap: 40px;
 }
 
 .entryIdContent {
@@ -70,9 +70,14 @@
     color: var(--white);
     font-size: 32px;
     text-align: center;
+    margin: 80px 0px 20px 0px;
 }
 
-.joinedUserSection {
+.joinedUsersSectionCount span{
+    margin: 10px;
+}
+
+.joinedUserSectionList {
     display: flex;
     height: 100%;
     min-height: 100%;

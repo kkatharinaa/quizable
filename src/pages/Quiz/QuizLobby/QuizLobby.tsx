@@ -14,6 +14,7 @@ import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.t
 
 import { QuizPlayerCard } from "../../../components/QuizPlayerCard/QuizPlayerCard";
 import { QuizPlayerCardType } from "../../../components/QuizPlayerCard/QuizPlayerCardExports";
+import { ICON_USER_FILLED, PLAY_ICON_LIGHT, TURN_OFF_DARK } from "../../../assets/Icons";
 
 interface QuizMasterMessage {
     notifyQuizSession?: QuizSession,
@@ -129,11 +130,14 @@ export const QuizLobby: FC = () => {
                     </div>
                 }
                 {listOfUsers.length >= 1 && // change this back to joinedQuizUsers
-                    <div>
-                        <h4 className="joinedUsersSectionCount">{listOfUsers.length} joined</h4>
-                        <div className="joinedUserSection">
+                    <div className="joinedUserSection">
+                        <div className="joinedUsersSectionCount">
+                            <span><img src={ICON_USER_FILLED.path} alt={ICON_USER_FILLED.alt}></img></span>
+                            {listOfUsers.length} joined
+                        </div>
+                        <div className="joinedUserSectionList">
                             {listOfUsers.map((quizUser) => (
-                                <QuizPlayerCard 
+                                <QuizPlayerCard
                                     type={QuizPlayerCardType.DesktopScoreDown}
                                     playerName={quizUser.identifier}
                                     playerScore={907}>
@@ -146,9 +150,9 @@ export const QuizLobby: FC = () => {
 
             <BottomNavBar
                 secondaryButtonText="End Quiz"
-                secondaryButtonIcon={null}
+                secondaryButtonIcon={TURN_OFF_DARK}
                 primaryButtonText="Start Quiz"
-                primaryButtonIcon={null}
+                primaryButtonIcon={PLAY_ICON_LIGHT}
                 type={BottomNavBarType.Default}
                 onSecondaryClick={killQuizSession} 
                 style={BottomNavBarStyle.Long}/>
