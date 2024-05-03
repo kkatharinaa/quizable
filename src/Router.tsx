@@ -4,7 +4,7 @@ import Home from "./pages/Home/Home";
 import { CreateSendEmail } from "./pages/Create/CreateSendEmail/CreateSendEmail";
 import { Join } from "./pages/Join/Join";
 import { QuizLobby } from "./pages/Quiz/QuizLobby/QuizLobby";
-import QuizResult from "./pages/Quiz/QuizResult/QuizResult";
+import {QuizResult} from "./pages/Quiz/QuizResult/QuizResult";
 import {QuizSessionQuestion} from "./pages/Quiz/QuizSessionQuestion/QuizSessionQuestion.tsx";
 import {CreateEditor} from "./pages/Create/CreateEditor/CreateEditor.tsx";
 import {CreateOverview} from "./pages/Create/CreateOverview/CreateOverview.tsx";

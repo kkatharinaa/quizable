@@ -38,6 +38,10 @@ export const TICK_ICON_DARK: Icon = {
     path: '/assets/icon-tick-dark.svg',
     alt: 'Tick',
 };
+export const TICK_ICON_LIGHT: Icon = {
+    path: '/assets/icon-tick-light.svg',
+    alt: 'Tick',
+};
 
 export const X_ICON_DISABLED: Icon = {
     path: '/assets/icon-x-disabled.svg',

@@ -14,12 +14,15 @@ import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {Question} from "../../../models/Question.ts";
 import {Answer} from "../../../models/Answer.ts";
+import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
+import {useNavigate} from "react-router-dom";
 
 export const QuizSessionQuestion: FC = () => {
+    const navigate = useNavigate();
 
     // TODO: get current quizsession, current quiz and game code - rn just use default values to develop the ui
     const currentQuiz =  new Quiz()
-    currentQuiz.questions[0] = new Question(uuid(), "What are the most effective strategies for managing stress in high-pressure work environments?"/*"Which colour is the sky?"*/, [new Answer(false, uuid(), "That are the most effective strategies for managing stress in high-pressure work environments."), new Answer(true, uuid(), "Green"), new Answer(false, uuid(), "Yellow")])
+    currentQuiz.questions[0] = new Question(uuid(), "What are the most effective strategies for managing stress in high-pressure work environments?"/*"Which colour is the sky?"*/, [new Answer(false, uuid(), "That are the most effective strategies for managing stress in high-pressure work environments."), new Answer(true, uuid(), "Green"), new Answer(false, uuid(), "Yellow"), new Answer(false, uuid(), "Red"), new Answer(false, uuid(), "Pink")])
     const currentSession: QuizSession = {
         id: uuid(),
         quizId: currentQuiz.id,
@@ -40,6 +43,8 @@ export const QuizSessionQuestion: FC = () => {
     }
     const gameCode = "123456"
     const [quizSession, setQuizSession] = useState<QuizSession>(currentSession)
+    const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
+    const [showingPopup, setShowingPopup] = useState(false);
 
     const getCurrentQuestion = () => {
         const currentQuestion = currentQuiz.questions.find(question => question.id == quizSession.state.currentQuestionId)
@@ -59,10 +64,32 @@ export const QuizSessionQuestion: FC = () => {
     }
 
     const handleEndQuiz = () => {
-        // TODO: end quiz session
+        // TODO: later also implement being able to go back to the previous question
+        const endQuizPopup: PopupProps = {
+            title: "Are you sure you want to end this quiz session?",
+            message: null,
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null,
+            primaryButtonText: "Yes, I Am Sure",
+            primaryButtonIcon: null,
+            type: BottomNavBarType.Default,
+            onSecondaryClick: () => {
+                setShowingPopup(false)
+            },
+            onPrimaryClick: () => {
+                // TODO: navigate to quiz end screen
+            },
+        }
+        showPopup(endQuizPopup)
     }
     const handleSkipQuestion = () => {
-        // TODO: move on to answer statistics screen
+        // move on to answer statistics screen
+        navigate(`/quiz/result`)
+    }
+
+    const showPopup = (popup: PopupProps) => {
+        setPopupProps(popup)
+        setShowingPopup(true)
     }
 
     return (
@@ -103,7 +130,7 @@ export const QuizSessionQuestion: FC = () => {
             </div>
 
             <BottomNavBar
-                secondaryButtonText="End Quiz" // TODO: implement going back to the previous question
+                secondaryButtonText="End Quiz"
                 secondaryButtonIcon={POWER_ICON_DARK}
                 primaryButtonText={getCurrentQuestion().maxQuestionTime != 0 ? "Skip" : "Next"}
                 primaryButtonIcon={SKIP_ICON_LIGHT}
@@ -112,6 +139,20 @@ export const QuizSessionQuestion: FC = () => {
                 onSecondaryClick={handleEndQuiz}
                 onPrimaryClick={handleSkipQuestion}
             />
+
+            { (showingPopup && popupProps != null) &&
+                <Popup
+                    title={popupProps.title}
+                    message={popupProps.message}
+                    secondaryButtonText={popupProps.secondaryButtonText}
+                    secondaryButtonIcon={popupProps.secondaryButtonIcon}
+                    primaryButtonText={popupProps.primaryButtonText}
+                    primaryButtonIcon={popupProps.primaryButtonIcon}
+                    type={popupProps.type}
+                    onSecondaryClick={popupProps.onSecondaryClick}
+                    onPrimaryClick={popupProps.onPrimaryClick}
+                />
+            }
         </div>
     );
 }
