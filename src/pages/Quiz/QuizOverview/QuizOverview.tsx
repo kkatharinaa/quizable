@@ -1,5 +1,5 @@
 import { Button } from "react-bootstrap";
-import { Quiz } from "../../../models/Quiz";
+import {makeQuiz, Quiz} from "../../../models/Quiz";
 import QuizRepository from "../../../repositories/QuizRepository";
 import './QuizOverview.css'
 import { useEffect, useState } from "react";
@@ -27,7 +27,7 @@ export const QuizOverview = () => {
     }
 
     const uploadDefaultQuiz = () => {
-        const newQuiz: Quiz = new Quiz();
+        const newQuiz: Quiz = makeQuiz();
         QuizRepository.add(newQuiz);
         setQuizzesFromFirestore()
     }
@@ -75,7 +75,7 @@ export const QuizOverview = () => {
             {quiz.map((quiz: Quiz) => (
                 <div key={quiz.id + "_key"} className="quizOverviewListItem">
                     <div className="quizOverviewListItemCard">
-                        <h3>{quiz.name.value}</h3>
+                        <h3>{quiz.name}</h3>
                     </div>
                     <div className="quizOverviewListItemActions">
                         <Button disabled={true}>Edit Quiz</Button>
