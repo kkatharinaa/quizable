@@ -27,3 +27,9 @@
 .bottomNavBar.navForPopup button.medium {
     padding: 12px 30px;
 }
+
+@media only screen and (max-width: 480px) {
+    .bottomNavBar {
+        padding: 10px 20px 18px 20px;
+    }
+}

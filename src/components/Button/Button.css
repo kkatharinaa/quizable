@@ -9,6 +9,7 @@ button {
     --shadow-width-medium: 4px;
     --shadow-width-long: 6px;
     box-sizing: border-box;
+    max-width: 80vw;
 }
 /* Change ButtonType */
 button.short {
@@ -132,4 +133,54 @@ button.long:active {
     margin-top: var(--shadow-width-long);
     margin-bottom: 0;
     box-shadow: 0px 0px 0px 0px !important;
+}
+
+
+@media only screen and (max-width: 480px) {
+    button.long, button.medium, button.short {
+        padding: 10px 15px;
+        gap: 6px;
+        border-radius: 4px;
+        margin-bottom: var(--shadow-width-medium);
+    }
+
+    button.long img, button.medium img, button.short img {
+        width: 14px;
+        height: 14px;
+    }
+
+    button.long span, button.medium span, button.short span {
+        font-size: 18px;
+    }
+
+    button.primary.long {
+        box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--primary-button-shadow);
+    }
+    button.secondary.long {
+        box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--secondary-button-shadow);
+    }
+    button.accent.long {
+        box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--accent-button-shadow);
+    }
+    button.settings.long {
+        box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--settings-button-shadow);
+    }
+    button.delete.long {
+        box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--delete-button-shadow);
+    }
+    button.disabled.long {
+        box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--disabled-button-shadow);
+    }
+    button.disabledDark.long {
+        box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--disabled-button-dark-shadow);
+    }
+    button.correct.long {
+        box-shadow: 0px var(--shadow-width-medium) 0px 0px var(--correct-button-shadow);
+    }
+
+    button.long:active {
+        margin-top: var(--shadow-width-medium);
+        margin-bottom: 0;
+        box-shadow: 0px 0px 0px 0px !important;
+    }
 }

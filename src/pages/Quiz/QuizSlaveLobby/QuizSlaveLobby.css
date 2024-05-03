@@ -8,28 +8,20 @@
 }
 
 .quizSlaveSessionLobbyTitle {
-    position: fixed;
     color: var(--white);
     text-align: center;
-    font-size: 68px;
+    font-size: 48px;
     font-style: normal;
     font-weight: bold;
     line-height: normal;
     margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
 }
 
-.content {
+.quizSlaveSessionLobbyContent {
     display: flex;
-    padding: 100px;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    gap: 100px;
     flex: 1 0 0;
     align-self: stretch;
     overflow: hidden;

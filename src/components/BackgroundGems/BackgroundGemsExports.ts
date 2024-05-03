@@ -1,5 +1,7 @@
 export enum BackgroundGemsType {
     Primary,
     Grey,
-    Primary2
+    Primary2,
+    PrimarySlave,
+    PrimarySlave2
 }

@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react"
+import { FC, useEffect } from "react"
 import "./QuizSlaveLobby.css"
 import { useLocation } from "react-router-dom";
 import QuizSession from "../../../models/QuizSession";
@@ -60,10 +60,12 @@ export const QuizSlaveLobby: FC = () => {
             .catch((err) => console.error(err))
     }, [])
 
+    // TODO: adjust slave lobby based on figma design
+
     return (
         <div className="page_styling">
             <BackgroundGems type={BackgroundGemsType.Primary}/>
-            <div className="content">
+            <div className="quizSlaveSessionLobbyContent">
                 <h1 className="quizSlaveSessionLobbyTitle">Waiting for players.</h1>
             </div>
             <BottomNavBar
