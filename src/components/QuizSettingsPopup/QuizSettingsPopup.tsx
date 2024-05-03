@@ -6,7 +6,12 @@ import {BottomNavBar} from "../BottomNavBar/BottomNavBar.tsx";
 import {BottomNavBarStyle, BottomNavBarType} from "../BottomNavBar/BottomNavBarExports.ts";
 import {InputField} from "../InputField/InputField.tsx";
 import {InputFieldType} from "../InputField/InputFieldExports.ts";
-import {ColourScheme, QuizOptions} from "../../models/QuizOptions.ts";
+import {
+    ColourScheme,
+    QuizOptions,
+    quizOptionsAreEqual,
+    quizOptionsAreEqualForQuestions
+} from "../../models/QuizOptions.ts";
 import {SAVE_ICON_LIGHT} from "../../assets/Icons.ts";
 import {formattedDate} from "../../helper/DateFormatter.ts";
 import {SettingsField} from "../SettingsField/SettingsField.tsx";
@@ -96,7 +101,7 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
     }
     const handleRevertOverrides = (): Question[] => {
         const updatedQuestions = [... selectedQuiz.questions]
-        if (QuizOptions.isEqualForQuestions(quizOptions, selectedQuiz.options)) {
+        if (quizOptionsAreEqualForQuestions(quizOptions, selectedQuiz.options)) {
             return updatedQuestions
         }
         updatedQuestions.forEach((question) => {
@@ -109,14 +114,14 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
     }
     const showSaveConfirmationPopup = (extraMessage: string | null, onSecondaryClick: () => void, onPrimaryClick: () => void) => {
         // check if sth has been changed, if yes show this popup, else just perform the primaryClick
-        if (quizName == selectedQuiz.name && QuizOptions.isEqual(quizOptions, selectedQuiz.options)) {
+        if (quizName == selectedQuiz.name && quizOptionsAreEqual(quizOptions, selectedQuiz.options)) {
             onPrimaryClick()
             hidePopup()
             return
         }
         const popup: PopupProps = {
             title: "Do you want to save your changes?",
-            message: (QuizOptions.isEqualForQuestions(quizOptions, selectedQuiz.options) ? extraMessage : (extraMessage != null ? extraMessage + " " : "") + "When saving, your new quiz settings will be applied to all the questions in this quiz."),
+            message: (quizOptionsAreEqualForQuestions(quizOptions, selectedQuiz.options) ? extraMessage : (extraMessage != null ? extraMessage + " " : "") + "When saving, your new quiz settings will be applied to all the questions in this quiz."),
             secondaryButtonText: "Discard Changes",
             secondaryButtonIcon: null,
             primaryButtonText: "Save Changes",

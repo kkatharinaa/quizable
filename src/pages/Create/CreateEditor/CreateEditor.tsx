@@ -1,12 +1,11 @@
 import React, {FC, useEffect, useState} from "react";
 import "./CreateEditor.css"
 import {Quiz} from "../../../models/Quiz.ts";
-import {Question} from "../../../models/Question.ts";
+import {makeQuestion, Question, questionArraysAreEqual} from "../../../models/Question.ts";
 import {RETURN_ICON_DARK, SAVE_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {QuestionEditor} from "../../../components/QuestionEditor/QuestionEditor.tsx";
-import {Answer} from "../../../models/Answer.ts";
 import {QuestionEditorNav} from "../../../components/QuestionEditorNav/QuestionEditorNav.tsx";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
@@ -19,6 +18,7 @@ import {
     showErrorPageNothingToFind,
     showErrorPageSomethingWentWrong
 } from "../../ErrorPage/ErrorPageExports.ts";
+import {makeAnswer} from "../../../models/Answer.ts";
 
 export const CreateEditor: FC = () => {
 
@@ -118,7 +118,7 @@ export const CreateEditor: FC = () => {
         setCurrentQuestionIndex(index)
     }
     const handleQuestionAdd = () => {
-        const newQuestion = new Question()
+        const newQuestion = makeQuestion()
         if (originalQuiz != null) {
             newQuestion.maxQuestionTime = originalQuiz.options.maxQuestionTime
             newQuestion.questionPoints = originalQuiz.options.questionPoints
@@ -206,7 +206,7 @@ export const CreateEditor: FC = () => {
         if (questions[currentQuestionIndex].answers.length == 6) { return } // max 6 answers per question
         const updatedQuestions = [...questions]
         const currentQuestion = updatedQuestions[currentQuestionIndex];
-        const newAnswers = [...currentQuestion.answers, new Answer(false)];
+        const newAnswers = [...currentQuestion.answers, makeAnswer()];
         updatedQuestions[currentQuestionIndex] = {...currentQuestion, answers: newAnswers};
         setQuestions(updatedQuestions)
     }
@@ -237,7 +237,7 @@ export const CreateEditor: FC = () => {
             showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
             return
         }
-        if (!Question.areEqual(originalQuiz.questions, questions)) {
+        if (!questionArraysAreEqual(originalQuiz.questions, questions)) {
             const updatedQuiz = {...originalQuiz, questions: questions}
             QuizRepository.add(updatedQuiz)
         }
@@ -245,7 +245,7 @@ export const CreateEditor: FC = () => {
     };
     const toOverview = () => {
         // check if sth has been changed, if no simply go back, if yes show a popup
-        if (originalQuiz != null && Question.areEqual(originalQuiz.questions, questions)) {
+        if (originalQuiz != null && questionArraysAreEqual(originalQuiz.questions, questions)) {
             navigateToOverview()
             return
         }

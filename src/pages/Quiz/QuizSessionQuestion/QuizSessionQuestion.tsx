@@ -5,15 +5,15 @@ import {POWER_ICON_DARK, SKIP_ICON_LIGHT, USER_ICON_LIGHT} from "../../../assets
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import QuizSession from "../../../models/QuizSession.ts";
 import {v4 as uuid} from "uuid";
-import {Quiz} from "../../../models/Quiz.ts";
+import {makeQuiz} from "../../../models/Quiz.ts";
 import {Timer} from "../../../components/Timer/Timer.tsx";
 import {AnswerInputField} from "../../../components/AnswerInputField/AnswerInputField.tsx";
 import {getAnswerInputFieldTypeForIndex} from "../../../components/AnswerInputField/AnswerInputFieldExports.ts";
 import {QuizCodeTag} from "../../../components/QuizCodeTag/QuizCodeTag.tsx";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
-import {Question} from "../../../models/Question.ts";
-import {Answer} from "../../../models/Answer.ts";
+import {makeQuestion, Question} from "../../../models/Question.ts";
+import {makeAnswer} from "../../../models/Answer.ts";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {useNavigate} from "react-router-dom";
 import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
@@ -72,8 +72,8 @@ export const QuizSessionQuestion: FC = () => {
     useEffect(() => {
 
         // TODO: get current quizsession, current question and game code - rn just use default values to develop the ui
-        const currentQuiz =  new Quiz()
-        currentQuiz.questions[0] = new Question(uuid(), "What are the most effective strategies for managing stress in high-pressure work environments?"/*"Which colour is the sky?"*/, [new Answer(false, uuid(), "That are the most effective strategies for managing stress in high-pressure work environments."), new Answer(true, uuid(), "Green"), new Answer(false, uuid(), "Yellow"), new Answer(false, uuid(), "Red"), new Answer(false, uuid(), "Pink")])
+        const currentQuiz =  makeQuiz()
+        currentQuiz.questions[0] = makeQuestion(uuid(), "What are the most effective strategies for managing stress in high-pressure work environments?"/*"Which colour is the sky?"*/, [makeAnswer(false, "That are the most effective strategies for managing stress in high-pressure work environments."), makeAnswer(true, "Green"), makeAnswer(false, "Yellow"), makeAnswer(false, "Red"), makeAnswer(false, "Pink")])
         const currentSession: QuizSession = {
             id: uuid(),
             quizId: currentQuiz.id,

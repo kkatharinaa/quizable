@@ -1,7 +1,7 @@
 import {FC, useEffect, useState} from "react";
 import "./CreateOverview.css"
 import {useLocation, useNavigate} from 'react-router-dom';
-import {Quiz} from "../../../models/Quiz.ts";
+import {makeQuiz, Quiz} from "../../../models/Quiz.ts";
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {QuizCardContainer} from "../../../components/QuizCardContainer/QuizCardContainer.tsx";
@@ -12,11 +12,11 @@ import QuizSessionService from "../../../services/QuizSessionService.ts";
 import {v4 as uuid} from "uuid";
 import { getDeviceId } from "../../../helper/DeviceHelper.ts";
 import QuizSession from "../../../models/QuizSession.ts";
-import {QuizOptions} from "../../../models/QuizOptions.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {LEAVE_ICON_DARK} from "../../../assets/Icons.ts";
 import {ErrorPageLinkedTo, showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
+import {quizOptionsAreEqual} from "../../../models/QuizOptions.ts";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -70,7 +70,7 @@ export const CreateOverview: FC = () => {
     }
     const handleAddQuiz = () => {
         // open new quiz settings popup which will create a quiz and update the quizzes state when closed, or when clicked on "edit questions" button
-        const newQuiz = new Quiz()
+        const newQuiz = makeQuiz()
         setQuizSettingsPopupProps([newQuiz, true])
         setShowingQuizSettingsPopup(true)
     };
@@ -121,7 +121,7 @@ export const CreateOverview: FC = () => {
         }
 
         // else update the quiz if it existed before and its title or settings were changed
-        if (previousQuiz.name != updatedQuiz.name || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
+        if (previousQuiz.name != updatedQuiz.name || !quizOptionsAreEqual(previousQuiz.options, updatedQuiz.options)) {
             const updatedQuizzes = [...quizzes]
             const index = updatedQuizzes.indexOf(previousQuiz)
             if (index < 0) {
