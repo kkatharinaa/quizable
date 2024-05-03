@@ -31,6 +31,9 @@ export const ErrorPage: FC = () => {
             case ErrorPageLinkedTo.Overview:
                 navigate(`/overview`)
                 break
+            case ErrorPageLinkedTo.Join:
+                navigate(`/join`)
+                break
         }
     }
 

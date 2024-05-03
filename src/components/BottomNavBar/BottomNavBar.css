@@ -29,11 +29,11 @@
 }
 
 @media only screen and (max-width: 480px) {
-    .bottomNavBar {
+    .bottomNavBar, .bottomNavBar.navForPopup {
         padding: 10px 20px 18px 20px;
     }
 
-    .bottomNavBar button.long {
+    .bottomNavBar button.long, .bottomNavBar.navForPopup button.medium {
         padding: 10px 15px;
     }
 }

@@ -2,7 +2,8 @@ import {NavigateFunction} from "react-router-dom";
 
 export enum ErrorPageLinkedTo {
     Home = "Home",
-    Overview = "Overview"
+    Overview = "Overview",
+    Join = "Join",
 }
 
 export const getErrorPageLinkedTo = (value: string): ErrorPageLinkedTo | undefined => {
@@ -12,6 +13,11 @@ export const getErrorPageLinkedTo = (value: string): ErrorPageLinkedTo | undefin
 export const showErrorQuizSessionNotRunning = (navigate: NavigateFunction, isHost: boolean) => {
     const message = isHost ? "You are currently not in an active quiz session. Start playing a quiz from your quizzes overview screen." : "You are not logged in."
     const linkTo = isHost ? ErrorPageLinkedTo.Overview : ErrorPageLinkedTo.Home;
+    showErrorPage(navigate, message, linkTo)
+}
+export const showErrorNotInSession = (navigate: NavigateFunction) => {
+    const message = "You are not a player in this quiz session. The button below will take you to the correct screen on which you can join any active quiz session."
+    const linkTo = ErrorPageLinkedTo.Join
     showErrorPage(navigate, message, linkTo)
 }
 

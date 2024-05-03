@@ -1,6 +1,6 @@
-import { FC, useEffect } from "react"
+import {FC, useEffect, useState} from "react"
 import "./QuizSlaveLobby.css"
-import { useLocation } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import QuizSession from "../../../models/QuizSession";
 import { BottomNavBar } from "../../../components/BottomNavBar/BottomNavBar";
 import { BottomNavBarStyle, BottomNavBarType } from "../../../components/BottomNavBar/BottomNavBarExports";
@@ -11,18 +11,37 @@ import QuizUser from "../../../models/QuizUser";
 import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
 import {RETURN_ICON_DARK} from "../../../assets/Icons.ts";
+import {showErrorPageNothingToFind} from "../../ErrorPage/ErrorPageExports.ts";
+import {showPopupLeaveSession} from "../../../components/Popup/PopupExports.ts";
+import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 
 
 export const QuizSlaveLobby: FC = () => {
+    const navigate = useNavigate();
     const {state} = useLocation();
-    const quizSessionId: QuizSession = state.quizSessionId; // Read values passed on state  
-    const userName: string = state.userName; // Read values passed on state      
+    const quizSessionId: QuizSession | null = state ? state.quizSessionId : null; //  Read values passed on state
+    const userName: string = state ? state.userName : ""; // Read values passed on state
+
+    const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
+    const [showingPopup, setShowingPopup] = useState(false);
 
     const killQuizSession = () => {
-        
+        const leaveSession = () => {} // TODO: leave session
+        showPopupLeaveSession(showPopup, hidePopup, navigate, leaveSession)
+    }
+
+    const showPopup = (popup: PopupProps) => {
+        setPopupProps(popup)
+        setShowingPopup(true)
+    }
+    const hidePopup = () => {
+        setShowingPopup(false)
     }
 
     useEffect(() => {
+        if (quizSessionId == null || userName == "") {
+            showErrorPageNothingToFind(navigate)
+        }
         console.log("Quiz session in Quiz Lobby: ", quizSessionId)
 
         // start websocket connection
@@ -58,6 +77,11 @@ export const QuizSlaveLobby: FC = () => {
                 connection.send("EnterSlaveQuizSession", quizUser, quizSessionId)
             })
             .catch((err) => console.error(err))
+
+        // TODO: check if player is part of quiz session, if not show error
+        /*if () {
+            showErrorNotInSession(navigate)
+        }*/
     }, [])
 
     // TODO: adjust slave lobby based on figma design
@@ -76,6 +100,20 @@ export const QuizSlaveLobby: FC = () => {
                 type={BottomNavBarType.SecondaryOnly}
                 onSecondaryClick={killQuizSession} 
                 style={BottomNavBarStyle.Long}/>
+
+            {(showingPopup && popupProps != null) &&
+                <Popup
+                    title={popupProps.title}
+                    message={popupProps.message}
+                    secondaryButtonText={popupProps.secondaryButtonText}
+                    secondaryButtonIcon={popupProps.secondaryButtonIcon}
+                    primaryButtonText={popupProps.primaryButtonText}
+                    primaryButtonIcon={popupProps.primaryButtonIcon}
+                    type={popupProps.type}
+                    onSecondaryClick={popupProps.onSecondaryClick}
+                    onPrimaryClick={popupProps.onPrimaryClick}
+                />
+            }
         </div>
     )
 }

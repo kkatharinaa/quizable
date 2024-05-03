@@ -18,6 +18,7 @@ import {SettingsField} from "../SettingsField/SettingsField.tsx";
 import {SettingsFieldType} from "../SettingsField/SettingsFieldExports.ts";
 import {Question} from "../../models/Question.ts";
 import {PopupProps} from "../Popup/Popup.tsx";
+import {showPopupSomethingWentWrong} from "../Popup/PopupExports.ts";
 
 export interface QuizSettingsPopupProps {
     selectedQuiz: Quiz
@@ -169,19 +170,7 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
     }
     const handleColourSchemeInputChange = (value: number) => {
         if (!Object.values(ColourScheme).includes(value)) {
-            const popup: PopupProps = {
-                title: "Looks like something went wrong.",
-                message: "Please try again later or contact us if the issue persists.",
-                secondaryButtonText: "Ok",
-                secondaryButtonIcon: null,
-                primaryButtonText: "",
-                primaryButtonIcon: null,
-                type: BottomNavBarType.SecondaryOnly,
-                onSecondaryClick: () => {
-                    hidePopup()
-                }
-            }
-            showPopup(popup)
+            showPopupSomethingWentWrong(showPopup, hidePopup)
         }
         setQuizOptions({...quizOptions, colourScheme: value})
     }
