@@ -61,12 +61,24 @@ export const CREATE_ICON_DARK: Icon = {
     path: '/assets/icon-create-dark.svg',
     alt: 'Create',
 }; 
+export const QUIZ_CREATE_DARK: Icon = {
+    path: '/assets/create-quiz-dark.svg',
+    alt: 'Add',
+};
 
 export const PLAY_ICON_LIGHT: Icon = {
     path: '/assets/icon-play-light.svg',
     alt: 'Play',
 };
 
+export const CHEVRON_UP: Icon = {
+    path: '/assets/icon-chevron-up.svg',
+    alt: 'ChevronUp',
+};
+
+export const CHEVRON_DOWN: Icon = {
+    path: '/assets/icon-chevron-down.svg',
+    alt: 'ChevronDown',
 export const ENTER_ICON_LIGHT: Icon = {
     path: '/assets/icon-enter-light.svg',
     alt: 'Join',

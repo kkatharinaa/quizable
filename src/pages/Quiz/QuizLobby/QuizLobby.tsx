@@ -12,6 +12,8 @@ import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGem
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
 import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
 
+import { QuizPlayerCard } from "../../../components/QuizPlayerCard/QuizPlayerCard";
+import { QuizPlayerCardType } from "../../../components/QuizPlayerCard/QuizPlayerCardExports";
 
 interface QuizMasterMessage {
     notifyQuizSession?: QuizSession,
@@ -26,6 +28,34 @@ export const QuizLobby: FC = () => {
     const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
     const [quizEntryId, setQuizEntryId] = useState<string | null>(null);
     const [joinedQuizUser, setJoinedQuizUser] = useState<QuizUser[]>([])
+
+    const listOfUsers: QuizUser[] = [
+        {
+            id: uuid(),
+            identifier: "user1",
+            deviceId: uuid(),
+        },
+        {
+            id: uuid(),
+            identifier: "user2",
+            deviceId: uuid(),
+        },
+        {
+            id: uuid(),
+            identifier: "user3",
+            deviceId: uuid(),
+        },
+        {
+            id: uuid(),
+            identifier: "user4",
+            deviceId: uuid(),
+        },
+        {
+            id: uuid(),
+            identifier: "user5",
+            deviceId: uuid(),
+        },
+    ]
 
     const killQuizSession = () => {
 
@@ -44,8 +74,8 @@ export const QuizLobby: FC = () => {
 
         // start websocket connection
         const port: number = 5296
-        // const url: string = `http://localhost:${port}`
-        const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+        const url: string = `http://localhost:${port}`
+        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
 
         const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
             .withUrl(url + "/master", {
@@ -94,18 +124,22 @@ export const QuizLobby: FC = () => {
                             <p className="entryIdContentGameCode">{quizEntryId}</p>
                         </div>
                         <div className="quizUserLobby">
-                            
+
                         </div>
                     </div>
                 }
-                {joinedQuizUser.length >= 1 &&
-                    <div className="joinedUserSection">
-                        <h4>{joinedQuizUser.length} joined</h4>
-                        {joinedQuizUser.map((quizUser) => (
-                            <div className="joinedUserSectionCards" key={quizUser.deviceId+":"+quizUser.identifier}>
-                                <p>{quizUser.identifier}</p>
-                            </div>
-                        ))}                        
+                {listOfUsers.length >= 1 && // change this back to joinedQuizUsers
+                    <div>
+                        <h4 className="joinedUsersSectionCount">{listOfUsers.length} joined</h4>
+                        <div className="joinedUserSection">
+                            {listOfUsers.map((quizUser) => (
+                                <QuizPlayerCard 
+                                    type={QuizPlayerCardType.DesktopScoreDown}
+                                    playerName={quizUser.identifier}
+                                    playerScore={907}>
+                                </QuizPlayerCard>
+                            ))}                        
+                        </div>
                     </div>
                 }
             </div>

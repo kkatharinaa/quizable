@@ -37,7 +37,8 @@ export const QuizOverview = () => {
         QuizSessionService.addSession({id: "someID", quizId: "quizId", deviceId: "deviceId", state: {
             currentQuestionId: "",
             usersStats: [],
-            currentQuizState: ""
+            currentQuizState: "",
+        
         }})
     }
 
