@@ -27,7 +27,7 @@ export const BackgroundGems: FC<BackgroundGemsProps> = ({ type }) => {
             break;
         case BackgroundGemsType.PrimarySlave2:
             path = '/assets/background-gems-primary-slave-2.svg'
-            // TODO: make primarySlave2 gems look good
+            className = 'gemsPrimarySlave2'
             break;
     }
 

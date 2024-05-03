@@ -11,6 +11,12 @@
     align-items: center;
     z-index: -1;
 }
+.backgroundGemsContainer.gemsPrimarySlave {
+    filter: blur(5px);
+}
+.backgroundGemsContainer.gemsPrimarySlave2 {
+    filter: blur(10px);
+}
 
 .backgroundGemsBackground {
     width: 100vw;
@@ -22,7 +28,7 @@
     z-index: -2;
 }
 
-.backgroundGemsBackground.gemsPrimary, .backgroundGemsBackground.gemsPrimarySlave {
+.backgroundGemsBackground.gemsPrimary, .backgroundGemsBackground.gemsPrimarySlave, .backgroundGemsBackground.gemsPrimarySlave2 {
     background: var(--primary-color);
 }
 .backgroundGemsBackground.gemsGrey {
@@ -38,17 +44,10 @@
     max-height: 90vh;
     padding-bottom: 7vh;
 }
-.backgroundGems.gemsPrimarySlave {
+.backgroundGems.gemsPrimarySlave, .backgroundGems.gemsPrimarySlave2 {
     width: 100%;
 }
 
 .backgroundGems.gemsGrey {
     padding-top: 10vh;
-}
-
-
-@media only screen and (max-width: 480px) {
-    .backgroundGemsContainer {
-        filter: blur(5px);
-    }
 }

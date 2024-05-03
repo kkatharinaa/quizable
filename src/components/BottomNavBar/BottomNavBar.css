@@ -32,4 +32,8 @@
     .bottomNavBar {
         padding: 10px 20px 18px 20px;
     }
+
+    .bottomNavBar button.long {
+        padding: 10px 15px;
+    }
 }

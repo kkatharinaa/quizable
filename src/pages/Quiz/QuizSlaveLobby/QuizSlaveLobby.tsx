@@ -10,7 +10,7 @@ import { v4 as uuid } from "uuid"
 import QuizUser from "../../../models/QuizUser";
 import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
-import {LEAVE_ICON_DARK} from "../../../assets/Icons.ts";
+import {RETURN_ICON_DARK} from "../../../assets/Icons.ts";
 
 
 export const QuizSlaveLobby: FC = () => {
@@ -64,13 +64,13 @@ export const QuizSlaveLobby: FC = () => {
 
     return (
         <div className="page_styling">
-            <BackgroundGems type={BackgroundGemsType.Primary}/>
+            <BackgroundGems type={BackgroundGemsType.PrimarySlave2}/>
             <div className="quizSlaveSessionLobbyContent">
-                <h1 className="quizSlaveSessionLobbyTitle">Waiting for players.</h1>
+                <h1 className="quizSlaveSessionLobbyTitle">Waiting for players...</h1>
             </div>
             <BottomNavBar
-                secondaryButtonText="Logout"
-                secondaryButtonIcon={LEAVE_ICON_DARK}
+                secondaryButtonText="Leave"
+                secondaryButtonIcon={RETURN_ICON_DARK}
                 primaryButtonText=""
                 primaryButtonIcon={null}
                 type={BottomNavBarType.SecondaryOnly}
