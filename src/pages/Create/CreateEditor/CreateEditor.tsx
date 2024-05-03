@@ -14,6 +14,11 @@ import QuizRepository from "../../../repositories/QuizRepository.ts";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {QuestionSettingsPopup} from "../../../components/QuestionSettingsPopup/QuestionSettingsPopup.tsx";
+import {
+    ErrorPageLinkedTo,
+    showErrorPageNothingToFind,
+    showErrorPageSomethingWentWrong
+} from "../../ErrorPage/ErrorPageExports.ts";
 
 export const CreateEditor: FC = () => {
 
@@ -24,11 +29,11 @@ export const CreateEditor: FC = () => {
 
     // TODO: check that we are logged in!! else redirect to home
 
-    // TODO generally: adjust question settings popup
-
     //const { quizID } = useParams();
     const quizID = searchParams.get('id');
-    if (!quizID) throw new Error("No such quiz ID"); // TODO: show error page
+    if (!quizID) {
+        showErrorPageNothingToFind(navigate, ErrorPageLinkedTo.Overview)
+    }
 
     const [originalQuiz, setOriginalQuiz] = useState<Quiz | null>(null) // only needed for saving
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -39,6 +44,10 @@ export const CreateEditor: FC = () => {
 
     // get quiz from Firebase using the quizID
     const setQuizFromFirestore = async () => {
+        if (quizID == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         const quizFromFirestore: Quiz = await QuizRepository.getById(quizID)
         setQuestions(quizFromFirestore.questions)
         setCurrentQuestionIndex(0)
@@ -51,7 +60,10 @@ export const CreateEditor: FC = () => {
 
     // question functions
     const handleQuestionTitleInputChange = (value: string) => {
-        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+        if (currentQuestionIndex == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         const updatedQuestions = [...questions]
         // create a copy of the question we want to update, change the value we want to change and reassign it to the state copy (updatedquestions)
         updatedQuestions[currentQuestionIndex] = {
@@ -64,7 +76,10 @@ export const CreateEditor: FC = () => {
         setShowingQuestionSettingsPopup(true)
     };
     const handleQuestionSettingsClose = (updatedQuestion: Question) => {
-        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+        if (currentQuestionIndex == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         const updatedQuestions = [...questions];
         updatedQuestions[currentQuestionIndex] = updatedQuestion
         setQuestions(updatedQuestions);
@@ -73,7 +88,6 @@ export const CreateEditor: FC = () => {
     const handleQuestionDelete = () => {
         if (questions.length == 1) { return } // quiz has to have at least one question
 
-        // TODO: adjust popup based on design
         const deleteConfirmationPopup: PopupProps = {
             title: "Are you sure you want to delete this question?",
             message: "This action cannot be undone.",
@@ -87,7 +101,10 @@ export const CreateEditor: FC = () => {
             },
             onPrimaryClick: () => {
                 // delete question
-                if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+                if (currentQuestionIndex == null) {
+                    showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+                    return
+                }
                 const updatedQuestions = [...questions]
                 updatedQuestions.splice(currentQuestionIndex, 1);
                 setCurrentQuestionIndex(currentQuestionIndex == 0 ? 0 : currentQuestionIndex-1)
@@ -123,7 +140,10 @@ export const CreateEditor: FC = () => {
         const [draggedItem] = updatedQuestions.splice(dragIndex, 1);
         updatedQuestions.splice(dropIndex, 0, draggedItem);
 
-        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+        if (currentQuestionIndex == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         if (dragIndex == currentQuestionIndex) { // we dragged our selected question somewhere else, so the currentQuestionIndex has to be updated to the new index
             setCurrentQuestionIndex(dropIndex)
         } else if (dropIndex < dragIndex) { // we dragged a question which was not the selected question in front of our selected question
@@ -139,7 +159,10 @@ export const CreateEditor: FC = () => {
 
     // answer functions
     const handleAnswerInputChange = (value: string, index: number) => {
-        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+        if (currentQuestionIndex == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         const updatedQuestions = [...questions]
         updatedQuestions[currentQuestionIndex] = {
             ...updatedQuestions[currentQuestionIndex],
@@ -154,13 +177,19 @@ export const CreateEditor: FC = () => {
         setQuestions(updatedQuestions)
     };
     const handleAnswerDelete = (index: number) => {
-        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+        if (currentQuestionIndex == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         const updatedQuestions = [...questions]
         updatedQuestions[currentQuestionIndex].answers.splice(index, 1);
         setQuestions(updatedQuestions)
     }
     const handleAnswerToggleCorrect = (index: number) => {
-        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+        if (currentQuestionIndex == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         const updatedQuestions = [...questions]
         // set only the answer at the specified index to true
         updatedQuestions[currentQuestionIndex].answers = updatedQuestions[currentQuestionIndex].answers.map((answer, i) => ({
@@ -170,7 +199,10 @@ export const CreateEditor: FC = () => {
         setQuestions(updatedQuestions)
     }
     const handleAnswerAdd = () => {
-        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+        if (currentQuestionIndex == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         if (questions[currentQuestionIndex].answers.length == 6) { return } // max 6 answers per question
         const updatedQuestions = [...questions]
         const currentQuestion = updatedQuestions[currentQuestionIndex];
@@ -185,7 +217,10 @@ export const CreateEditor: FC = () => {
         e.preventDefault();
     };
     const handleAnswerDragDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
-        if (currentQuestionIndex == null) throw new Error("error: no currentQuestionIndex") // TODO: display error
+        if (currentQuestionIndex == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         const dragIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
         const updatedQuestions = [...questions];
         const [draggedItem] = updatedQuestions[currentQuestionIndex].answers.splice(dragIndex, 1);
@@ -198,7 +233,10 @@ export const CreateEditor: FC = () => {
 
     // nav functions
     const saveQuiz = () => {
-        if (originalQuiz == null) throw new Error("error saving quiz") // TODO: display error
+        if (originalQuiz == null) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         if (!Question.areEqual(originalQuiz.questions, questions)) {
             const updatedQuiz = {...originalQuiz, questions: questions}
             QuizRepository.add(updatedQuiz)

@@ -16,6 +16,7 @@ import {QuizOptions} from "../../../models/QuizOptions.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {LEAVE_ICON_DARK} from "../../../assets/Icons.ts";
+import {ErrorPageLinkedTo, showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -75,13 +76,19 @@ export const CreateOverview: FC = () => {
     };
     const handleEditQuiz = (id: string) => {
         const quizToBeEdited = findQuizByID(id)
-        if (quizToBeEdited == undefined) throw new Error("could not find quiz in array") // TODO: display error
+        if (quizToBeEdited == undefined) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
         setQuizSettingsPopupProps([quizToBeEdited, false])
         setShowingQuizSettingsPopup(true)
     };
     const handlePlayQuiz = async (id: string) => {
         const quizToBePlayed: Quiz | undefined = findQuizByID(id)
-        if (quizToBePlayed == undefined) throw new Error("quiz could not be found") // TODO: display error
+        if (quizToBePlayed == undefined) {
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            return
+        }
 
         // create a new quiz session
         const quizSessionPlay: QuizSession = {
@@ -117,7 +124,9 @@ export const CreateOverview: FC = () => {
         if (previousQuiz.name != updatedQuiz.name || !QuizOptions.isEqual(previousQuiz.options, updatedQuiz.options)) {
             const updatedQuizzes = [...quizzes]
             const index = updatedQuizzes.indexOf(previousQuiz)
-            if (index < 0) throw new Error("error updating quiz") // TODO: display error
+            if (index < 0) {
+                showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+            }
             updatedQuizzes[index] = updatedQuiz
             setQuizzes(updatedQuizzes)
             await QuizRepository.add(updatedQuiz)
