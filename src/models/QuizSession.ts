@@ -1,3 +1,4 @@
+import { QuizOptions } from "./QuizOptions";
 import QuizSessionState from "./QuizSessionState";
 
 
@@ -11,6 +12,7 @@ export default interface QuizSession{
     quizId: string,
     state: QuizSessionState,
     deviceId: string,
+    options?: QuizOptions
 }
 
 /* export const DefaultQuizSession: QuizSession = () => {

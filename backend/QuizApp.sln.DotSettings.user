@@ -1,0 +1,8 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=5e5a6219_002Deb88_002D40cc_002Db727_002D78215638f0a8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Assert_Update_Quiz_Session_User_Add" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::89E86BF0-BE97-4D00-8B5A-FE7F66972382::net8.0::QuizApp.QuizSessionServiceTest&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::89E86BF0-BE97-4D00-8B5A-FE7F66972382::net8.0::QuizApp.QuizSessionControllerTest.Assert_Validate_Entry_Id&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::89E86BF0-BE97-4D00-8B5A-FE7F66972382::net8.0::QuizApp.QuizSessionControllerTest&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

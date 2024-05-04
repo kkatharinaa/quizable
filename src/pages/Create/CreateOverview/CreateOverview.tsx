@@ -93,10 +93,10 @@ export const CreateOverview: FC = () => {
         // create a new quiz session
         const quizSessionPlay: QuizSession = {
             id: uuid(),
-            quizId: quizToBePlayed.id, 
+            quizId: quizToBePlayed!.id, 
             deviceId: await getDeviceId(), 
             state: {
-                currentQuestionId: quizToBePlayed.questions[0].id,
+                currentQuestionId: quizToBePlayed!.questions[0].id,
                 usersStats: [ /**keep it empty at the beginning */],
                 currentQuizState: "start"
             }
