@@ -1,12 +1,14 @@
-import { FC, useState } from "react";
-import { BottomNavBar } from "../../components/BottomNavBar/BottomNavBar";
-import { BottomNavBarStyle, BottomNavBarType } from "../../components/BottomNavBar/BottomNavBarExports";
-import { BackgroundGems } from "../../components/BackgroundGems/BackgroundGems";
-import { BackgroundGemsType } from "../../components/BackgroundGems/BackgroundGemsExports";
+import {FC, useState} from "react";
+import {BottomNavBar} from "../../components/BottomNavBar/BottomNavBar";
+import {BottomNavBarStyle, BottomNavBarType} from "../../components/BottomNavBar/BottomNavBarExports";
+import {BackgroundGems} from "../../components/BackgroundGems/BackgroundGems";
+import {BackgroundGemsType} from "../../components/BackgroundGems/BackgroundGemsExports";
 import "./Join.css"
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import QuizSessionService from "../../services/QuizSessionService";
 import {RETURN_ICON_DARK} from "../../assets/Icons.ts";
+import {InputField} from "../../components/InputField/InputField.tsx";
+import {InputFieldType} from "../../components/InputField/InputFieldExports.ts";
 
 interface ValidationState {
     valid: boolean, 
@@ -54,14 +56,12 @@ export const Join: FC = () => {
         // other page with create the websocket connection
     }
 
-    const validateInputLive = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const inputValue: string = e.target.value;
-
+    const validateInputLive = (newValue: string) => {
         // update input value
-        setInputValue(inputValue);
+        setInputValue(newValue);
 
         // validate the text
-        validateText(inputValue);
+        validateText(newValue);
     }
 
     const joinQuiz = () => {
@@ -108,41 +108,28 @@ export const Join: FC = () => {
         setValidation(newValidationState)
     }
 
+    const updateInput = (newValue: string) => {
+        setInputValue(newValue)
+    }
+
     return (
         <div className="joinPage">
-            <BackgroundGems type={BackgroundGemsType.Primary}></BackgroundGems>
+            <BackgroundGems type={BackgroundGemsType.PrimarySlave}></BackgroundGems>
             <div className="contentJoin">
                 <div>
-                    {validQuizCode.code.length == 0 ? (
-                        <div className="inputFieldJoin">
-                            <input
-                                type="text"
-                                value={inputValue}
-                                onChange={validateInputLive}
-                                placeholder="Enter quiz code"
-                            />
-                            {!validation.valid &&
-                                <p className="inputFieldJoinValidation">{validation.validationText}</p>
-                            }
-                        </div> 
-                    ) : (
-                        <div className="inputFieldJoin">
-                            <input
-                                type="text"
-                                value={inputValue}
-                                onChange={e => setInputValue(e.target.value)}
-                                placeholder="Enter user name"
-                            />
-                            {!validation.valid &&
-                                <p className="inputFieldJoinValidation">{validation.validationText}</p>
-                            }
-                        </div> 
-                    )}
+                    <InputField
+                        value={inputValue}
+                        onChange={validQuizCode.code.length == 0 ? validateInputLive : updateInput}
+                        type={validQuizCode.code.length == 0 ? InputFieldType.Quizcode : InputFieldType.Username}
+                    />
+                    {!validation.valid &&
+                        <p className="inputFieldJoinValidation">{validation.validationText}</p>
+                    }
                 </div>
             </div>
             
             <BottomNavBar
-                secondaryButtonText="Back to Home"
+                secondaryButtonText="Home"
                 secondaryButtonIcon={RETURN_ICON_DARK}
                 primaryButtonText={validQuizCode.code.length == 0 ? "Enter Code" : "Join Quiz"}
                 primaryButtonIcon={null}

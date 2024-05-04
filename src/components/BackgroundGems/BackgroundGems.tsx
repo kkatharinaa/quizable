@@ -20,7 +20,14 @@ export const BackgroundGems: FC<BackgroundGemsProps> = ({ type }) => {
             break;
         case BackgroundGemsType.Primary2:
             path = '/assets/background-gems-primary-2.svg'
-            className = 'gemsPrimary'
+            break;
+        case BackgroundGemsType.PrimarySlave:
+            path = '/assets/background-gems-primary-slave.svg'
+            className = 'gemsPrimarySlave'
+            break;
+        case BackgroundGemsType.PrimarySlave2:
+            path = '/assets/background-gems-primary-slave-2.svg'
+            className = 'gemsPrimarySlave2'
             break;
     }
 

@@ -101,3 +101,13 @@ export const USER_ICON_LIGHT: Icon = {
     path: '/assets/icon-user-light.svg',
     alt: 'User',
 };
+
+export const CHEVRONDOWN_ICON_LIGHT: Icon = {
+    path: '/assets/icon-chevrondown-light.svg',
+    alt: 'Expand',
+};
+
+export const CHEVRONUP_ICON_LIGHT: Icon = {
+    path: '/assets/icon-chevronup-light.svg',
+    alt: 'Collapse',
+};

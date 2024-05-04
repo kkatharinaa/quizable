@@ -32,3 +32,22 @@
 .timer .digitSeparator {
     color: var(--white);
 }
+
+@media only screen and (max-width: 480px) {
+    .timer {
+        gap: 6px;
+    }
+
+    .timer .digit {
+        width: 40px;
+        height: 56px;
+        padding: 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    .timer .digit p, .timer .digitSeparator {
+        margin: 0;
+        font-size: 32px;
+    }
+}

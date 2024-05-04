@@ -1,0 +1,52 @@
+.answerSelection {
+    display: flex;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+    flex: 1 0 0;
+    border-radius: 6px;
+    background: var(--black);
+    position: relative;
+    height: 150px;
+}
+.answerSelection.disabled, .answerSelection.unselected {
+    background: var(--disabled-button);
+}
+.answerSelection.unselected, .answerSelection.wrong {
+    opacity: 0.4;
+}
+.answerSelection.correct {
+    box-shadow: 0px 0px 20px 6px var(--white);
+}
+
+.answerSelection p {
+    color: var(--white);
+    text-align: center;
+    font-family: "Sansation", sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
+    flex: 1 0 0;
+    margin: 0;
+    text-overflow: ellipsis;
+}
+.answerSelection.disabled p, .answerSelection.unselected p {
+    color: var(--disabled-button-text);
+}
+
+.answerSelection object:first-of-type {
+    z-index: 1;
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 24px;
+}
+.answerSelection object:last-of-type {
+    z-index: 1;
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    rotate: 180deg;
+    width: 24px;
+}

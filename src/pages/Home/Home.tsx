@@ -29,7 +29,7 @@ const Home: FC = () => {
 
   return (
     <div className="home">
-      <BackgroundGems type={BackgroundGemsType.Primary}/>
+      <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary : BackgroundGemsType.PrimarySlave}/>
       <h1 className="quizableTitle">Quizable</h1>
       <div className="homeButtons">
         <ButtonComponent

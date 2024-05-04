@@ -31,3 +31,13 @@
     line-height: normal;
     margin: 0;
 }
+
+@media only screen and (max-width: 480px) {
+    .errorPage .content {
+        padding: 20px;
+    }
+
+    .errorPage .content h1 {
+        font-size: 32px;
+    }
+}

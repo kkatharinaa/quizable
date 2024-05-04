@@ -1,0 +1,68 @@
+.questionSlideInTagContainer {
+    pointer-events: none;
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    z-index: 2;
+}
+
+.questionSlideInTag {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100vw;
+    position: absolute;
+    pointer-events: auto;
+    bottom: calc(100vh - 36px);
+    transition: top 2s ease 0s; /* TODO: not working? */
+}
+.questionSlideInTag.open {
+    top: 0;
+}
+
+.questionSlideInTag .content {
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    align-self: stretch;
+    border-right: 3px solid var(--primary-shadow);
+    border-bottom: 3px solid var(--primary-shadow);
+    border-left: 3px solid var(--primary-shadow);
+    background: var(--primary-color);
+}
+
+.questionSlideInTag .content h1 {
+    align-self: stretch;
+    color: var(--white);
+    text-align: center;
+    font-family: "Inika", serif;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: bold;
+    line-height: normal;
+    margin: 0;
+}
+
+.questionSlideInTag .content .timer {
+
+}
+
+.questionSlideInTag .tag {
+    display: flex;
+    padding: 14px 30px;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    border-radius: 0 0 8px 8px;
+    border-right: 3px solid var(--primary-shadow);
+    border-bottom: 3px solid var(--primary-shadow);
+    border-left: 3px solid var(--primary-shadow);
+    background: var(--primary-color);
+}
+
+.questionSlideInTag .tag img {
+    width: 14px;
+}

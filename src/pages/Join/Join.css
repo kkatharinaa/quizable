@@ -20,45 +20,17 @@
     height: 100%;
 }
 
-.contentJoin .inputFieldJoin .inputFieldJoinValidation {
+.contentJoin .inputFieldJoinValidation {
     position: absolute;
-    padding-top: 175px;
     font-size: 24px;
     color: var(--white);
-}
-
-.contentJoin .inputFieldJoin {
-    position: relative;
-    top: 50%;
-    display: flex;
-    width: 680px;
-    padding: 30px 40px;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
-    border-radius: 8px;
-    background: var(--black);
-}
-
-.contentJoin .inputFieldJoin input {
-    width: inherit;
-    height: inherit;
-    padding: 0;
-    background: transparent;
-    border-width: 0;
-    color: var(--white);
-    font-size: 32px;
+    max-width: 90vw;
     text-align: center;
-    font-family: 'Sansation', sans-serif;
-    font-style: normal;
-    font-weight: normal;
-    line-height: normal;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    width: 100%;
 }
-.contentJoin .inputFieldJoin input::placeholder {
-    color: var(--text-field-text);
-}
-.contentJoin .inputFieldJoin input:focus {
-    outline: none;
+
+@media only screen and (max-width: 480px) {
+    .contentJoin .inputFieldJoinValidation {
+        font-size: 18px;
+    }
 }

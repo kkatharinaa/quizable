@@ -7,6 +7,7 @@
     border-radius: 8px;
     background: var(--black);
     position: relative;
+    max-width: 90vw;
 }
 
 .inputField .characterCount {
@@ -45,4 +46,17 @@
 }
 .inputField input:focus {
     outline: none;
+}
+
+@media only screen and (max-width: 480px) {
+    .inputField input {
+        padding: 18px 20px;
+        font-size: 24px;
+    }
+
+    .inputField .characterCount {
+        right: 6px;
+        top: 6px;
+        font-size: 12px;
+    }
 }
