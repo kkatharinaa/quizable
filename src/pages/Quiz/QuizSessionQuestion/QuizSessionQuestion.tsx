@@ -15,15 +15,17 @@ import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundG
 import {makeQuestion, Question} from "../../../models/Question.ts";
 import {makeAnswer} from "../../../models/Answer.ts";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
 
 export const QuizSessionQuestion: FC = () => {
     const navigate = useNavigate();
+    const {state} = useLocation();
 
+    const [userName, setUsername] = useState<string>(state.username)
     const [gameCode, setGameCode] = useState<string>("")
     const [quizSession, setQuizSession] = useState<QuizSession | null>(null)
-    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
+    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
 

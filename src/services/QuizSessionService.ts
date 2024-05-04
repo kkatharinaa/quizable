@@ -32,7 +32,6 @@ export default class QuizSessionService{
         console.log("Status code: " + quizUserExistResponse.status)
 
         if(quizUserExistResponse.status == 404){
-            console.log("User not found ... valid username")
             return false;  
         }
         else if (quizUserExistResponse.status == 400)

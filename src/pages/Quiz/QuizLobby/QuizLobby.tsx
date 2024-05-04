@@ -30,36 +30,15 @@ export const QuizLobby: FC = () => {
     const [quizEntryId, setQuizEntryId] = useState<string | null>(null);
     const [joinedQuizUser, setJoinedQuizUser] = useState<QuizUser[]>([])
 
-    const listOfUsers: QuizUser[] = [
-        {
-            id: uuid(),
-            identifier: "user1",
-            deviceId: uuid(),
-        },
-        {
-            id: uuid(),
-            identifier: "user2",
-            deviceId: uuid(),
-        },
-        {
-            id: uuid(),
-            identifier: "user3",
-            deviceId: uuid(),
-        },
-        {
-            id: uuid(),
-            identifier: "user4",
-            deviceId: uuid(),
-        },
-        {
-            id: uuid(),
-            identifier: "user5",
-            deviceId: uuid(),
-        },
-    ]
+    const [connection, setConnection] = useState<SignalR.HubConnection>();
 
     const killQuizSession = () => {
 
+    }
+
+    const playQuiz = () => {
+        console.log("Play quiz...")
+        connection?.send("NotifyPlayQuizSession", quizSession?.id)
     }
 
     useEffect(() => {
@@ -112,6 +91,8 @@ export const QuizLobby: FC = () => {
                 connection.send("requestQuizSession", quizUser, quizSessionId)
             })
             .catch((err) => console.error(err))
+
+        setConnection(connection);
     }, [])
 
     return (
@@ -133,7 +114,7 @@ export const QuizLobby: FC = () => {
                     <div className="joinedUserSection">
                         <div className="joinedUsersSectionCount">
                             <span><img src={ICON_USER_FILLED.path} alt={ICON_USER_FILLED.alt}></img></span>
-                            {listOfUsers.length} joined
+                            {joinedQuizUser.length} joined
                         </div>
                         <div className="joinedUserSectionList">
                             {joinedQuizUser.map((quizUser) => (
@@ -154,6 +135,7 @@ export const QuizLobby: FC = () => {
                 primaryButtonText="Start Quiz"
                 primaryButtonIcon={PLAY_ICON_LIGHT}
                 type={BottomNavBarType.Default}
+                onPrimaryClick={playQuiz}
                 onSecondaryClick={killQuizSession} 
                 style={BottomNavBarStyle.Long}/>
         </div>

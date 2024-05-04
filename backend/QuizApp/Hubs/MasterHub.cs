@@ -5,7 +5,7 @@ using QuizApp.Services.Interface;
 
 namespace QuizApp.Hubs;
 
-public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessionService): Hub
+public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessionService, IHubContext<SlaveHub> slaveContext): Hub
 {
     // Master sends messages and they arrive here
     // get the data and send it back
@@ -21,8 +21,27 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
     
     public async Task NotifyMasterNewUser(string userIdMaster, QuizMasterMessage masterMessage)
     {
-        ILogger<SlaveHub> logger = LoggerFactory.Create((c) => {}).CreateLogger<SlaveHub>();
-        
         await Clients.All.SendAsync($"message:{userIdMaster}",masterMessage);
     }
+    
+    public async Task NotifyPlayQuizSession(string quizSessionId)
+    {
+        // Set the state of the quiz session
+        quizSessionService.SetQuizSessionState(quizSessionId, "play");
+        
+        
+        // Notify slaves
+        bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsers);
+
+        if (isQuizSessionUser)
+        {
+            foreach(QuizSessionUserStats quizSessionUserStats in quizUsers)
+            {
+                Console.WriteLine($"play:{quizSessionId}/{quizSessionUserStats.User.Identifier}");
+
+                await slaveContext.Clients.All.SendAsync($"play:{quizSessionId}/{quizSessionUserStats.User.Identifier}");
+            }
+        }
+    }
+    
 }

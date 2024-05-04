@@ -99,7 +99,6 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
 
         if (quizUserStats is not null)
         {
-
             QuizSessionUserStats? quizSessionUserStats = quizUserStats.State.UsersStats
                 .FirstOrDefault(s => s.User.Identifier.Equals(identifier));
             
@@ -118,17 +117,28 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         }
         quizUser = null;
         return false;
+    }
+    
+    /// <summary>
+    /// Get quiz users for quiz session and their session
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="quizUsers"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public bool TryGetQuizSessionUserStats(string quizSessionId, out List<QuizSessionUserStats> quizUsers)
+    {
+        QuizSession? quizSession = QuizSessions
+            .Values.ToList()
+            .FirstOrDefault(session => session.Id == quizSessionId);
 
-        //
-        // if (quizUserStats is not null)
-        // {
-        //     logger.LogInformation("Found it: " + quizUserStats.User.Identifier);
-        //     quizUser = quizUserStats.User;
-        //     return true;
-        // }
+        if (quizSession is not null)
+        {
+            quizUsers = quizSession.State.UsersStats;
+            return true;
+        }
 
-        
-        quizUser = null;
+        quizUsers = [];
         return false;
     }
 
@@ -188,19 +198,23 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                 }
             ).ToDictionary();
     }
-
-    /*
-    public List<QuizSessionUserStats> GetLeaderboard(string quizSessionId)
+    
+    /// <summary>
+    /// Set the quiz session for the respective quiz
+    /// </summary>
+    /// <param name="quizSessionId">id of the quiz session to set state</param>
+    /// <param name="state">desired state</param>
+    /// <exception cref="NotImplementedException"></exception>
+    public void SetQuizSessionState(string quizSessionId, string state)
     {
-        return QuizSessions
-            .Where(session => session.Value.Id.Equals(quizSessionId))
-            .Select(quizSession =>
-            {
-                if (quizSession.Value.Id.Equals(quizSessionId))
+        QuizSessions = QuizSessions
+            .Select(session =>
                 {
-                    return quizSession.Value.State.UsersStats.OrderBy(s => s.Score);
+                    if (session.Value.Id == quizSessionId)
+                        session.Value.State.CurrentQuizState = state;
+
+                    return session;
                 }
-            }).ToList();
+            ).ToDictionary();
     }
-    */
 }
