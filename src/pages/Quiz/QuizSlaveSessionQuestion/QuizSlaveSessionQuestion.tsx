@@ -19,6 +19,7 @@ import {getAnswerInputFieldTypeForIndex} from "../../../components/AnswerInputFi
 import {AnswerSelection} from "../../../components/AnswerSelection/AnswerSelection.tsx";
 import {QuizState} from "../../../models/QuizSessionState.ts";
 import {AnswerSelectionStyle} from "../../../components/AnswerSelection/AnswerSelectionExports.ts";
+import {QuestionSlideInTag} from "../../../components/QuestionSlideInTag/QuestionSlideInTag.tsx";
 
 export const QuizSlaveSessionQuestion: FC = () => {
     const navigate = useNavigate();
@@ -120,6 +121,12 @@ export const QuizSlaveSessionQuestion: FC = () => {
             <BackgroundGems
                 type={BackgroundGemsType.PrimarySlave2}
             />
+            { currentQuestion != null &&
+                <QuestionSlideInTag
+                    questionText={currentQuestion.questionText}
+                    maxQuestionTime={currentQuestion.maxQuestionTime}
+                />
+            }
             <div className="content">
                 <div className="answersContainer">
                     {currentQuestion?.answers.map((item, index) => (
