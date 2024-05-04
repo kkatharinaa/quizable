@@ -1,5 +1,6 @@
 import "firebase/firestore";
 import QuizSession from "../models/QuizSession";
+import QuizUser from "../models/QuizUser";
 
 export default class QuizSessionService{
     static port: number = 5296
@@ -21,6 +22,23 @@ export default class QuizSessionService{
     public static async isQuizCodeValid(quizCode: string): Promise<{valid: boolean, sessionId: string}> {
         const textReturn: string = await (await fetch(`${this.url}/api/session/validate/${quizCode}`)).text()
         return {valid: textReturn != "", sessionId: textReturn};
+    }
+
+    public static async checkQuizUserAlreadyExists(quizSessionId: string, quizUserIdentifier: string): Promise<boolean> {
+        const quizUserExistResponse: Response = await (
+            await fetch(`${this.url}/api/session/user/${quizSessionId}/${quizUserIdentifier}`)
+        )
+
+        console.log("Status code: " + quizUserExistResponse.status)
+
+        if(quizUserExistResponse.status == 404){
+            console.log("User not found ... valid username")
+            return false;  
+        }
+        else if (quizUserExistResponse.status == 400)
+            return false;
+                
+        return true;
     }
 
     public static async getSession(): Promise<QuizSession>{

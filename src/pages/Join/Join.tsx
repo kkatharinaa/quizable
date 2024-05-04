@@ -64,8 +64,17 @@ export const Join: FC = () => {
         validateText(inputValue);
     }
 
-    const joinQuiz = () => {
-        navigate("/quiz/slave/lobby", {state: {quizSessionId: validQuizCode.quizSessionId, userName: inputValue}})
+    const joinQuiz = async () => {
+        const userExists: boolean = await QuizSessionService.checkQuizUserAlreadyExists(validQuizCode.quizSessionId,inputValue);
+
+        if(!userExists)
+            navigate("/quiz/slave/lobby", {state: {quizSessionId: validQuizCode.quizSessionId, userName: inputValue}})
+        else {
+            setValidation({
+                valid: false,
+                validationText: "Username is already given!"
+            })
+        }
     }
 
     const validateText = (text: string) => {

@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using QuizApp.Models;
 using QuizApp.Services.Interface;
 
@@ -8,7 +9,7 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     /// <summary>
     /// Quiz Sessions Dictionary. Key is the Entry ID
     /// </summary>
-    private Dictionary<string, QuizSession> QuizSessions { get; set; } = new();
+    private static Dictionary<string, QuizSession> QuizSessions { get; set; } = new();
     
     /// <summary>
     /// Add new quiz session
@@ -63,17 +64,72 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             {
                 if (quizSession.Value.Id.Equals(quizSessionId))
                 {
-                    var newQuizSessionState = new QuizSessionUserStats
-                    {
-                        User = quizUser,
-                        Score = 0,
-                        Answers = []
-                    };
+                    // check if user does not already exist inside the quiz
+                    bool quizUserExists = quizSession.Value.State.UsersStats
+                        .Any(u => u.User.Identifier == quizUser.Identifier);
 
-                    quizSession.Value.State.UsersStats.Add(newQuizSessionState);
+                    // if it does not exist, add it
+                    if (!quizUserExists)
+                    {
+                        var newQuizSessionState = new QuizSessionUserStats
+                        {
+                            User = quizUser,
+                            Score = 0,
+                            Answers = []
+                        };
+
+                        quizSession.Value.State.UsersStats.Add(newQuizSessionState);
+                    }
                 }
                 return quizSession;
             }).ToDictionary();
+    }
+    
+    /// <summary>
+    /// Tries to get a quiz user for the give identifier and session id.
+    /// </summary>
+    /// <param name="quizSessionId">Quiz Session ID</param>
+    /// <param name="identifier">The name of the quiz user.</param>
+    /// <param name="quizUser">Out</param>
+    public bool TryGetQuizSessionUser(string quizSessionId, string identifier, out QuizUser quizUser)
+    {
+        QuizSession? quizUserStats = QuizSessions
+            .Values.ToList()
+            .FirstOrDefault(session => session.Id == quizSessionId);
+
+        if (quizUserStats is not null)
+        {
+
+            QuizSessionUserStats? quizSessionUserStats = quizUserStats.State.UsersStats
+                .FirstOrDefault(s => s.User.Identifier.Equals(identifier));
+            
+            logger.LogInformation(quizUserStats.State.UsersStats.Count.ToString());
+
+            if (quizSessionUserStats is not null)
+            {
+                logger.LogInformation(quizSessionUserStats.User.ToString());
+
+                quizUser = quizSessionUserStats.User;
+                return true;
+            }
+           
+            quizUser = null;
+            return false;
+        }
+        quizUser = null;
+        return false;
+
+        //
+        // if (quizUserStats is not null)
+        // {
+        //     logger.LogInformation("Found it: " + quizUserStats.User.Identifier);
+        //     quizUser = quizUserStats.User;
+        //     return true;
+        // }
+
+        
+        quizUser = null;
+        return false;
     }
 
     /// <summary>

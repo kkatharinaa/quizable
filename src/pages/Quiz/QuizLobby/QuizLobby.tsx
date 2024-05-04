@@ -129,14 +129,14 @@ export const QuizLobby: FC = () => {
                         </div>
                     </div>
                 }
-                {listOfUsers.length >= 1 && // change this back to joinedQuizUsers
+                {joinedQuizUser.length >= 1 && // change this back to joinedQuizUsers
                     <div className="joinedUserSection">
                         <div className="joinedUsersSectionCount">
                             <span><img src={ICON_USER_FILLED.path} alt={ICON_USER_FILLED.alt}></img></span>
                             {listOfUsers.length} joined
                         </div>
                         <div className="joinedUserSectionList">
-                            {listOfUsers.map((quizUser) => (
+                            {joinedQuizUser.map((quizUser) => (
                                 <QuizPlayerCard
                                     type={QuizPlayerCardType.DesktopScoreDown}
                                     playerName={quizUser.identifier}
