@@ -18,6 +18,7 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
     {
         logger.LogInformation($"New slave message from {quizUser.Identifier}");
         await masterContext.Clients.All.SendAsync($"message:userId1", new QuizMasterMessage{NotifyNewQuizUser = quizUser});
+        quizSessionService.AddUserToQuizSession(quizSessionId, quizUser);
     }
 
     public async Task NotifyAllSlavesNewUser(List<string> userNames, QuizUser quizUser)

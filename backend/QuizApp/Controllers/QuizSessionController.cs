@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using QuizApp.Models;
@@ -38,5 +39,33 @@ public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizS
             return Ok(quizSession.Id);
         
         return NotFound("Code is not valid.");
+    }
+
+    [HttpGet]
+    [Route("user/{quizSessionId}/{quizUserIdentifier}")]
+    public IActionResult GetQuizSessionUser(string quizSessionId, string quizUserIdentifier)
+    {
+        if (quizSessionId == string.Empty || quizUserIdentifier == string.Empty)
+        {
+            Response.StatusCode = 400;
+            return Content("Bad request. Missing Data");
+        }
+        
+        bool quizSessionUserExists = quizSessionService.TryGetQuizSessionUser(quizSessionId, quizUserIdentifier, out QuizUser quizUser);
+
+        if (quizSessionUserExists)
+            return Ok(quizUser);
+        
+        logger.LogInformation("Quiz user not found!");
+        
+        return NotFound("Quiz user not found!");
+    }
+    
+    
+    [HttpGet]
+    [Route("session/{entryId}/")]
+    public IActionResult GetSessionByEntryId(string entryId)
+    {
+        return Ok(quizSessionService.GetQuizSessionByEntryId(entryId));
     }
 }

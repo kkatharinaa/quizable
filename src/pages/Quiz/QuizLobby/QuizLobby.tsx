@@ -12,6 +12,9 @@ import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGem
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
 import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
 
+import { QuizPlayerCard } from "../../../components/QuizPlayerCard/QuizPlayerCard";
+import { QuizPlayerCardType } from "../../../components/QuizPlayerCard/QuizPlayerCardExports";
+import { ICON_USER_FILLED, PLAY_ICON_LIGHT, TURN_OFF_DARK } from "../../../assets/Icons";
 
 interface QuizMasterMessage {
     notifyQuizSession?: QuizSession,
@@ -26,6 +29,34 @@ export const QuizLobby: FC = () => {
     const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
     const [quizEntryId, setQuizEntryId] = useState<string | null>(null);
     const [joinedQuizUser, setJoinedQuizUser] = useState<QuizUser[]>([])
+
+    const listOfUsers: QuizUser[] = [
+        {
+            id: uuid(),
+            identifier: "user1",
+            deviceId: uuid(),
+        },
+        {
+            id: uuid(),
+            identifier: "user2",
+            deviceId: uuid(),
+        },
+        {
+            id: uuid(),
+            identifier: "user3",
+            deviceId: uuid(),
+        },
+        {
+            id: uuid(),
+            identifier: "user4",
+            deviceId: uuid(),
+        },
+        {
+            id: uuid(),
+            identifier: "user5",
+            deviceId: uuid(),
+        },
+    ]
 
     const killQuizSession = () => {
 
@@ -43,9 +74,9 @@ export const QuizLobby: FC = () => {
         const starterUserId: string = "userId1"
 
         // start websocket connection
-        // const port: number = 5296
-        // const url: string = `http://localhost:${port}`
-        const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+        const port: number = 5296
+        const url: string = `http://localhost:${port}`
+        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
 
         const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
             .withUrl(url + "/master", {
@@ -94,27 +125,34 @@ export const QuizLobby: FC = () => {
                             <p className="entryIdContentGameCode">{quizEntryId}</p>
                         </div>
                         <div className="quizUserLobby">
-                            
+
                         </div>
                     </div>
                 }
-                {joinedQuizUser.length >= 1 &&
+                {joinedQuizUser.length >= 1 && // change this back to joinedQuizUsers
                     <div className="joinedUserSection">
-                        <h4>{joinedQuizUser.length} joined</h4>
-                        {joinedQuizUser.map((quizUser) => (
-                            <div className="joinedUserSectionCards" key={quizUser.deviceId+":"+quizUser.identifier}>
-                                <p>{quizUser.identifier}</p>
-                            </div>
-                        ))}                        
+                        <div className="joinedUsersSectionCount">
+                            <span><img src={ICON_USER_FILLED.path} alt={ICON_USER_FILLED.alt}></img></span>
+                            {listOfUsers.length} joined
+                        </div>
+                        <div className="joinedUserSectionList">
+                            {joinedQuizUser.map((quizUser) => (
+                                <QuizPlayerCard
+                                    type={QuizPlayerCardType.DesktopScoreDown}
+                                    playerName={quizUser.identifier}
+                                    playerScore={907}>
+                                </QuizPlayerCard>
+                            ))}                        
+                        </div>
                     </div>
                 }
             </div>
 
             <BottomNavBar
                 secondaryButtonText="End Quiz"
-                secondaryButtonIcon={null}
+                secondaryButtonIcon={TURN_OFF_DARK}
                 primaryButtonText="Start Quiz"
-                primaryButtonIcon={null}
+                primaryButtonIcon={PLAY_ICON_LIGHT}
                 type={BottomNavBarType.Default}
                 onSecondaryClick={killQuizSession} 
                 style={BottomNavBarStyle.Long}/>

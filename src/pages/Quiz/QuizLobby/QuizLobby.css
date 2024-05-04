@@ -9,17 +9,19 @@
     align-items: center;
     flex-direction: column;
     justify-content: space-between;
+    overflow-y: hidden;
+
 }
 
 .lobbyContent {
     display: flex;
-    padding: 100px;
     flex-direction: column;
     align-items: center;
-    gap: 100px;
     flex: 1 0 0;
     align-self: stretch;
-    overflow-x: hidden;
+    height: 100%;
+    margin-top: 40px;   
+    gap: 40px;
 }
 
 .entryIdContent {
@@ -64,35 +66,27 @@
     background: var(--black);
 }
 
-.joinedUserSection {
+.joinedUsersSectionCount {
+    color: var(--white);
+    font-size: 32px;
+    text-align: center;
+    margin: 80px 0px 20px 0px;
+}
+
+.joinedUsersSectionCount span{
+    margin: 10px;
+}
+
+.joinedUserSectionList {
     display: flex;
     height: 100%;
     min-height: 100%;
     width: 100vw;
     min-width: 100vw;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 10px;
-}
-
-.joinedUserSection h4 {
-    color: var(--white);
-    font-size: 32px;
-    text-align: center;
-}
-
-.joinedUserSection .joinedUserSectionCards {
-    display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
-    background-color: var(--black);
-    border-radius: 20px;
-    width: 386px;
-    height: 90px;
-}
-
-.joinedUserSection .joinedUserSectionCards p {
-    color: var(--white);
-    font-size: 32px;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 2;
 }

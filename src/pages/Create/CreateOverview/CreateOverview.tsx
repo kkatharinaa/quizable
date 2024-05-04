@@ -99,7 +99,8 @@ export const CreateOverview: FC = () => {
                 currentQuestionId: quizToBePlayed!.questions[0].id,
                 usersStats: [ /**keep it empty at the beginning */],
                 currentQuizState: "start"
-            }
+            },
+            options: quizToBePlayed!.options
         };
 
         // send the quiz session to the backend
