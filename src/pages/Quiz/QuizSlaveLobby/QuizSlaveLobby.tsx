@@ -39,6 +39,10 @@ export const QuizSlaveLobby: FC = () => {
     }
 
     useEffect(() => {
+        init()
+    }, [])
+    
+    const init = async () => {
         if (quizSessionId == null || userName == "") {
             showErrorPageNothingToFind(navigate)
         }
@@ -48,6 +52,12 @@ export const QuizSlaveLobby: FC = () => {
         const url: string = `http://localhost:${port}`
         // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
 
+        const quizUser: QuizUser = {
+            id: uuid(),
+            identifier: userName,
+            deviceId: await getDeviceId()
+        }
+
         const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
             .withUrl(url + "/slave", {
                 skipNegotiation: true,
@@ -56,18 +66,15 @@ export const QuizSlaveLobby: FC = () => {
             .build();
 
         console.log(`play:${quizSessionId}/${userName}`)
-        connection.on(`play:${quizSessionId}/${userName}`, () => {
-            navigate("/quiz/session", {state: {quizSessionId: quizSessionId, username: userName}})
+
+        // when the game actually starts and you get messages, navigate to the questions
+        connection.on(`play:${quizSessionId}/${userName}`, async () => {
+            console.log(JSON.stringify(quizUser))
+            navigate("/quiz/slave/session", {state: {quizSessionId: quizSessionId, quizUser: quizUser}})
         })
 
         connection.start()
             .then(async () => {
-                const quizUser: QuizUser = {
-                    id: uuid(),
-                    identifier: userName,
-                    deviceId: await getDeviceId()
-                }
-
                 console.log("Quiz user new: " + quizUser)
                 connection.send("EnterSlaveQuizSession", quizUser, quizSessionId)
             })
@@ -77,7 +84,7 @@ export const QuizSlaveLobby: FC = () => {
         /*if () {
             showErrorNotInSession(navigate)
         }*/
-    }, [])
+    }
 
     // TODO: adjust slave lobby based on figma design
 

@@ -94,7 +94,7 @@ export const CreateOverview: FC = () => {
         const quizSessionPlay: QuizSession = {
             id: uuid(),
             quizId: quizToBePlayed!.id, 
-            deviceId: await getDeviceId(), 
+            deviceId: await getDeviceId(),
             state: {
                 currentQuestionId: quizToBePlayed!.questions[0].id,
                 usersStats: [ /**keep it empty at the beginning */],
@@ -103,8 +103,14 @@ export const CreateOverview: FC = () => {
             options: quizToBePlayed!.options
         };
 
+        console.log(JSON.stringify(quizToBePlayed!.options))
+
         // send the quiz session to the backend
         await QuizSessionService.addSession(quizSessionPlay)
+
+
+        // send the quiz data to the backend too
+        await QuizSessionService.addQuestionsToSession(quizSessionPlay.id,quizToBePlayed.questions);
 
         // navigate to the lobby page
         navigate('/quiz/lobby', {state: {quizSessionId: quizSessionPlay.id}})

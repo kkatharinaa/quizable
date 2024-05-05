@@ -1,8 +1,10 @@
 import "firebase/firestore";
 import QuizSession from "../models/QuizSession";
 import QuizUser from "../models/QuizUser";
+import { Question } from "../models/Question";
 
 export default class QuizSessionService{
+   
     static port: number = 5296
     static url: string = `http://localhost:${this.port}`
     // static url: string = `https://quizapp-rueasghvla-nw.a.run.app`
@@ -17,6 +19,18 @@ export default class QuizSessionService{
                 'Content-Type': 'application/json;charset=UTF-8'
             }
         })).text()
+    }
+
+    public static async addQuestionsToSession(quizSessionId: string, questions: Question[]) {
+        return (await fetch(`${this.url}/api/session/${quizSessionId}/questions`, 
+        {
+            method: "POST", 
+            body: JSON.stringify(questions),
+            headers: {
+                'Accept': 'application/json; charset=utf-8',
+                'Content-Type': 'application/json;charset=UTF-8'
+            }
+        }))
     }
 
     public static async isQuizCodeValid(quizCode: string): Promise<{valid: boolean, sessionId: string}> {

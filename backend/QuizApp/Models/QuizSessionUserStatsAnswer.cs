@@ -6,4 +6,5 @@ public class QuizSessionUserStatsAnswer
     public string AnswerId { get; set; }
     public int PointsReceived { get; set; }
     public int TimeTaken { get; set; }
+    
 }

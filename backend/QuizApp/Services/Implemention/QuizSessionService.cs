@@ -11,6 +11,8 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     /// </summary>
     private static Dictionary<string, QuizSession> QuizSessions { get; set; } = new();
     
+    private static Dictionary<string, List<Question>> QuizSessionsQuestions { get; set; } = new();
+    
     /// <summary>
     /// Add new quiz session
     /// </summary>
@@ -25,8 +27,20 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             .Select(s => s[random.Next(s.Length)]).ToArray());
         
         QuizSessions.Add(randomEntryId, quizSession);
+        
+        logger.LogInformation(randomEntryId);
 
         return randomEntryId;
+    }
+
+    /// <summary>
+    /// Add new quiz session questions with quiz session id
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="questions"></param>
+    public void AddQuizSessionQuestions(string quizSessionId, List<Question> questions)
+    {
+        QuizSessionsQuestions.Add(quizSessionId, questions);
     }
 
     /// <summary>
@@ -178,25 +192,43 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     }
 
     /// <summary>
-    /// Add Users Answers
+    /// Add answers to the current quiz session quiz
     /// </summary>
-    /// <param name="quizUserId">The Id of the Quiz user</param>
-    /// <param name="answer">The answer to add</param>
-    public void AddUserAnswers(string quizUserId, QuizSessionUserStatsAnswer answer)
+    /// <param name="quizSessionId"></param>
+    /// <param name="quizUserId"></param>
+    /// <param name="questionId"></param>
+    /// <param name="answer"></param>
+    public void AddUserAnswers(string quizSessionId, string quizUserId, string questionId, Answer answer)
     {
         QuizSessions = QuizSessions
-            .Select(session =>
+            .Select(quizSession =>
+            {
+                if (quizSession.Value.Id == quizSessionId)
                 {
-                    session.Value.State.UsersStats = session.Value.State.UsersStats.Select(stat =>
+                    quizSession.Value.State.UsersStats = quizSession.Value.State.UsersStats.Select(stat =>
                     {
                         if (stat.User.Id == quizUserId)
-                            stat.Answers.Add(answer);
+                        {
+                            QuizSessionUserStatsAnswer statsAnswer = new QuizSessionUserStatsAnswer{
+                                QuestionId = questionId,
+                                AnswerId = answer.id,
+                                PointsReceived = answer.correct ? quizSession.Value.Options.QuestionPoints : 0,
+                                TimeTaken = 0
+                            };
+                            stat.Answers.Add(statsAnswer);
+                            
+                            // Calculate user score
+                            stat.Answers.ForEach(answer =>
+                            {
+                                // TODO: Formula to calculate the real value.
+                                stat.Score += answer.PointsReceived;
+                            });
+                        }
                         return stat;
                     }).ToList();
-
-                    return session;
                 }
-            ).ToDictionary();
+                return quizSession;
+            }).ToDictionary();
     }
     
     /// <summary>
@@ -216,5 +248,60 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                     return session;
                 }
             ).ToDictionary();
+    }
+
+    /// <summary>
+    /// Get quiz session options
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="questions"></param>
+    /// <returns></returns>
+    public bool TryGetQuizSessionQuestions(string quizSessionId, out List<Question> questions)
+    {
+        QuizSession? quizSession = QuizSessions
+            .Values.ToList()
+            .FirstOrDefault(session => session.Id == quizSessionId);
+
+        bool isQuizSessionQuestions = QuizSessionsQuestions.ContainsKey(quizSessionId);
+
+        if (isQuizSessionQuestions)
+        {
+            questions = QuizSessionsQuestions[quizSessionId];
+            return true;
+        }
+
+        questions = [];
+        return false;
+    }
+
+    /// <summary>
+    /// Check if the question has been answered by all users
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="questionId"></param>
+    /// <returns></returns>
+    public bool IsQuestionAnswerAllUsers(string quizSessionId, string questionId)
+    {
+        QuizSession? quizSession = QuizSessions
+            .Values.ToList()
+            .FirstOrDefault(session => session.Id == quizSessionId);
+
+        var isAnswered = true;
+
+        quizSession?.State.UsersStats.ForEach(stat =>
+        {
+            var isQuestionIdFound = false;
+            stat.Answers.ForEach(answer =>
+            {
+                if (answer.QuestionId == questionId)
+                {
+                    isQuestionIdFound = true;
+                }
+            });
+
+            isAnswered = isQuestionIdFound;
+        });
+
+        return isAnswered;
     }
 }

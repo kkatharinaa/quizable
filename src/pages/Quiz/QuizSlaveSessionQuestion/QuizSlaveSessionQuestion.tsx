@@ -9,9 +9,9 @@ import {makeQuiz} from "../../../models/Quiz.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {makeQuestion, Question} from "../../../models/Question.ts";
-import {makeAnswer} from "../../../models/Answer.ts";
+import {Answer, makeAnswer} from "../../../models/Answer.ts";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {showErrorNotInSession} from "../../ErrorPage/ErrorPageExports.ts";
 import {showPopupLeaveSession, showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
 import QuizUser from "../../../models/QuizUser.ts";
@@ -20,22 +20,26 @@ import {AnswerSelection} from "../../../components/AnswerSelection/AnswerSelecti
 import {QuizState} from "../../../models/QuizSessionState.ts";
 import {AnswerSelectionStyle} from "../../../components/AnswerSelection/AnswerSelectionExports.ts";
 import {QuestionSlideInTag} from "../../../components/QuestionSlideInTag/QuestionSlideInTag.tsx";
+import * as SignalR from "@microsoft/signalr";
 
 export const QuizSlaveSessionQuestion: FC = () => {
     const navigate = useNavigate();
+    const {state} = useLocation();
 
-    const [player, setPlayer] = useState<QuizUser | null>(null)
-    const [quizSession, setQuizSession] = useState<QuizSession | null>(null)
+    const [quizUser, setQuizUser] = useState<QuizUser | null>(null)
+    const [quizSessionId, setQuizSessionId] = useState<string | null>(null)
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
-    const [selectedAnswerID, setSelectedAnswerID] = useState<string>("")
+    const [selectedAnswerID, setSelectedAnswerID] = useState<string>("");
     const [sessionState, setSessionState] = useState<QuizState>(QuizState.Playing) // reuse this screen for showing which answer was correct, which gets displayed while the master is showing the answer statistics TODO: set/update the quiz state somewhere
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
+    const [connection, setConnection] = useState<SignalR.HubConnection>();
 
     // TODO: generally: implement behaviour when disconnecting
 
     const getAnswerStyle = (id: string): AnswerSelectionStyle => {
-        if (player == null || quizSession == null || currentQuestion == null) {
+
+        if (quizUser == null || quizSessionId == null || currentQuestion == null) {
             showPopupSomethingWentWrong(showPopup, hidePopup)
             return AnswerSelectionStyle.Disabled
         }
@@ -57,13 +61,17 @@ export const QuizSlaveSessionQuestion: FC = () => {
         return AnswerSelectionStyle.Unselected
     }
 
-    const handleSelectAnswer = (id: string) => {
-        if (player == null || quizSession == null || currentQuestion == null) {
+    const handleSelectAnswer = (answer: Answer) => {
+        if(selectedAnswerID != "")
+            return
+
+        if (quizUser == null || quizSessionId == null || currentQuestion == null) {
             showPopupSomethingWentWrong(showPopup, hidePopup)
             return
         }
-        // TODO: update answer stats in quizsession
-        setSelectedAnswerID(id)
+
+        setSelectedAnswerID(answer.id)
+        connection?.send("EnterSlaveAnswerSelection", quizUser, quizSessionId, currentQuestion.id, answer);
     }
 
     const handleLeaveSession = () => {
@@ -80,41 +88,54 @@ export const QuizSlaveSessionQuestion: FC = () => {
     }
 
     useEffect(() => {
-
-        // TODO: get player, current quizsession and current question - rn just use default values to develop the ui
-        const player: QuizUser = {
-            id: uuid(),
-            identifier: "player1",
-            deviceId: ""
-        }
-        const currentQuiz =  makeQuiz()
-        currentQuiz.questions[0] = makeQuestion(uuid(), "What are the most effective strategies for managing stress in high-pressure work environments?"/*"Which colour is the sky?"*/, [makeAnswer(false, "That are the most effective strategies for managing stress in high-pressure work environments."), makeAnswer(true, "Green"), makeAnswer(false, "Yellow"), makeAnswer(false, "Red"), makeAnswer(false, "Pink")])
-        const currentSession: QuizSession = {
-            id: uuid(),
-            quizId: currentQuiz.id,
-            state: {
-                currentQuestionId: currentQuiz.questions[0].id,
-                usersStats: [{
-                    user: player,
-                    score: 0,
-                    answers: []
-                }],
-                currentQuizState: "" // TODO: shouldn't this be an enum?
-            },
-            deviceId: "",
-        }
-        const currentQuestion = currentQuiz.questions.find(question => question.id == currentSession.state.currentQuestionId)
-
-        const playerIsPartOfSession = currentSession.state.usersStats.find(userStat => userStat.user.id = player.id)
-        if (playerIsPartOfSession == undefined) {
-            showErrorNotInSession(navigate)
-        }
-
-        // if everything is fine, set up our state
-        setQuizSession(currentSession)
-        setPlayer(player)
-        setCurrentQuestion(currentQuestion ?? null)
+        init()
     }, []);
+
+    const initSignalR = async (quizSessionIdState: string, quizUserState: QuizUser) => {
+        // start websocket connection
+        const port: number = 5296
+        const url: string = `http://localhost:${port}`
+        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+
+        const userName = quizUserState.identifier;
+
+        const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
+            .withUrl(url + "/slave", {
+                skipNegotiation: true,
+                transport: SignalR.HttpTransportType.WebSockets
+              })
+            .build();
+
+        // when the game actually starts and you get messages, navigate to the questions
+        connection.on(`nextquestion:${quizSessionIdState}/${userName}`, async (nextQuestion) => {
+            setSessionState(QuizState.Playing)
+            setCurrentQuestion(nextQuestion[0])
+            // TODO: send question to user
+        })
+
+        connection.on(`questionend:${userName}`, () => {
+            // Show the corect answers
+            setSelectedAnswerID("")
+            setSessionState(QuizState.Statistics)
+        })
+
+        connection.start()
+            .then(async () => {
+                connection.send("EnterSlaveQuizSessionQuestion", quizUserState, quizSessionIdState)
+            })
+            .catch((err) => console.error(err))
+
+        setConnection(connection);
+    }
+
+    const init = async () => {
+        // if everything is fine, set up our state
+        setQuizSessionId(state.quizSessionId)
+        setQuizUser(state.quizUser)
+        // setCurrentQuestion(currentQuestion ?? null)
+
+        await initSignalR(state.quizSessionId, state.quizUser)
+    }
 
     return (
         <div className="quizSlaveSessionQuestion">
@@ -136,7 +157,8 @@ export const QuizSlaveSessionQuestion: FC = () => {
                             value={item.value}
                             type={getAnswerInputFieldTypeForIndex(index)}
                             style={getAnswerStyle(item.id)}
-                            onClick={handleSelectAnswer}
+                            onClick={() => handleSelectAnswer(item)}
+                        
                         />
                     ))}
                 </div>

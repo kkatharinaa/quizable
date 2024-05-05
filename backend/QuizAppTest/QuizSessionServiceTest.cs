@@ -87,8 +87,8 @@ namespace QuizApp
             _quizSessionService.AddQuizSession(quizSession);
             _quizSessionService.AddUserToQuizSession(quizSession.Id, quizUser1);
             _quizSessionService.AddUserToQuizSession(quizSession.Id, quizUser2);
-            _quizSessionService.AddUserAnswers(quizUser1.Id, quizUserAnswer1);
-            _quizSessionService.AddUserAnswers(quizUser2.Id, quizUserAnswer2);
+            // _quizSessionService.AddUserAnswers(quizSession.Id, quizUser1.Id, quizUserAnswer1);
+            // _quizSessionService.AddUserAnswers(quizSession.Id, quizUser2.Id, quizUserAnswer2);
 
             // TODO: Calculate the points given and create leaderboard
 

@@ -24,8 +24,6 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
 
     public async Task EnterSlaveQuizSession(QuizUser quizUser, string quizSessionId)
     {
-        logger.LogInformation($"New slave message from {quizUser.Identifier}");
-
         if (!quizSessionService.TryGetQuizSessionUser(quizSessionId, quizUser.Identifier, out var _))
         {
             await masterContext.Clients.All.SendAsync($"message:userId1", new QuizMasterMessage{NotifyNewQuizUser = quizUser});
@@ -33,9 +31,39 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
         }
     }
     
+    public async Task EnterSlaveQuizSessionQuestion(QuizUser quizUser, string quizSessionId)
+    {
+        bool quizSessionQuestionsOk = quizSessionService.TryGetQuizSessionQuestions(quizSessionId, out var questions);
+
+        if (quizSessionQuestionsOk)
+        {
+            await Clients.All.SendAsync($"nextquestion:{quizSessionId}/{quizUser.Identifier}", questions);
+        }
+    }
+    
+    public async Task EnterSlaveAnswerSelection(QuizUser quizUser, string quizSessionId, string questionId, Answer answer)
+    {
+        logger.LogInformation("Add answer to the question and calculating score");
+        
+        quizSessionService.AddUserAnswers(quizSessionId, quizUser.Id, questionId, answer);
+        
+        if (quizSessionService.IsQuestionAnswerAllUsers(quizSessionId, questionId))
+        {
+            logger.LogInformation("Question has been answered by all users.");
+            
+            await masterContext.Clients.All.SendAsync("questionend:userId1");
+            quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsers);
+            
+            foreach(QuizSessionUserStats user in quizUsers)
+            {
+                await Clients.All.SendAsync($"questionend:{user.User.Identifier}");
+            }
+        }
+        else await masterContext.Clients.All.SendAsync("useranswered:userId1");
+    }
+    
     public async Task NotifyAllSlavesNewUser(List<string> userNames, QuizUser quizUser)
     {
-
         foreach(string userName in userNames)
         {
             await Clients.All.SendAsync(userName,quizUser);

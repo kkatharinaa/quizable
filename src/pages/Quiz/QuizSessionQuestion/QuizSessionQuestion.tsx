@@ -17,6 +17,7 @@ import {makeAnswer} from "../../../models/Answer.ts";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
 import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
+import * as SignalR from "@microsoft/signalr";
 
 export const QuizSessionQuestion: FC = () => {
     const navigate = useNavigate();
@@ -28,19 +29,7 @@ export const QuizSessionQuestion: FC = () => {
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
-
-    const getAnsweredPlayersCount = (): number | null => {
-        if (quizSession == null) return null
-        let count = 0
-        const userStats = quizSession!.state.usersStats
-        for (const index in userStats) {
-            const userAnswers = userStats[index].answers
-            if (userAnswers.find(userAnswer => userAnswer.questionId == quizSession.state.currentQuestionId)) {
-                count += 1
-            }
-        }
-        return count
-    }
+    const [playerCount, setPlayerCount] = useState(0);
 
     const handleEndQuiz = () => {
         // TODO: later also implement being able to go back to the previous question
@@ -61,6 +50,7 @@ export const QuizSessionQuestion: FC = () => {
         }
         showPopup(endQuizPopup)
     }
+    
     const handleSkipQuestion = () => {
         // move on to answer statistics screen
         navigate(`/quiz/result`)
@@ -69,6 +59,33 @@ export const QuizSessionQuestion: FC = () => {
     const showPopup = (popup: PopupProps) => {
         setPopupProps(popup)
         setShowingPopup(true)
+    }
+
+    const initSignalR = () => {
+        const starterUserId: string = "userId1"
+
+        // start websocket connection
+        const port: number = 5296
+        const url: string = `http://localhost:${port}`
+        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+
+        const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
+            .withUrl(url + "/master", {
+                skipNegotiation: true,
+                transport: SignalR.HttpTransportType.WebSockets
+              })
+            .build();
+        
+        connection.on(`questionend:${starterUserId}`, () => {
+            console.log("Question end")
+            navigate(`/quiz/result`)
+        })
+
+        connection.on(`useranswered:${starterUserId}`, () => {
+            setPlayerCount(playerCount + 1)
+        })
+
+        connection.start()
     }
 
     useEffect(() => {
@@ -108,6 +125,8 @@ export const QuizSessionQuestion: FC = () => {
         setQuizSession(currentSession)
         setGameCode(gameCode)
         setCurrentQuestion(currentQuestion ?? null)
+
+        initSignalR();
     }, []);
 
     return (
@@ -130,7 +149,7 @@ export const QuizSessionQuestion: FC = () => {
                 <div className="answersGroup">
                     <div className="answersInfo">
                         <img src={USER_ICON_LIGHT.path} alt={USER_ICON_LIGHT.alt}/>
-                        <p>{`${getAnsweredPlayersCount() ?? "?"}/${quizSession != null ? quizSession.state.usersStats.length : "?"} answered`}</p>
+                        <p>{`${playerCount} answered`}</p>
                     </div>
                     <div className="answersContainer">
                         {currentQuestion?.answers.map((item, index) => (

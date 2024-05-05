@@ -6,9 +6,9 @@ public class QuizSession
     public string QuizId { get; set; }
     public QuizSessionState State { get; set; }
     public string DeviceId { get; set; }
-
-    public QuizOptions QuizOptions;
     
+    public QuizOptions Options { get; set; }
+
     public override string ToString()
     {
         return $"{{{Id}, {QuizId}, {State}, {DeviceId}}}";

@@ -24,6 +24,15 @@ public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizS
         return Ok(quizSessionService.AddQuizSession(quizSession));
     }
     
+    [HttpPost]
+    [Route("{quizSessionId}/questions")]
+    [Consumes("application/json")]
+    public IActionResult Set([FromBody] List<Question> questions, string quizSessionId)
+    {
+        quizSessionService.AddQuizSessionQuestions(quizSessionId, questions);
+        return Ok("Added questions to quiz");
+    }
+    
     /// <summary>
     /// Returns quizSessionId if the quiz code is valid
     /// </summary>

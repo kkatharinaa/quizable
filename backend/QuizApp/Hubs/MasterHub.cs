@@ -29,7 +29,6 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
         // Set the state of the quiz session
         quizSessionService.SetQuizSessionState(quizSessionId, "play");
         
-        
         // Notify slaves
         bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsers);
 
@@ -37,8 +36,6 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
         {
             foreach(QuizSessionUserStats quizSessionUserStats in quizUsers)
             {
-                Console.WriteLine($"play:{quizSessionId}/{quizSessionUserStats.User.Identifier}");
-
                 await slaveContext.Clients.All.SendAsync($"play:{quizSessionId}/{quizSessionUserStats.User.Identifier}");
             }
         }

@@ -60,7 +60,6 @@ export const QuizOverview = () => {
         connection.start()
             .then(() => {
                 console.log("Sending to the master")
-                connection.send("newMessage", "userId1", "Hello World from frontend!")
             })
             .catch((err) => console.error(err))
     }
