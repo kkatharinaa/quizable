@@ -1,25 +1,22 @@
 import { FC } from "react"
-import "./QuizSlaveLobby.css"
+import "./QuizSlaveEnd.css"
 import { BottomNavBar } from "../../../components/BottomNavBar/BottomNavBar";
 import { BottomNavBarStyle, BottomNavBarType } from "../../../components/BottomNavBar/BottomNavBarExports";
 import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
-import {RETURN_ICON_DARK} from "../../../assets/Icons.ts";
 import {QuizSlaveChildrenProps} from "../QuizSlave/QuizSlave.tsx";
 
-
-export const QuizSlaveLobby: FC<QuizSlaveChildrenProps> = ({leaveQuizSession}) => {
+export const QuizSlaveEnd: FC<QuizSlaveChildrenProps> = ({leaveQuizSession}) => {
 
     return (
-        <div className="page_styling">
+        <div className="quizSlaveEnd">
             <BackgroundGems type={BackgroundGemsType.PrimarySlave2}/>
-            <div className="quizSlaveSessionLobbyContent">
-                <h1 className="quizSlaveSessionLobbyTitle">Waiting for players...</h1>
-                { /* TODO: adjust slave lobby based on figma design */ }
+            <div className="content">
+                { /* TODO */ }
             </div>
             <BottomNavBar
-                secondaryButtonText="Leave"
-                secondaryButtonIcon={RETURN_ICON_DARK}
+                secondaryButtonText="To Home"
+                secondaryButtonIcon={null}
                 primaryButtonText=""
                 primaryButtonIcon={null}
                 type={BottomNavBarType.SecondaryOnly}
@@ -28,4 +25,4 @@ export const QuizSlaveLobby: FC<QuizSlaveChildrenProps> = ({leaveQuizSession}) =
         </div>
     )
 }
- 
+

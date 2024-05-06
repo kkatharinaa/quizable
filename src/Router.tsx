@@ -3,14 +3,11 @@ import About from "./pages/About/About";
 import Home from "./pages/Home/Home";
 import { CreateSendEmail } from "./pages/Create/CreateSendEmail/CreateSendEmail";
 import { Join } from "./pages/Join/Join";
-import { QuizLobby } from "./pages/Quiz/QuizLobby/QuizLobby";
-import {QuizResult} from "./pages/Quiz/QuizResult/QuizResult";
-import {QuizSessionQuestion} from "./pages/Quiz/QuizSessionQuestion/QuizSessionQuestion.tsx";
 import {CreateEditor} from "./pages/Create/CreateEditor/CreateEditor.tsx";
 import {CreateOverview} from "./pages/Create/CreateOverview/CreateOverview.tsx";
-import { QuizSlaveLobby } from "./pages/Quiz/QuizSlaveLobby/QuizSlaveLobby.tsx";
 import {ErrorPage} from "./pages/ErrorPage/ErrorPage.tsx";
-import {QuizSlaveSessionQuestion} from "./pages/Quiz/QuizSlaveSessionQuestion/QuizSlaveSessionQuestion.tsx";
+import {QuizMaster} from "./pages/Quiz/QuizMaster/QuizMaster.tsx";
+import {QuizSlave} from "./pages/Quiz/QuizSlave/QuizSlave.tsx";
 
 // TODO: only make master routes accessible if you are logged in
 
@@ -58,29 +55,14 @@ const pagesData: RouterType[] = [
       title: "Join Quiz | Quizable"
     },
     {
-      path: "quiz/slave/lobby",
-      element: <QuizSlaveLobby />,
-      title: "Quiz Lobby | Quizable"
+        path: "quiz",
+        element: <QuizMaster />,
+        title: "Quiz | Quizable"
     },
     {
-        path: "quiz/slave/session",
-        element: <QuizSlaveSessionQuestion />,
-        title: "Quiz Session | Quizable"
-    },
-    {
-      path: "quiz/lobby",
-      element: <QuizLobby />,
-      title: "Quiz Lobby | Quizable"
-    },
-    {
-      path: "quiz/result",
-      element: <QuizResult />,
-      title: "Quiz Result | Quizable"
-    },
-    {
-      path: "quiz/session",
-      element: <QuizSessionQuestion />,
-      title: "Quiz Session | Quizable"
+        path: "quiz/slave",
+        element: <QuizSlave />,
+        title: "Quiz | Quizable"
     },
 ];
 

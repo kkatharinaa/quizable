@@ -68,7 +68,7 @@ export const Join: FC = () => {
         const userExists: boolean = await QuizSessionService.checkQuizUserAlreadyExists(validQuizCode.quizSessionId,inputValue);
 
         if(!userExists)
-            navigate("/quiz/slave/lobby", {state: {quizSessionId: validQuizCode.quizSessionId, userName: inputValue}})
+            navigate("/quiz/slave", {state: {quizSessionId: validQuizCode.quizSessionId, userName: inputValue}})
         else {
             setValidation({
                 valid: false,
@@ -110,7 +110,7 @@ export const Join: FC = () => {
         if(invalidChars.test(text)){
             newValidationState = {
                 valid: false, 
-                validationText: "Quiz code is invalid, not special characters allowed!"
+                validationText: "Quiz code is invalid, no special characters allowed!"
             }
         }
 

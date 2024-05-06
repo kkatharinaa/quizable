@@ -98,7 +98,7 @@ export const CreateOverview: FC = () => {
             state: {
                 currentQuestionId: quizToBePlayed!.questions[0].id,
                 usersStats: [ /**keep it empty at the beginning */],
-                currentQuizState: "start"
+                currentQuizState: "lobby"
             },
             options: quizToBePlayed!.options
         };
@@ -108,12 +108,11 @@ export const CreateOverview: FC = () => {
         // send the quiz session to the backend
         await QuizSessionService.addSession(quizSessionPlay)
 
-
         // send the quiz data to the backend too
         await QuizSessionService.addQuestionsToSession(quizSessionPlay.id,quizToBePlayed.questions);
 
         // navigate to the lobby page
-        navigate('/quiz/lobby', {state: {quizSessionId: quizSessionPlay.id}})
+        navigate('/quiz', {state: {quizSessionId: quizSessionPlay.id, quizId: quizToBePlayed!.id}})
     };
 
     //quiz settings popup functions

@@ -1,5 +1,4 @@
 import {Email} from "./ConstrainedTypes.ts";
-import {v4 as uuid} from "uuid";
 
 export interface AuthenticatedUser {
     id: string;
@@ -9,7 +8,7 @@ export interface AuthenticatedUser {
 
 // TODO: remove once authentication gets added
 export const defaultAuthenticatedUser: AuthenticatedUser = {
-    id: uuid(),
+    id: "userId1",
     email: Email.tryMake("user@email.com")!,
     autoSendLog: true
 }

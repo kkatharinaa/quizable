@@ -1,11 +1,12 @@
 import QuizSessionUserStats from "./QuizSessionUserStats";
 
 export enum QuizState {
-    Playing,
-    Statistics,
-    Leaderboard,
-    Podium,
-    EndScreen
+    Lobby = "lobby",
+    Playing = "playing",
+    Statistics = "statistics",
+    Leaderboard = "leaderboard",
+    Podium = "podium",
+    EndScreen = "endscreen",
 }
 
 export default interface QuizSessionState {

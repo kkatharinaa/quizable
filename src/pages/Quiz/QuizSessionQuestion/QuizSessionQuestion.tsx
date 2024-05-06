@@ -3,130 +3,44 @@ import "./QuizSessionQuestion.css"
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
 import {POWER_ICON_DARK, SKIP_ICON_LIGHT, USER_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
-import QuizSession from "../../../models/QuizSession.ts";
-import {v4 as uuid} from "uuid";
-import {makeQuiz} from "../../../models/Quiz.ts";
 import {Timer} from "../../../components/Timer/Timer.tsx";
 import {AnswerInputField} from "../../../components/AnswerInputField/AnswerInputField.tsx";
 import {getAnswerInputFieldTypeForIndex} from "../../../components/AnswerInputField/AnswerInputFieldExports.ts";
 import {QuizCodeTag} from "../../../components/QuizCodeTag/QuizCodeTag.tsx";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
-import {makeQuestion, Question} from "../../../models/Question.ts";
-import {makeAnswer} from "../../../models/Answer.ts";
-import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
-import {useLocation, useNavigate} from "react-router-dom";
-import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
-import * as SignalR from "@microsoft/signalr";
+import {Question} from "../../../models/Question.ts";
+import {useNavigate} from "react-router-dom";
+import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
+import {showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
 
-export const QuizSessionQuestion: FC = () => {
+export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({connection, quizCode, quizSession, quiz, authenticatedUser, endQuizSession}) => {
     const navigate = useNavigate();
-    const {state} = useLocation();
 
-    const [userName, setUsername] = useState<string>(state.username)
-    const [gameCode, setGameCode] = useState<string>("")
-    const [quizSession, setQuizSession] = useState<QuizSession | null>(null)
-    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-    const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
-    const [showingPopup, setShowingPopup] = useState(false);
-    const [playerCount, setPlayerCount] = useState(0);
-
-    const handleEndQuiz = () => {
-        // TODO: later also implement being able to go back to the previous question
-        const endQuizPopup: PopupProps = {
-            title: "Are you sure you want to end this quiz session?",
-            message: null,
-            secondaryButtonText: "Cancel",
-            secondaryButtonIcon: null,
-            primaryButtonText: "Yes, I Am Sure",
-            primaryButtonIcon: null,
-            type: BottomNavBarType.Default,
-            onSecondaryClick: () => {
-                setShowingPopup(false)
-            },
-            onPrimaryClick: () => {
-                // TODO: navigate to quiz end screen
-            },
-        }
-        showPopup(endQuizPopup)
-    }
+    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(quiz.questions.find(question => question.id == quizSession.state.currentQuestionId) ?? null);
+    const [playerCount, setPlayerCount] = useState(quizSession.state.usersStats.filter(userStat => {
+        return userStat.answers.some(userAnswer => userAnswer.questionId === quizSession.state.currentQuestionId);
+    }).length);
     
     const handleSkipQuestion = () => {
         // move on to answer statistics screen
-        navigate(`/quiz/result`)
-    }
-
-    const showPopup = (popup: PopupProps) => {
-        setPopupProps(popup)
-        setShowingPopup(true)
-    }
-
-    const initSignalR = () => {
-        const starterUserId: string = "userId1"
-
-        // start websocket connection
-        const port: number = 5296
-        const url: string = `http://localhost:${port}`
-        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
-
-        const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
-            .withUrl(url + "/master", {
-                skipNegotiation: true,
-                transport: SignalR.HttpTransportType.WebSockets
-              })
-            .build();
-        
-        connection.on(`questionend:${starterUserId}`, () => {
-            console.log("Question end")
-            navigate(`/quiz/result`)
-        })
-
-        connection.on(`useranswered:${starterUserId}`, () => {
-            setPlayerCount(playerCount + 1)
-        })
-
-        connection.start()
+        // TODO: set the quizstate to statistics
     }
 
     useEffect(() => {
-
-        // TODO: get current quizsession, current question and game code - rn just use default values to develop the ui
-        const currentQuiz =  makeQuiz()
-        currentQuiz.questions[0] = makeQuestion(uuid(), "What are the most effective strategies for managing stress in high-pressure work environments?"/*"Which colour is the sky?"*/, [makeAnswer(false, "That are the most effective strategies for managing stress in high-pressure work environments."), makeAnswer(true, "Green"), makeAnswer(false, "Yellow"), makeAnswer(false, "Red"), makeAnswer(false, "Pink")])
-        const currentSession: QuizSession = {
-            id: uuid(),
-            quizId: currentQuiz.id,
-            state: {
-                currentQuestionId: currentQuiz.questions[0].id,
-                usersStats: [{
-                    user: {
-                        id: uuid(),
-                        identifier: "player1",
-                        deviceId: ""
-                    },
-                    score: 0,
-                    answers: []
-                }],
-                currentQuizState: "" // TODO: shouldn't this be an enum?
-            },
-            deviceId: "",
-        }
-        const gameCode = "123456"
-        const currentQuestion = currentQuiz.questions.find(question => question.id == currentSession.state.currentQuestionId)
-
-        // TODO: check if we are the host and if we are currently in an active quiz session (using constant values for now)
-        const quizSessionIsRunning = true
-        const userIsHost = true // TODO: check here if 1) user is authenticated 2) authenticated user is owner of the quiz that is played rn
-        if (!quizSessionIsRunning || !userIsHost) {
-            showErrorQuizSessionNotRunning(navigate, userIsHost)
+        if (currentQuestion == null) {
+            showErrorPageSomethingWentWrong(navigate)
+            return
         }
 
-        // if everything is fine, set up our state
-        setQuizSession(currentSession)
-        setGameCode(gameCode)
-        setCurrentQuestion(currentQuestion ?? null)
+        connection.on(`questionend:${authenticatedUser.id}`, () => {
+            console.log("Question end")
+            handleSkipQuestion()
+        })
 
-        initSignalR();
+        connection.on(`useranswered:${authenticatedUser.id}`, () => {
+            setPlayerCount(playerCount + 1)
+        })
     }, []);
 
     return (
@@ -135,7 +49,7 @@ export const QuizSessionQuestion: FC = () => {
                 type={BackgroundGemsType.Primary2}
             />
             <QuizCodeTag
-                code={gameCode}
+                code={quizCode}
             />
             <div className="content">
                 <h1>{currentQuestion?.questionText ?? ""}</h1>
@@ -149,7 +63,7 @@ export const QuizSessionQuestion: FC = () => {
                 <div className="answersGroup">
                     <div className="answersInfo">
                         <img src={USER_ICON_LIGHT.path} alt={USER_ICON_LIGHT.alt}/>
-                        <p>{`${playerCount} answered`}</p>
+                        <p>{`${playerCount}/${quizSession.state.usersStats.length} answered`}</p>
                     </div>
                     <div className="answersContainer">
                         {currentQuestion?.answers.map((item, index) => (
@@ -173,23 +87,9 @@ export const QuizSessionQuestion: FC = () => {
                 primaryButtonIcon={SKIP_ICON_LIGHT}
                 type={BottomNavBarType.Default}
                 style={BottomNavBarStyle.Long}
-                onSecondaryClick={handleEndQuiz}
+                onSecondaryClick={endQuizSession}
                 onPrimaryClick={handleSkipQuestion}
             />
-
-            { (showingPopup && popupProps != null) &&
-                <Popup
-                    title={popupProps.title}
-                    message={popupProps.message}
-                    secondaryButtonText={popupProps.secondaryButtonText}
-                    secondaryButtonIcon={popupProps.secondaryButtonIcon}
-                    primaryButtonText={popupProps.primaryButtonText}
-                    primaryButtonIcon={popupProps.primaryButtonIcon}
-                    type={popupProps.type}
-                    onSecondaryClick={popupProps.onSecondaryClick}
-                    onPrimaryClick={popupProps.onPrimaryClick}
-                />
-            }
         </div>
     );
 }

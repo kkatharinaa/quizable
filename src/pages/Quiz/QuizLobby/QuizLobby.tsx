@@ -1,116 +1,51 @@
 import { FC, useEffect, useState } from "react"
 import "./QuizLobby.css"
-import {useLocation, useNavigate} from "react-router-dom";
 import QuizSession from "../../../models/QuizSession";
 import { BottomNavBar } from "../../../components/BottomNavBar/BottomNavBar";
 import { BottomNavBarStyle, BottomNavBarType } from "../../../components/BottomNavBar/BottomNavBarExports";
-import * as SignalR from "@microsoft/signalr";
 import QuizUser from "../../../models/QuizUser";
-import {v4 as uuid} from "uuid"
-import { getDeviceId } from "../../../helper/DeviceHelper";
 import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
-import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
-
 import { QuizPlayerCard } from "../../../components/QuizPlayerCard/QuizPlayerCard";
 import { QuizPlayerCardType } from "../../../components/QuizPlayerCard/QuizPlayerCardExports";
 import { ICON_USER_FILLED, PLAY_ICON_LIGHT, TURN_OFF_DARK } from "../../../assets/Icons";
+import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
 
 interface QuizMasterMessage {
     notifyQuizSession?: QuizSession,
     notifyNewQuizUser?: QuizUser
 }
 
-export const QuizLobby: FC = () => {
-    const navigate = useNavigate();
-    const {state} = useLocation();
-    const quizSessionId: QuizSession | null = state ? state.quizSessionId : null; // Read values passed on state
+export const QuizLobby: FC<QuizMasterChildrenProps> = ({connection, quizCode, quizSession, authenticatedUser, endQuizSession}) => {
 
-    const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
-    const [quizEntryId, setQuizEntryId] = useState<string | null>(null);
-    const [joinedQuizUser, setJoinedQuizUser] = useState<QuizUser[]>([])
-
-    const [connection, setConnection] = useState<SignalR.HubConnection>();
-
-    const killQuizSession = () => {
-
-    }
+    const [joinedQuizUser, setJoinedQuizUser] = useState<QuizUser[]>(quizSession.state.usersStats.map(item => item.user))
 
     const playQuiz = () => {
         console.log("Play quiz...")
-        connection?.send("NotifyPlayQuizSession", quizSession?.id)
-        navigate("/quiz/session", {state: {quizSessionId: quizSessionId, user: joinedQuizUser}})
+        connection?.send("NotifyPlayQuizSession", quizSession?.id) // TODO: this should change the quizstate to playing, set the joinedquizusers in the overall quizsession (already implemented i believe) and set the currentquestionid (already implemented?) so that the quizmaster component can adjust its ui
     }
 
     useEffect(() => {
-        console.log("Quiz session in Quiz Lobby: ", quizSessionId)
-
-        const quizSessionIsRunning = quizSessionId != null
-        const userIsHost = true // TODO: check here if 1) user is authenticated 2) authenticated user is owner of the quiz that is played rn
-        if (!quizSessionIsRunning || !userIsHost) {
-            showErrorQuizSessionNotRunning(navigate, userIsHost)
-        }
-
-        const starterUserId: string = "userId1"
-
-        // start websocket connection
-        const port: number = 5296
-        const url: string = `http://localhost:${port}`
-        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
-
-        const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
-            .withUrl(url + "/master", {
-                skipNegotiation: true,
-                transport: SignalR.HttpTransportType.WebSockets
-              })
-            .build();
-
-        connection.on(starterUserId, (quizEntryId: string, message: QuizSession) => {
-            // Get the entry id
-            // and quizSession back
-            console.log("Backend Message from: " + quizEntryId)
-
-            setQuizEntryId(quizEntryId);
-            setQuizSession(message)
-        })
-
-        connection.on(`message:${starterUserId}`, (masterMessage: QuizMasterMessage) => {
-            // Get the entry id
-            // and quizSession backs
+        connection.on(`message:${authenticatedUser.id}`, (masterMessage: QuizMasterMessage) => {
             console.log(masterMessage.notifyNewQuizUser)
             joinedQuizUser.push(masterMessage.notifyNewQuizUser ?? {id: "", identifier: "", deviceId: ""})
             setJoinedQuizUser([...joinedQuizUser]);
         })
-
-        connection.start()
-            .then(async () => {
-                const quizUser: QuizUser = {
-                    id: uuid(),
-                    identifier: starterUserId,
-                    deviceId: await getDeviceId()
-                }
-                connection.send("requestQuizSession", quizUser, quizSessionId)
-            })
-            .catch((err) => console.error(err))
-
-        setConnection(connection);
-    }, [])
+    }, []);
 
     return (
         <div className="page_styling">
             <BackgroundGems type={BackgroundGemsType.Primary}/>
             <div className="lobbyContent">
-                {(quizSession != null && quizEntryId != null) && 
-                    <div>
-                        <div className="entryIdContent">
-                            <p className="entryIdContentTitle">Game code</p>
-                            <p className="entryIdContentGameCode">{quizEntryId}</p>
-                        </div>
-                        <div className="quizUserLobby">
-
-                        </div>
+                <div>
+                    <div className="entryIdContent">
+                        <p className="entryIdContentTitle">Game code</p>
+                        <p className="entryIdContentGameCode">{quizCode}</p>
                     </div>
-                }
+                    <div className="quizUserLobby">
+
+                    </div>
+                </div>
                 {joinedQuizUser.length >= 1 && // change this back to joinedQuizUsers
                     <div className="joinedUserSection">
                         <div className="joinedUsersSectionCount">
@@ -124,7 +59,7 @@ export const QuizLobby: FC = () => {
                                     playerName={quizUser.identifier}
                                     playerScore={907}>
                                 </QuizPlayerCard>
-                            ))}                        
+                            ))}
                         </div>
                     </div>
                 }
@@ -137,7 +72,7 @@ export const QuizLobby: FC = () => {
                 primaryButtonIcon={PLAY_ICON_LIGHT}
                 type={BottomNavBarType.Default}
                 onPrimaryClick={playQuiz}
-                onSecondaryClick={killQuizSession} 
+                onSecondaryClick={endQuizSession}
                 style={BottomNavBarStyle.Long}/>
         </div>
     )
