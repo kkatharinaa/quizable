@@ -18,15 +18,14 @@ import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
 import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
 import * as SignalR from "@microsoft/signalr";
+import QuizSessionUserStats from "../../../models/QuizSessionUserStats.ts";
 
 export const QuizSessionQuestion: FC = () => {
     const navigate = useNavigate();
     const {state} = useLocation();
 
-    const [userName, setUsername] = useState<string>(state.username)
     const [gameCode, setGameCode] = useState<string>("")
-    const [quizSession, setQuizSession] = useState<QuizSession | null>(null)
-    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(state.question);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
     const [playerCount, setPlayerCount] = useState(0);
@@ -76,20 +75,24 @@ export const QuizSessionQuestion: FC = () => {
               })
             .build();
         
-        connection.on(`questionend:${starterUserId}`, () => {
+        connection.on(`questionend:${starterUserId}`, (quizSessionId: string, quizUserStats: QuizSessionUserStats[]) => {
             console.log("Question end")
-            navigate(`/quiz/result`)
+            navigate(`/quiz/result`, {state: {quizSessionId: quizSessionId, quizUserStats: quizUserStats}})
         })
 
-        connection.on(`useranswered:${starterUserId}`, () => {
-            setPlayerCount(playerCount + 1)
+        connection.on(`answer:${starterUserId}`, (quizUserStats: QuizSessionUserStats[]) => {
+            setPlayerCount(
+                quizUserStats
+                    .map(stats => stats.answers)
+                    .filter(answers => 
+                        answers.some(answer => answer.questionId == currentQuestion?.id)
+                    ).length)
         })
 
         connection.start()
     }
 
     useEffect(() => {
-
         // TODO: get current quizsession, current question and game code - rn just use default values to develop the ui
         const currentQuiz =  makeQuiz()
         currentQuiz.questions[0] = makeQuestion(uuid(), "What are the most effective strategies for managing stress in high-pressure work environments?"/*"Which colour is the sky?"*/, [makeAnswer(false, "That are the most effective strategies for managing stress in high-pressure work environments."), makeAnswer(true, "Green"), makeAnswer(false, "Yellow"), makeAnswer(false, "Red"), makeAnswer(false, "Pink")])
@@ -122,7 +125,6 @@ export const QuizSessionQuestion: FC = () => {
         }
 
         // if everything is fine, set up our state
-        setQuizSession(currentSession)
         setGameCode(gameCode)
         setCurrentQuestion(currentQuestion ?? null)
 

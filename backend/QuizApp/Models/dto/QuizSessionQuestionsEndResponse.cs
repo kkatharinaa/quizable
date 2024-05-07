@@ -1,0 +1,2 @@
+namespace QuizApp.Models.dto;
+

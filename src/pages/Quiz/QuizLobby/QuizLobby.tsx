@@ -15,11 +15,8 @@ import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.t
 import { QuizPlayerCard } from "../../../components/QuizPlayerCard/QuizPlayerCard";
 import { QuizPlayerCardType } from "../../../components/QuizPlayerCard/QuizPlayerCardExports";
 import { ICON_USER_FILLED, PLAY_ICON_LIGHT, TURN_OFF_DARK } from "../../../assets/Icons";
+import { Question } from "../../../models/Question.ts";
 
-interface QuizMasterMessage {
-    notifyQuizSession?: QuizSession,
-    notifyNewQuizUser?: QuizUser
-}
 
 export const QuizLobby: FC = () => {
     const navigate = useNavigate();
@@ -32,14 +29,9 @@ export const QuizLobby: FC = () => {
 
     const [connection, setConnection] = useState<SignalR.HubConnection>();
 
-    const killQuizSession = () => {
-
-    }
-
     const playQuiz = () => {
-        console.log("Play quiz...")
-        connection?.send("NotifyPlayQuizSession", quizSession?.id)
-        navigate("/quiz/session", {state: {quizSessionId: quizSessionId, user: joinedQuizUser}})
+        console.log("Play quiz...") 
+        connection?.send("NotifyPlayQuiz", quizSessionId)
     }
 
     useEffect(() => {
@@ -74,12 +66,18 @@ export const QuizLobby: FC = () => {
             setQuizSession(message)
         })
 
-        connection.on(`message:${starterUserId}`, (masterMessage: QuizMasterMessage) => {
+        connection.on(`message:${starterUserId}`, (quizUsers: QuizUser[]) => {
             // Get the entry id
             // and quizSession backs
-            console.log(masterMessage.notifyNewQuizUser)
-            joinedQuizUser.push(masterMessage.notifyNewQuizUser ?? {id: "", identifier: "", deviceId: ""})
-            setJoinedQuizUser([...joinedQuizUser]);
+            setJoinedQuizUser(quizUsers);
+        })
+
+        connection.on(`play:${quizSessionId}`, (quizSessionIdMaster: string, question: Question) => {
+            navigate("/quiz/session", {state: {
+                quizSessionId: quizSessionId, 
+                user: joinedQuizUser,
+                firstQuestion: question
+            }})
         })
 
         connection.start()
@@ -89,7 +87,7 @@ export const QuizLobby: FC = () => {
                     identifier: starterUserId,
                     deviceId: await getDeviceId()
                 }
-                connection.send("requestQuizSession", quizUser, quizSessionId)
+                connection.send("RequestQuizSession", quizUser, quizSessionId)
             })
             .catch((err) => console.error(err))
 
@@ -111,7 +109,7 @@ export const QuizLobby: FC = () => {
                         </div>
                     </div>
                 }
-                {joinedQuizUser.length >= 1 && // change this back to joinedQuizUsers
+                {joinedQuizUser.length >= 0 && // change this back to joinedQuizUsers
                     <div className="joinedUserSection">
                         <div className="joinedUsersSectionCount">
                             <span><img src={ICON_USER_FILLED.path} alt={ICON_USER_FILLED.alt}></img></span>
@@ -120,9 +118,9 @@ export const QuizLobby: FC = () => {
                         <div className="joinedUserSectionList">
                             {joinedQuizUser.map((quizUser) => (
                                 <QuizPlayerCard
-                                    type={QuizPlayerCardType.DesktopScoreDown}
-                                    playerName={quizUser.identifier}
-                                    playerScore={907}>
+                                    key={quizUser.id}
+                                    type={QuizPlayerCardType.DesktopNormal}
+                                    playerName={quizUser.identifier}>
                                 </QuizPlayerCard>
                             ))}                        
                         </div>
@@ -137,7 +135,7 @@ export const QuizLobby: FC = () => {
                 primaryButtonIcon={PLAY_ICON_LIGHT}
                 type={BottomNavBarType.Default}
                 onPrimaryClick={playQuiz}
-                onSecondaryClick={killQuizSession} 
+                onSecondaryClick={() => {}} 
                 style={BottomNavBarStyle.Long}/>
         </div>
     )

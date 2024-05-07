@@ -13,18 +13,26 @@ import {makeQuestion, Question} from "../../../models/Question.ts";
 import {StatisticsBar} from "../../../components/StatisticsBar/StatisticsBar.tsx";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {makeQuiz} from "../../../models/Quiz.ts";
 import {makeAnswer} from "../../../models/Answer.ts";
+import * as SignalR from "@microsoft/signalr";
 
 export const QuizResult: FC = () => {
     const navigate = useNavigate()
+    const {state} = useLocation()
 
     const [gameCode, setGameCode] = useState("")
     const [quizSession, setQuizSession] = useState<QuizSession | null>(null)
+    const [quizSessionId] = useState<string>(state.quizSessionId)
     const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
+
+    const [quizQuestionResult] = useState<string>(state.quizUserStats)
+
+
+    const [connection, setConnection] = useState<SignalR.HubConnection>();
 
     const getAnswersCountForAnswer = (answerID: string): number => {
         if (quizSession == null) return 0
@@ -70,11 +78,38 @@ export const QuizResult: FC = () => {
     }
     const handleContinue = () => {
         // TODO: move on to leaderboard, rn it skips the leaderboard and goes directly to the next question
+        console.log("Quiz Session ID: " + quizSessionId)
+        connection?.send("NotifyPlayQuiz", quizSessionId)
     }
 
     const showPopup = (popup: PopupProps) => {
         setPopupProps(popup)
         setShowingPopup(true)
+    }
+
+    const initSignalR = () => {
+        // start websocket connection
+        const port: number = 5296
+        const url: string = `http://localhost:${port}`
+        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+
+        const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
+            .withUrl(url + "/master", {
+                skipNegotiation: true,
+                transport: SignalR.HttpTransportType.WebSockets
+              })
+            .build();
+        
+        connection.on(`play:${quizSessionId}`, (_: string, question: Question) => {
+            console.log("From result to next question")
+            navigate("/quiz/session", {state: {
+                quizSessionId: quizSessionId, 
+                question: question
+            }})
+        })
+
+        connection.start()
+        setConnection(connection)
     }
 
     useEffect(() => {
@@ -130,6 +165,7 @@ export const QuizResult: FC = () => {
         setQuizSession(currentSession)
         setGameCode(gameCode)
         setCurrentQuestion(currentQuestion ?? null)
+        initSignalR();
     }, []);
 
     return (

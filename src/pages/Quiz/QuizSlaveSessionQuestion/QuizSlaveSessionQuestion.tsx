@@ -26,9 +26,10 @@ export const QuizSlaveSessionQuestion: FC = () => {
     const navigate = useNavigate();
     const {state} = useLocation();
 
-    const [quizUser, setQuizUser] = useState<QuizUser | null>(null)
-    const [quizSessionId, setQuizSessionId] = useState<string | null>(null)
-    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
+    const [quizUser, setQuizUser] = useState<QuizUser | null>(state.quizUser)
+    const [quizSessionId, setQuizSessionId] = useState<string | null>(state.quizSessionId)
+    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(state.question)
+
     const [selectedAnswerID, setSelectedAnswerID] = useState<string>("");
     const [sessionState, setSessionState] = useState<QuizState>(QuizState.Playing) // reuse this screen for showing which answer was correct, which gets displayed while the master is showing the answer statistics TODO: set/update the quiz state somewhere
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
@@ -71,7 +72,7 @@ export const QuizSlaveSessionQuestion: FC = () => {
         }
 
         setSelectedAnswerID(answer.id)
-        connection?.send("EnterSlaveAnswerSelection", quizUser, quizSessionId, currentQuestion.id, answer);
+        connection?.send("NotifySlaveAnswered", quizUser, quizSessionId, currentQuestion.id, answer);
     }
 
     const handleLeaveSession = () => {
@@ -91,7 +92,7 @@ export const QuizSlaveSessionQuestion: FC = () => {
         init()
     }, []);
 
-    const initSignalR = async (quizSessionIdState: string, quizUserState: QuizUser) => {
+    const initSignalR = async (quizSessionId: string, quizUserState: QuizUser) => {
         // start websocket connection
         const port: number = 5296
         const url: string = `http://localhost:${port}`
@@ -107,9 +108,10 @@ export const QuizSlaveSessionQuestion: FC = () => {
             .build();
 
         // when the game actually starts and you get messages, navigate to the questions
-        connection.on(`nextquestion:${quizSessionIdState}/${userName}`, async (nextQuestion) => {
+        connection.on(`play:${quizSessionId}/${userName}`, async (_: string, question: Question, quizUser: QuizUser) => {
             setSessionState(QuizState.Playing)
-            setCurrentQuestion(nextQuestion[0])
+            setCurrentQuestion(question)
+            setQuizUser(quizUser)
             // TODO: send question to user
         })
 
@@ -119,9 +121,10 @@ export const QuizSlaveSessionQuestion: FC = () => {
             setSessionState(QuizState.Statistics)
         })
 
+
         connection.start()
             .then(async () => {
-                connection.send("EnterSlaveQuizSessionQuestion", quizUserState, quizSessionIdState)
+                connection.send("EnterSlaveQuizSessionQuestion", quizUserState, quizSessionId)
             })
             .catch((err) => console.error(err))
 

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.SignalR;
-using QuizApp.Hubs.Models;
 using QuizApp.Models;
 using QuizApp.Services.Interface;
 
@@ -19,26 +18,95 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
         }
     }
     
-    public async Task NotifyMasterNewUser(string userIdMaster, QuizMasterMessage masterMessage)
-    {
-        await Clients.All.SendAsync($"message:{userIdMaster}",masterMessage);
-    }
-    
-    public async Task NotifyPlayQuizSession(string quizSessionId)
+    // Message from Client (Master Frontend) to Notify every quiz session participant to start the quiz
+    // Master and slave will receive a message from the backend when exactly to start
+    public async Task NotifyPlayQuiz(string quizSessionId)
     {
         // Set the state of the quiz session
         quizSessionService.SetQuizSessionState(quizSessionId, "play");
         
-        // Notify slaves
         bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsers);
 
         if (isQuizSessionUser)
         {
-            foreach(QuizSessionUserStats quizSessionUserStats in quizUsers)
+            bool hasQuestions = quizSessionService.TryGetQuizSessionQuestions(quizSessionId, out var questions);
+
+            if (hasQuestions)
             {
-                await slaveContext.Clients.All.SendAsync($"play:{quizSessionId}/{quizSessionUserStats.User.Identifier}");
+                bool isNextQuestion = quizSessionService.TryGetQuizSessionNextQuestion(quizSessionId, out var nextQuestion);
+
+                // use tasks to notify all in parallel and at the same time
+                List<Task> tasks = new ();
+                
+                if (isNextQuestion)
+                {
+                    // Get the next question
+                    tasks.Add(Task.Run(() => Clients.All.SendAsync($"play:{quizSessionId}", quizSessionId, nextQuestion)));
+            
+                    foreach(QuizSessionUserStats quizSessionUserStats in quizUsers)
+                    {
+                        tasks.Add(Task.Run(() =>
+                            slaveContext.Clients.All.SendAsync(
+                                $"play:{quizSessionId}/{quizSessionUserStats.User.Identifier}",quizSessionId, nextQuestion, quizSessionUserStats.User)));
+                    }
+
+                    await Task.WhenAll(tasks.ToList());
+                }
+                else
+                {
+                    // no next question, end the quiz.
+                    
+                    // send end message back to the master and the slave ("end:quizSessionId" i think)
+                    
+                }
             }
+            else logger.LogError("Could not find questions for this quiz session!");
         }
     }
-    
+
+    // Notifies every participant that the question has been skipped and we should move on to the next question after scoreboard
+    // TODO: Change Diagram to add quiz user name too
+    public async Task NotifyQuestionSkip(string quizSessionId, string quizUserName, Question question)
+    {
+        bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsersStatsList);
+
+        if (isQuizSessionUser)
+        {
+            // use tasks to notify all in parallel and at the same time
+            List<Task> tasks = new();
+            
+            tasks.Add(
+            Task.Run(
+                    () => Clients.All.SendAsync(
+                    $"questionend:{quizUserName}", 
+                    quizSessionId, 
+                    quizUsersStatsList)
+                )
+            );
+            
+            foreach (QuizSessionUserStats quizSessionUserStats in quizUsersStatsList)
+            {
+                tasks.Add(Task.Run(() =>
+                    slaveContext.Clients.All.SendAsync(
+                        $"questionend:{quizSessionId}/{quizSessionUserStats.User.Identifier}",
+                            quizSessionId, 
+                            quizUsersStatsList)
+                    ));
+                
+            }
+
+            await Task.WhenAll(tasks.ToList());
+        }
+    }
+
+    // Kills the quiz session
+    public async Task NotifyKillQuiz(string quizSessionId, bool sendPdf)
+    {
+        (QuizSession? quizSession, string entry) = quizSessionService.GetQuizSessionById(quizSessionId);
+
+        if (quizSession is not null)
+        {
+            quizSessionService.DeleteSessionByEntryCode(entry);
+        }
+    }
 }
