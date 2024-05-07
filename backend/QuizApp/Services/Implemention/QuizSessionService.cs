@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Diagnostics.CodeAnalysis;
 using QuizApp.Models;
 using QuizApp.Services.Interface;
 
@@ -64,8 +65,16 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         KeyValuePair<string, QuizSession?> quizSessionEntryId = QuizSessions.FirstOrDefault(kvP => kvP.Value.Id == quizSessionId, new ("", null));
         return (quizSessionEntryId.Value, quizSessionEntryId.Key);
     }
-    
 
+    /// <summary>
+    /// Delete the quiz session by the entry id
+    /// </summary>
+    /// <param name="entryCode">Entry code of the session to be deleted</param>
+    public void DeleteSessionByEntryCode(string entryCode)
+    {
+        QuizSessions.Remove(entryCode);
+    }
+    
     /// <summary>
     /// Add new quiz user to the session
     /// </summary>
@@ -304,4 +313,46 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
 
         return isAnswered;
     }
+    
+    /// <summary>
+    /// Get the next question in the quiz session
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="question"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public bool TryGetQuizSessionNextQuestion(string quizSessionId,[MaybeNullWhen(false)] out Question question)
+    {
+        bool nextQuestionExists = false;
+        
+        // Get the current quiz question id 
+        string currentQuestionId = QuizSessions.FirstOrDefault(
+            session => session.Value.Id == quizSessionId
+        ).Value.State.CurrentQuestionId;
+        
+        // Get the index in the array of the current question 
+        int index = 0;
+        int resultIndex = 0;
+        
+        QuizSessionsQuestions[quizSessionId].ForEach((question) =>
+        {
+            if (question.id == currentQuestionId)
+            {
+                resultIndex = index;
+            }
+
+            index++;
+        });
+
+        if (resultIndex + 1 >= QuizSessionsQuestions[quizSessionId].Count)
+        {
+            question = null;
+            return false;
+        }
+
+        question = QuizSessionsQuestions[quizSessionId][resultIndex + 1];
+        return nextQuestionExists;
+    }
+
+    
 }
