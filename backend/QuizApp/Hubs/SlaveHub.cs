@@ -46,6 +46,8 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
         if (quizSessionService.IsQuestionAnswerAllUsers(quizSessionId, questionId))
         {            
             quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsersStatsList);
+
+            quizSessionService.SetQuizSessionState(quizSessionId, "statistics");
             
             await masterContext.Clients.All.SendAsync(
                 "questionend:userId1",

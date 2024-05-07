@@ -31,7 +31,7 @@ export const QuizLobby: FC = () => {
 
     const playQuiz = () => {
         console.log("Play quiz...") 
-        connection?.send("NotifyPlayQuiz", quizSessionId)
+        connection?.send("NotifyPlayQuiz", quizSessionId, true)
     }
 
     useEffect(() => {
@@ -76,7 +76,8 @@ export const QuizLobby: FC = () => {
             navigate("/quiz/session", {state: {
                 quizSessionId: quizSessionId, 
                 user: joinedQuizUser,
-                firstQuestion: question
+                question: question,
+                gameCode: quizEntryId // TODO: not really working yet
             }})
         })
 

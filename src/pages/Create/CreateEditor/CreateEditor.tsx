@@ -17,6 +17,8 @@ import {
     showErrorPageSomethingWentWrong
 } from "../../ErrorPage/ErrorPageExports.ts";
 import {makeAnswer} from "../../../models/Answer.ts";
+import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
+import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 
 export const CreateEditor: FC = () => {
 

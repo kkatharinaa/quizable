@@ -3,17 +3,13 @@ import "./QuizSessionQuestion.css"
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
 import {POWER_ICON_DARK, SKIP_ICON_LIGHT, USER_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
-import QuizSession from "../../../models/QuizSession.ts";
-import {v4 as uuid} from "uuid";
-import {makeQuiz} from "../../../models/Quiz.ts";
 import {Timer} from "../../../components/Timer/Timer.tsx";
 import {AnswerInputField} from "../../../components/AnswerInputField/AnswerInputField.tsx";
 import {getAnswerInputFieldTypeForIndex} from "../../../components/AnswerInputField/AnswerInputFieldExports.ts";
 import {QuizCodeTag} from "../../../components/QuizCodeTag/QuizCodeTag.tsx";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
-import {makeQuestion, Question} from "../../../models/Question.ts";
-import {makeAnswer} from "../../../models/Answer.ts";
+import {Question} from "../../../models/Question.ts";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import {useLocation, useNavigate} from "react-router-dom";
 import {showErrorQuizSessionNotRunning} from "../../ErrorPage/ErrorPageExports.ts";
@@ -24,8 +20,8 @@ export const QuizSessionQuestion: FC = () => {
     const navigate = useNavigate();
     const {state} = useLocation();
 
-    const [gameCode, setGameCode] = useState<string>("")
-    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(state.question);
+    const [gameCode] = useState<string>(state.gameCode)
+    const [currentQuestion] = useState<Question>(state.question);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
     const [playerCount, setPlayerCount] = useState(0);
@@ -51,8 +47,8 @@ export const QuizSessionQuestion: FC = () => {
     }
     
     const handleSkipQuestion = () => {
-        // move on to answer statistics screen
-        navigate(`/quiz/result`)
+        // move on to answer statistics screen TODO because some state is missing, will probably be fixed by refactor
+        //navigate(`/quiz/result`, {state: {quizSessionId: quizSessionId, quizUserStats: quizUserStats, gameCode: gameCode, question: currentQuestion}})
     }
 
     const showPopup = (popup: PopupProps) => {
@@ -77,7 +73,7 @@ export const QuizSessionQuestion: FC = () => {
         
         connection.on(`questionend:${starterUserId}`, (quizSessionId: string, quizUserStats: QuizSessionUserStats[]) => {
             console.log("Question end")
-            navigate(`/quiz/result`, {state: {quizSessionId: quizSessionId, quizUserStats: quizUserStats}})
+            navigate(`/quiz/result`, {state: {quizSessionId: quizSessionId, quizUserStats: quizUserStats, gameCode: gameCode, question: currentQuestion}})
         })
 
         connection.on(`answer:${starterUserId}`, (quizUserStats: QuizSessionUserStats[]) => {
@@ -93,40 +89,12 @@ export const QuizSessionQuestion: FC = () => {
     }
 
     useEffect(() => {
-        // TODO: get current quizsession, current question and game code - rn just use default values to develop the ui
-        const currentQuiz =  makeQuiz()
-        currentQuiz.questions[0] = makeQuestion(uuid(), "What are the most effective strategies for managing stress in high-pressure work environments?"/*"Which colour is the sky?"*/, [makeAnswer(false, "That are the most effective strategies for managing stress in high-pressure work environments."), makeAnswer(true, "Green"), makeAnswer(false, "Yellow"), makeAnswer(false, "Red"), makeAnswer(false, "Pink")])
-        const currentSession: QuizSession = {
-            id: uuid(),
-            quizId: currentQuiz.id,
-            state: {
-                currentQuestionId: currentQuiz.questions[0].id,
-                usersStats: [{
-                    user: {
-                        id: uuid(),
-                        identifier: "player1",
-                        deviceId: ""
-                    },
-                    score: 0,
-                    answers: []
-                }],
-                currentQuizState: "" // TODO: shouldn't this be an enum?
-            },
-            deviceId: "",
-        }
-        const gameCode = "123456"
-        const currentQuestion = currentQuiz.questions.find(question => question.id == currentSession.state.currentQuestionId)
-
         // TODO: check if we are the host and if we are currently in an active quiz session (using constant values for now)
         const quizSessionIsRunning = true
         const userIsHost = true // TODO: check here if 1) user is authenticated 2) authenticated user is owner of the quiz that is played rn
         if (!quizSessionIsRunning || !userIsHost) {
             showErrorQuizSessionNotRunning(navigate, userIsHost)
         }
-
-        // if everything is fine, set up our state
-        setGameCode(gameCode)
-        setCurrentQuestion(currentQuestion ?? null)
 
         initSignalR();
     }, []);

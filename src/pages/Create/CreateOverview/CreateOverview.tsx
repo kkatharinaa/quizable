@@ -98,7 +98,7 @@ export const CreateOverview: FC = () => {
             state: {
                 currentQuestionId: quizToBePlayed!.questions[0].id,
                 usersStats: [ /**keep it empty at the beginning */],
-                currentQuizState: "start"
+                currentQuizState: "lobby"
             },
             options: quizToBePlayed!.options
         };

@@ -121,6 +121,10 @@ export const QuizSlaveSessionQuestion: FC = () => {
             setSessionState(QuizState.Statistics)
         })
 
+        connection.on(`end:${quizSessionId}/${userName}`, () => {
+            navigate("/quiz/end")
+        })
+
 
         connection.start()
             .then(async () => {

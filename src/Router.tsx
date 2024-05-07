@@ -11,6 +11,7 @@ import {CreateOverview} from "./pages/Create/CreateOverview/CreateOverview.tsx";
 import { QuizSlaveLobby } from "./pages/Quiz/QuizSlaveLobby/QuizSlaveLobby.tsx";
 import {ErrorPage} from "./pages/ErrorPage/ErrorPage.tsx";
 import {QuizSlaveSessionQuestion} from "./pages/Quiz/QuizSlaveSessionQuestion/QuizSlaveSessionQuestion.tsx";
+import {QuizEnd} from "./pages/Quiz/QuizEnd/QuizEnd.tsx";
 
 // TODO: only make master routes accessible if you are logged in
 
@@ -81,6 +82,11 @@ const pagesData: RouterType[] = [
       path: "quiz/session",
       element: <QuizSessionQuestion />,
       title: "Quiz Session | Quizable"
+    },
+    {
+        path: "quiz/end",
+        element: <QuizEnd />,
+        title: "Quiz End | Quizable"
     },
 ];
 

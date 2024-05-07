@@ -20,10 +20,10 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
     
     // Message from Client (Master Frontend) to Notify every quiz session participant to start the quiz
     // Master and slave will receive a message from the backend when exactly to start
-    public async Task NotifyPlayQuiz(string quizSessionId)
+    public async Task NotifyPlayQuiz(string quizSessionId, bool justStarted)
     {
         // Set the state of the quiz session
-        quizSessionService.SetQuizSessionState(quizSessionId, "play");
+        quizSessionService.SetQuizSessionState(quizSessionId, "playing");
         
         bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsers);
 
@@ -38,8 +38,16 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
                 // use tasks to notify all in parallel and at the same time
                 List<Task> tasks = new ();
                 
-                if (isNextQuestion)
+                if (justStarted)
                 {
+                    nextQuestion = quizSessionService.GetQuizSessionFirstQuestion(quizSessionId);
+                }
+                
+                if (isNextQuestion || justStarted)
+                {
+                    // update the current question id
+                    quizSessionService.SetQuizSessionCurrentQuestionId(quizSessionId, nextQuestion.id);
+                    
                     // Get the next question
                     tasks.Add(Task.Run(() => Clients.All.SendAsync($"play:{quizSessionId}", quizSessionId, nextQuestion)));
             
@@ -55,9 +63,19 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
                 else
                 {
                     // no next question, end the quiz.
+                    quizSessionService.SetQuizSessionState(quizSessionId, "end");
                     
-                    // send end message back to the master and the slave ("end:quizSessionId" i think)
+                    // send end message back to the master and the slave
+                    tasks.Add(Task.Run(() => Clients.All.SendAsync($"end:{quizSessionId}")));
+            
+                    foreach(QuizSessionUserStats quizSessionUserStats in quizUsers)
+                    {
+                        tasks.Add(Task.Run(() =>
+                            slaveContext.Clients.All.SendAsync(
+                                $"end:{quizSessionId}/{quizSessionUserStats.User.Identifier}")));
+                    }
                     
+                    await Task.WhenAll(tasks.ToList());
                 }
             }
             else logger.LogError("Could not find questions for this quiz session!");
