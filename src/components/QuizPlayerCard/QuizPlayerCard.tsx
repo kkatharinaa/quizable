@@ -1,7 +1,7 @@
 import {FC} from "react"
 import './QuizPlayerCard.css'
 import { QuizPlayerCardProps, QuizPlayerCardType } from "./QuizPlayerCardExports"
-import { CHEVRON_DOWN, CHEVRON_UP } from "../../assets/Icons"
+import { CHEVRONDOWN_ICON_RED, CHEVRONUP_ICON_GREEN } from "../../assets/Icons"
 
 
 export const QuizPlayerCard: FC<QuizPlayerCardProps> = (
@@ -13,11 +13,13 @@ export const QuizPlayerCard: FC<QuizPlayerCardProps> = (
 ) => {
     return (
         <div className={`quizPlayerCard ${type}`}>
-            <div className={`quizPlayerCardIcon_${type.startsWith("desktop") ? 'desktop' : 'mobile'}`}></div>
-            <p>{playerName}</p>
+            <div className="quizPlayerCardIconAndName">
+                <div className={`quizPlayerCardIcon_${type.startsWith("desktop") ? 'desktop' : 'mobile'}`}></div>
+                <p>{playerName}</p>
+            </div>
             {playerScore != null &&
                 <div className="quizPlayerCardScore">
-                    <p 
+                    <p
                         className={`quizPlayerCardScoreText`}
                         style={{
                             opacity: type.includes("Score")? 1:0,
@@ -28,8 +30,8 @@ export const QuizPlayerCard: FC<QuizPlayerCardProps> = (
                     <div className={`quizPlayerCardScoreArrow`}>
                         {(type.includes("Up") || type.includes("Down")) && 
                             <img 
-                                src={(type.includes("Up")?CHEVRON_UP:CHEVRON_DOWN).path} 
-                                alt={(type.includes("Up")?CHEVRON_UP:CHEVRON_DOWN).alt}>
+                                src={(type.includes("Up")?CHEVRONUP_ICON_GREEN:CHEVRONDOWN_ICON_RED).path}
+                                alt={(type.includes("Up")?CHEVRONUP_ICON_GREEN:CHEVRONDOWN_ICON_RED).alt}>
                             </img>
                         }
                     </div>

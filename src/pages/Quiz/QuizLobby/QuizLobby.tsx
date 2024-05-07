@@ -8,7 +8,7 @@ import { BackgroundGems } from "../../../components/BackgroundGems/BackgroundGem
 import { BackgroundGemsType } from "../../../components/BackgroundGems/BackgroundGemsExports";
 import { QuizPlayerCard } from "../../../components/QuizPlayerCard/QuizPlayerCard";
 import { QuizPlayerCardType } from "../../../components/QuizPlayerCard/QuizPlayerCardExports";
-import { ICON_USER_FILLED, PLAY_ICON_LIGHT, TURN_OFF_DARK } from "../../../assets/Icons";
+import { USER_ICON_LIGHT, PLAY_ICON_LIGHT, POWER_ICON_DARK } from "../../../assets/Icons";
 import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
 
 interface QuizMasterMessage {
@@ -34,30 +34,27 @@ export const QuizLobby: FC<QuizMasterChildrenProps> = ({connection, quizCode, qu
     }, []);
 
     return (
-        <div className="page_styling">
+        <div className="quizLobby">
             <BackgroundGems type={BackgroundGemsType.Primary}/>
-            <div className="lobbyContent">
+            <div className="content">
                 <div>
                     <div className="entryIdContent">
                         <p className="entryIdContentTitle">Game code</p>
                         <p className="entryIdContentGameCode">{quizCode}</p>
                     </div>
-                    <div className="quizUserLobby">
-
-                    </div>
                 </div>
                 {joinedQuizUser.length >= 1 && // change this back to joinedQuizUsers
                     <div className="joinedUserSection">
                         <div className="joinedUsersSectionCount">
-                            <span><img src={ICON_USER_FILLED.path} alt={ICON_USER_FILLED.alt}></img></span>
-                            {joinedQuizUser.length} joined
+                            <img src={USER_ICON_LIGHT.path} alt={USER_ICON_LIGHT.alt}></img>
+                            <p>{joinedQuizUser.length} joined</p>
                         </div>
                         <div className="joinedUserSectionList">
                             {joinedQuizUser.map((quizUser) => (
                                 <QuizPlayerCard
-                                    type={QuizPlayerCardType.DesktopScoreDown}
+                                    type={QuizPlayerCardType.DesktopNormal}
                                     playerName={quizUser.identifier}
-                                    playerScore={907}>
+                                    playerScore={undefined}>
                                 </QuizPlayerCard>
                             ))}
                         </div>
@@ -67,7 +64,7 @@ export const QuizLobby: FC<QuizMasterChildrenProps> = ({connection, quizCode, qu
 
             <BottomNavBar
                 secondaryButtonText="End Quiz"
-                secondaryButtonIcon={TURN_OFF_DARK}
+                secondaryButtonIcon={POWER_ICON_DARK}
                 primaryButtonText="Start Quiz"
                 primaryButtonIcon={PLAY_ICON_LIGHT}
                 type={BottomNavBarType.Default}

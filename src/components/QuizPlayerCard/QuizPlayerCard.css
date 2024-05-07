@@ -1,6 +1,6 @@
 .quizPlayerCard {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     background-color: var(--black);
     border-radius: 20px;
@@ -13,29 +13,35 @@
     padding-right: 28px;
 }
 
-.quizPlayerCard p{
+.quizPlayerCardIconAndName {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    overflow: hidden;
+}
+
+.quizPlayerCard .quizPlayerCardIconAndName p{
     padding: 0;
     margin: 0;
     color: var(--white);
     font-size: 32px;
     align-self: center;
-    flex-grow: 1;
     text-align: left;
-    margin-left: 20px;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
+.quizPlayerCardIcon_desktop, .quizPlayerCardIcon_mobile {
+    border-radius: 16px;
+    background-color: var(--grey-icon);
+}
 .quizPlayerCardIcon_desktop {
     min-width: 68px;
     height: 68px;
-    border-radius: 16px;
-    background-color: #D9D9D9;
 }
-
 .quizPlayerCardIcon_mobile {
     width: 52px;
     height: 52px;
-    border-radius: 16px;
-    background-color: #D9D9D9;
 }
 
 .quizPlayerCardScoreText { 
@@ -52,24 +58,17 @@
     gap: 10px;
 }
 
-.quizPlayerCardScore_desktopScore{
+.quizPlayerCardScore_desktopScore, .quizPlayerCardScore_mobileScore, .quizPlayerCardScore_desktopScoreUp, .quizPlayerCardScore_desktopScoreDown {
     opacity: 1;
     color: var(--white);
 }
-
-.quizPlayerCardScore_mobileScore{
-    opacity: 1;
-    color: var(--white);
+.quizPlayerCardScore_mobileScore {
     font-size: 24px;
 }
-
-.quizPlayerCardScore_desktopScoreUp{
-    opacity: 1;
-    color: var(--correct-button);
+.quizPlayerCardScore_desktopScoreUp {
+   color: var(--correct-button);
 }
-
-.quizPlayerCardScore_desktopScoreDown{
-    opacity: 1;
+.quizPlayerCardScore_desktopScoreDown {
     color: var(--delete-button);
 }
 

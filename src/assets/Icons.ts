@@ -67,14 +67,14 @@ export const PLAY_ICON_LIGHT: Icon = {
     alt: 'Play',
 };
 
-export const CHEVRON_UP: Icon = {
-    path: '/assets/icon-chevron-up.svg',
-    alt: 'ChevronUp',
+export const CHEVRONUP_ICON_GREEN: Icon = {
+    path: '/assets/icon-chevronup-green.svg',
+    alt: 'Two Green Chevrons Up',
 };
 
-export const CHEVRON_DOWN: Icon = {
-    path: '/assets/icon-chevron-down.svg',
-    alt: 'ChevronDown',
+export const CHEVRONDOWN_ICON_RED: Icon = {
+    path: '/assets/icon-chevrondown-red.svg',
+    alt: 'Two Red Chevrons Down',
 };
 
 export const ENTER_ICON_LIGHT: Icon = {
@@ -97,16 +97,6 @@ export const SEND_ICON_LIGHT: Icon = {
     alt: 'Send',
 };
 
-export const TURN_OFF_DARK: Icon = {
-    path: '/assets/icon-turnoff-dark.svg',
-    alt: 'Turn Off Icon'
-};
-
-export const ICON_USER_FILLED: Icon = {
-    path: '/assets/icon-user-filled.svg',
-    alt: 'Turn Off Icon'
-};
-
 export const SKIP_ICON_LIGHT: Icon = {
     path: '/assets/icon-skip-light.svg',
     alt: 'Skip',
@@ -114,7 +104,7 @@ export const SKIP_ICON_LIGHT: Icon = {
 
 export const POWER_ICON_DARK: Icon = {
     path: '/assets/icon-power-dark.svg',
-    alt: 'End',
+    alt: 'Turn Off',
 };
 
 export const USER_ICON_LIGHT: Icon = {
