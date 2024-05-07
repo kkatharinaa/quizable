@@ -60,7 +60,7 @@ const pagesData: RouterType[] = [
         title: "Quiz | Quizable"
     },
     {
-        path: "quiz/slave",
+        path: "quiz/player",
         element: <QuizSlave />,
         title: "Quiz | Quizable"
     },

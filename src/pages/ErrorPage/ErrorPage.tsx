@@ -1,7 +1,7 @@
-import {FC} from "react";
+import {FC, useEffect} from "react";
 import "./ErrorPage.css"
 import {useLocation, useNavigate} from "react-router-dom";
-import {ErrorPageLinkedTo, getErrorPageLinkedTo} from "./ErrorPageExports.ts";
+import {ErrorPageLinkedTo} from "./ErrorPageExports.ts";
 import {BackgroundGems} from "../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {BottomNavBar} from "../../components/BottomNavBar/BottomNavBar.tsx";
@@ -10,21 +10,21 @@ import {BottomNavBarStyle, BottomNavBarType} from "../../components/BottomNavBar
 export const ErrorPage: FC = () => {
 
     const navigate = useNavigate();
-    const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
+    const {state} = useLocation();
 
-    const message = searchParams.get('message');
-    const linkTo = searchParams.get('linkTo') ?? "Home"
-    const errorPageLinkedTo = getErrorPageLinkedTo(linkTo) ?? ErrorPageLinkedTo.Home;
+    // Read values passed on state
+    const message: string | null = state ? state.message : null;
+    const linkTo: ErrorPageLinkedTo = state ? state.linkTo : ErrorPageLinkedTo.Home
 
-    // prevent someone from manually going to the error path
-    if (message == null) {
-        navigate(`/`)
-        return ''
-    }
+    useEffect(() => {
+        // prevent someone from manually going to the error path
+        if (message == null) {
+            navigate(`/`)
+        }
+    }, []);
 
     const handleButtonClick = () => {
-        switch (errorPageLinkedTo) {
+        switch (linkTo) {
             case ErrorPageLinkedTo.Home:
                 navigate(`/`)
                 break

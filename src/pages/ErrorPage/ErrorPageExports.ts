@@ -31,5 +31,5 @@ export const showErrorPageSomethingWentWrong = (navigate: NavigateFunction, link
 }
 
 export const showErrorPage = (navigate: NavigateFunction, message: string, linkTo: ErrorPageLinkedTo) => {
-    navigate(`/error?message=${encodeURIComponent(message)}&linkTo=${encodeURIComponent(linkTo)}`);
+    navigate('/error', {state: {message: message, linkTo: linkTo}})
 }

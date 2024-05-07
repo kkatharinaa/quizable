@@ -68,7 +68,7 @@ export const Join: FC = () => {
         const userExists: boolean = await QuizSessionService.checkQuizUserAlreadyExists(validQuizCode.quizSessionId,inputValue);
 
         if(!userExists)
-            navigate("/quiz/slave", {state: {quizSessionId: validQuizCode.quizSessionId, userName: inputValue}})
+            navigate("/quiz/player", {state: {quizSessionId: validQuizCode.quizSessionId, userName: inputValue}})
         else {
             setValidation({
                 valid: false,

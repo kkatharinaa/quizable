@@ -10,7 +10,7 @@ import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
 import QuizSessionService from "../../../services/QuizSessionService.ts";
 import {v4 as uuid} from "uuid";
-import { getDeviceId } from "../../../helper/DeviceHelper.ts";
+import {getDeviceId} from "../../../helper/DeviceHelper.ts";
 import QuizSession from "../../../models/QuizSession.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
@@ -21,8 +21,10 @@ import {quizOptionsAreEqual} from "../../../models/QuizOptions.ts";
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
     const navigate = useNavigate();
-    const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
+    const {state} = useLocation();
+
+    // Read values passed on state
+    const showingPopupForID: string | null = state ? state.showingPopupFor : null;
 
     // setup states and other stuff
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -49,7 +51,6 @@ export const CreateOverview: FC = () => {
 
     // if we just came back from somewhere and we still want to see the quiz settings, do so based on the query parameter
     const showPopupForQuery = () => {
-        const showingPopupForID = searchParams.get('showingPopupFor');
         if (showingPopupForID == null) return
         const showingPopupForQuiz = quizzes.find(quiz => quiz.id === showingPopupForID)
         if (showingPopupForQuiz == null) return
@@ -141,7 +142,7 @@ export const CreateOverview: FC = () => {
     const handleEditQuizClose = () => {
         setQuizSettingsPopupProps(null)
         setShowingQuizSettingsPopup(false)
-        if (searchParams.get('showingPopupFor')) navigate('/overview') // hack to remove the search parameter so the popup does not keep reappearing if the user refreshes the page
+        if (showingPopupForID != null) navigate('/overview') // hack to remove the search parameter so the popup does not keep reappearing if the user refreshes the page
         setQuizzesFromFirestore() // reload quizzes
     };
     const handleEditQuizEditQuestions = (id: string) => {

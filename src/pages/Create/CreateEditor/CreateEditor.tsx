@@ -17,6 +17,8 @@ import {
     showErrorPageSomethingWentWrong
 } from "../../ErrorPage/ErrorPageExports.ts";
 import {makeAnswer} from "../../../models/Answer.ts";
+import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
+import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 
 export const CreateEditor: FC = () => {
 
@@ -265,7 +267,7 @@ export const CreateEditor: FC = () => {
         showPopup(discardChangesPopup)
     }
     const navigateToOverview = () => {
-        navigate(`/overview?showingPopupFor=${quizID}`)
+        navigate('/overview', {state: {showingPopupFor: quizID}})
     }
     const showPopup = (popup: PopupProps) => {
         setPopupProps(popup)
