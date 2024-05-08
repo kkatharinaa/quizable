@@ -25,6 +25,7 @@ export const QuizSessionQuestion: FC = () => {
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
     const [playerCount, setPlayerCount] = useState(0);
+    const [connection, setConnection] = useState<SignalR.HubConnection | null>(null);
 
     const handleEndQuiz = () => {
         // TODO: later also implement being able to go back to the previous question
@@ -47,8 +48,10 @@ export const QuizSessionQuestion: FC = () => {
     }
     
     const handleSkipQuestion = () => {
-        // move on to answer statistics screen TODO because some state is missing, will probably be fixed by refactor
-        //navigate(`/quiz/result`, {state: {quizSessionId: quizSessionId, quizUserStats: quizUserStats, gameCode: gameCode, question: currentQuestion}})
+        // move on to answer statistics screen
+        console.log("skip question")
+        // TODO: get to work with timer
+        connection?.send("NotifyQuestionSkip", state.quizSessionId)
     }
 
     const showPopup = (popup: PopupProps) => {
@@ -71,7 +74,7 @@ export const QuizSessionQuestion: FC = () => {
               })
             .build();
         
-        connection.on(`questionend:${starterUserId}`, (quizSessionId: string, quizUserStats: QuizSessionUserStats[]) => {
+        connection.on(`questionend:${starterUserId}`, (quizSessionId: string, quizUserStats: QuizSessionUserStats[], currentQuestion: Question) => {
             console.log("Question end")
             navigate(`/quiz/result`, {state: {quizSessionId: quizSessionId, quizUserStats: quizUserStats, gameCode: gameCode, question: currentQuestion}})
         })
@@ -86,6 +89,7 @@ export const QuizSessionQuestion: FC = () => {
         })
 
         connection.start()
+        setConnection(connection)
     }
 
     useEffect(() => {

@@ -72,7 +72,7 @@ export const QuizLobby: FC = () => {
             setJoinedQuizUser(quizUsers);
         })
 
-        connection.on(`play:${quizSessionId}`, (quizSessionIdMaster: string, question: Question) => {
+        connection.on(`start:${quizSessionId}`, (quizSessionIdMaster: string, question: Question) => {
             navigate("/quiz/session", {state: {
                 quizSessionId: quizSessionId, 
                 user: joinedQuizUser,

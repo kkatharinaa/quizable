@@ -23,6 +23,7 @@ export const Timer: FC<TimerProps> = ({ remainingTime, isRunning, onDone}) => {
         remainingTime -= 1
         setFormattedTime(formatTime(remainingTime))
         if (remainingTime <= 0) {
+            console.log("timer over")
             onDone()
         }
     }

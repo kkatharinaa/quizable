@@ -78,7 +78,7 @@ export const QuizSlaveLobby: FC = () => {
         console.log(`play:${quizSessionId}/${userName}`)
 
         // when the game actually starts and you get messages, navigate to the questions
-        connection.on(`play:${quizSessionId}/${userName}`, (_: string, question: Question, quizUser: QuizUser) => {
+        connection.on(`start:${quizSessionId}/${userName}`, (_: string, question: Question, quizUser: QuizUser) => {
             navigate("/quiz/slave/session", {state: {
                 quizSessionId: quizSessionId, 
                 quizUser: quizUser,

@@ -14,6 +14,7 @@ public interface IQuizSessionService
     public bool TryGetQuizSessionQuestions(string quizSessionId, out List<Question> questions);
     public bool TryGetQuizSessionNextQuestion(string quizSessionId, out Question question);
     public Question GetQuizSessionFirstQuestion(string quizSessionId);
+    public Question GetQuizSessionCurrentQuestion(string quizSessionId);
     
     public void AddUserToQuizSession(string quizSessionId, QuizUser quizUser);
     public string AddQuizSession(QuizSession quizSession);

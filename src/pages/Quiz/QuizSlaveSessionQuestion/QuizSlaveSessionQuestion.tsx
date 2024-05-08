@@ -112,12 +112,12 @@ export const QuizSlaveSessionQuestion: FC = () => {
             setSessionState(QuizState.Playing)
             setCurrentQuestion(question)
             setQuizUser(quizUser)
+            setSelectedAnswerID("")
             // TODO: send question to user
         })
 
         connection.on(`questionend:${userName}`, () => {
             // Show the corect answers
-            setSelectedAnswerID("")
             setSessionState(QuizState.Statistics)
         })
 

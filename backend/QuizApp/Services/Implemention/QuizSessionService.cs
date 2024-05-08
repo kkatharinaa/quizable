@@ -377,12 +377,23 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     /// <returns></returns>
     public Question GetQuizSessionFirstQuestion(string quizSessionId)
     {
+        // Get the first question
+        return QuizSessionsQuestions[quizSessionId][0];
+    }
+    
+    /// <summary>
+    /// Get the current question in the quiz session
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <returns></returns>
+    public Question GetQuizSessionCurrentQuestion(string quizSessionId)
+    {
         // Get the current quiz question id 
         string currentQuestionId = QuizSessions.FirstOrDefault(
             session => session.Value.Id == quizSessionId
         ).Value.State.CurrentQuestionId;
         
-        // Get the first question
-        return QuizSessionsQuestions[quizSessionId][0];
+        // Get the current question
+        return QuizSessionsQuestions[quizSessionId].Find(question => currentQuestionId == question.id)!;
     }
 }

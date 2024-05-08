@@ -49,10 +49,13 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
 
             quizSessionService.SetQuizSessionState(quizSessionId, "statistics");
             
+            Question currentQuestion = quizSessionService.GetQuizSessionCurrentQuestion(quizSessionId);
+            
             await masterContext.Clients.All.SendAsync(
                 "questionend:userId1",
                 quizSessionId, 
-                quizUsersStatsList);
+                quizUsersStatsList,
+                currentQuestion);
             
             foreach(QuizSessionUserStats user in quizUsersStatsList)
             {
