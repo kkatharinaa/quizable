@@ -112,8 +112,6 @@ export const QuizSlaveLobby: FC = () => {
             <BackgroundGems type={BackgroundGemsType.PrimarySlave2}/>
             <div className="quizSlaveSessionLobbyContent">
                 <h1 className="quizSlaveSessionLobbyTitle">Waiting for players...</h1>
-            </div>
-            <div className="lobbyContent">
                 {joinedQuizUser.length >= 1 && // change this back to joinedQuizUsers
                     <div className="joinedUserSection">
                         <div className="joinedUsersSectionCount">
