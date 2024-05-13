@@ -20,10 +20,10 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
     
     // Message from Client (Master Frontend) to Notify every quiz session participant to start the quiz
     // Master and slave will receive a message from the backend when exactly to start
-    public async Task NotifyPlayQuiz(string quizSessionId)
+    public async Task NotifyPlayQuiz(string quizSessionId, bool justStarted)
     {
         // Set the state of the quiz session
-        quizSessionService.SetQuizSessionState(quizSessionId, "play");
+        quizSessionService.SetQuizSessionState(quizSessionId, "playing");
         
         bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsers);
 
@@ -38,16 +38,26 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
                 // use tasks to notify all in parallel and at the same time
                 List<Task> tasks = new ();
                 
-                if (isNextQuestion)
+                if (justStarted)
                 {
+                    nextQuestion = quizSessionService.GetQuizSessionFirstQuestion(quizSessionId);
+                }
+                
+                if (isNextQuestion || justStarted)
+                {
+                    // update the current question id
+                    quizSessionService.SetQuizSessionCurrentQuestionId(quizSessionId, nextQuestion.id);
+
+                    string message = justStarted ? "start" : "play";
+                    
                     // Get the next question
-                    tasks.Add(Task.Run(() => Clients.All.SendAsync($"play:{quizSessionId}", quizSessionId, nextQuestion)));
+                    tasks.Add(Task.Run(() => Clients.All.SendAsync($"{message}:{quizSessionId}", quizSessionId, nextQuestion)));
             
                     foreach(QuizSessionUserStats quizSessionUserStats in quizUsers)
                     {
                         tasks.Add(Task.Run(() =>
                             slaveContext.Clients.All.SendAsync(
-                                $"play:{quizSessionId}/{quizSessionUserStats.User.Identifier}",quizSessionId, nextQuestion, quizSessionUserStats.User)));
+                                $"{message}:{quizSessionId}/{quizSessionUserStats.User.Identifier}",quizSessionId, nextQuestion, quizSessionUserStats.User)));
                     }
 
                     await Task.WhenAll(tasks.ToList());
@@ -55,9 +65,19 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
                 else
                 {
                     // no next question, end the quiz.
+                    quizSessionService.SetQuizSessionState(quizSessionId, "end");
                     
-                    // send end message back to the master and the slave ("end:quizSessionId" i think)
+                    // send end message back to the master and the slave
+                    tasks.Add(Task.Run(() => Clients.All.SendAsync($"end:{quizSessionId}")));
+            
+                    foreach(QuizSessionUserStats quizSessionUserStats in quizUsers)
+                    {
+                        tasks.Add(Task.Run(() =>
+                            slaveContext.Clients.All.SendAsync(
+                                $"end:{quizSessionId}/{quizSessionUserStats.User.Identifier}")));
+                    }
                     
+                    await Task.WhenAll(tasks.ToList());
                 }
             }
             else logger.LogError("Could not find questions for this quiz session!");
@@ -66,21 +86,26 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
 
     // Notifies every participant that the question has been skipped and we should move on to the next question after scoreboard
     // TODO: Change Diagram to add quiz user name too
-    public async Task NotifyQuestionSkip(string quizSessionId, string quizUserName, Question question)
+    public async Task NotifyQuestionSkip(string quizSessionId)
     {
         bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsersStatsList);
 
         if (isQuizSessionUser)
         {
+            quizSessionService.SetQuizSessionState(quizSessionId, "statistics");
+
+            Question currentQuestion = quizSessionService.GetQuizSessionCurrentQuestion(quizSessionId);
+            
             // use tasks to notify all in parallel and at the same time
             List<Task> tasks = new();
             
             tasks.Add(
             Task.Run(
                     () => Clients.All.SendAsync(
-                    $"questionend:{quizUserName}", 
+                    $"questionend:userId1", 
                     quizSessionId, 
-                    quizUsersStatsList)
+                    quizUsersStatsList,
+                    currentQuestion)
                 )
             );
             
@@ -88,7 +113,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             {
                 tasks.Add(Task.Run(() =>
                     slaveContext.Clients.All.SendAsync(
-                        $"questionend:{quizSessionId}/{quizSessionUserStats.User.Identifier}",
+                        $"questionend:{quizSessionUserStats.User.Identifier}",
                             quizSessionId, 
                             quizUsersStatsList)
                     ));

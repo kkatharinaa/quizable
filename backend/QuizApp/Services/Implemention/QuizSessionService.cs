@@ -258,6 +258,24 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                 }
             ).ToDictionary();
     }
+    
+    /// <summary>
+    /// Set the new currentQuestionId
+    /// </summary>
+    /// <param name="quizSessionId">id of the quiz session to set state</param>
+    /// <param name="newQuestionId">id of the new current question</param>
+    public void SetQuizSessionCurrentQuestionId(string quizSessionId, string newQuestionId)
+    {
+        QuizSessions = QuizSessions
+            .Select(session =>
+                {
+                    if (session.Value.Id == quizSessionId)
+                        session.Value.State.CurrentQuestionId = newQuestionId;
+
+                    return session;
+                }
+            ).ToDictionary();
+    }
 
     /// <summary>
     /// Get quiz session options
@@ -323,8 +341,6 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     /// <exception cref="NotImplementedException"></exception>
     public bool TryGetQuizSessionNextQuestion(string quizSessionId,[MaybeNullWhen(false)] out Question question)
     {
-        bool nextQuestionExists = false;
-        
         // Get the current quiz question id 
         string currentQuestionId = QuizSessions.FirstOrDefault(
             session => session.Value.Id == quizSessionId
@@ -351,8 +367,33 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         }
 
         question = QuizSessionsQuestions[quizSessionId][resultIndex + 1];
-        return nextQuestionExists;
+        return true;
     }
 
+    /// <summary>
+    /// Get the first question in the quiz session
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <returns></returns>
+    public Question GetQuizSessionFirstQuestion(string quizSessionId)
+    {
+        // Get the first question
+        return QuizSessionsQuestions[quizSessionId][0];
+    }
     
+    /// <summary>
+    /// Get the current question in the quiz session
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <returns></returns>
+    public Question GetQuizSessionCurrentQuestion(string quizSessionId)
+    {
+        // Get the current quiz question id 
+        string currentQuestionId = QuizSessions.FirstOrDefault(
+            session => session.Value.Id == quizSessionId
+        ).Value.State.CurrentQuestionId;
+        
+        // Get the current question
+        return QuizSessionsQuestions[quizSessionId].Find(question => currentQuestionId == question.id)!;
+    }
 }
