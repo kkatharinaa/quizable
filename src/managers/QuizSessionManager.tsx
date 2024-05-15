@@ -16,7 +16,10 @@ export interface QuizSessionManagerInterface {
     quizState: string | null;
     currentQuestionId: string | null;
     currentQuestion: Question | null;
+    currentQuestionIsFirstQuestion: boolean;
     userStats: QuizSessionUserStats[] | null;
+    userStatsOrderedByScore: QuizSessionUserStats[] | null;
+    userStatsOrderedByScoreWithoutCurrentQuestion: QuizSessionUserStats[] | null;
     sessionExists: boolean;
 }
 
@@ -48,7 +51,10 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             quizState: instance.quizState,
             currentQuestionId: instance.currentQuestionId,
             currentQuestion: instance.currentQuestion,
+            currentQuestionIsFirstQuestion: instance.currentQuestionIsFirstQuestion,
             userStats: instance.userStats,
+            userStatsOrderedByScore: instance.userStatsOrderedByScore,
+            userStatsOrderedByScoreWithoutCurrentQuestion: instance.userStatsOrderedByScoreWithoutCurrentQuestion,
             sessionExists: instance.sessionExists,
         }
     }
@@ -88,9 +94,46 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         if (this._quiz == null || this._quizSession == null) return null
         return this._quiz?.questions.find(question => question.id == this._quizSession?.state.currentQuestionId) ?? null
     }
+    public get currentQuestionIsFirstQuestion(): boolean {
+        const currentQuestion = this._quiz?.questions.find(question => question.id == this._quizSession?.state.currentQuestionId) ?? null
+        const firstQuestion = this._quiz?.questions[0]
+        return currentQuestion?.id === firstQuestion?.id;
+
+    }
     public get userStats(): QuizSessionUserStats[] | null {
         if (this._quizSession == null) return null
         return this._quizSession?.state.usersStats
+    }
+    public get userStatsOrderedByScore(): QuizSessionUserStats[] | null {
+        if (this._quizSession == null) return null
+        return this._quizSession?.state.usersStats.sort((a, b) => {
+            if (b.score !== a.score) {
+                return b.score - a.score;
+            } else {
+                // If scores are equal, sort alphabetically by user id
+                return a.user.id.localeCompare(b.user.id);
+            }
+        })
+    }
+    public get userStatsOrderedByScoreWithoutCurrentQuestion(): QuizSessionUserStats[] | null {
+        // this function is necessary so that we can display on the leaderboard if users moved up or down on the leaderboard or if they stayed in the same spot within the ranking
+        if (this._quizSession == null) return null
+        const usersStatsCopy: QuizSessionUserStats[] = this._quizSession!.state.usersStats.map(stats => ({ ...stats }));
+        usersStatsCopy.forEach(stats => {
+            const pointsReceivedForCurrentQuestion = stats.answers
+                .filter(answer => answer.questionId === this._quizSession?.state.currentQuestionId)
+                .reduce((total, answer) => total + answer.pointsReceived, 0);
+
+            stats.score -= pointsReceivedForCurrentQuestion;
+        });
+        return usersStatsCopy.sort((a, b) => {
+            if (b.score !== a.score) {
+                return b.score - a.score;
+            } else {
+                // If scores are equal, sort alphabetically by user id
+                return a.user.id.localeCompare(b.user.id);
+            }
+        })
     }
     public get sessionExists(): boolean {
         return this._quizSession != null &&

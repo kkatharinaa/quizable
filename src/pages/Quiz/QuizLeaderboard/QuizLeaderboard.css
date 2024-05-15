@@ -16,5 +16,42 @@
 }
 
 .quizLeaderboard .content {
+    display: flex;
+    padding: 100px 100px 0 100px;
+    flex-direction: column;
+    align-items: center;
+    gap: 100px;
+    flex: 1 0 0;
+    align-self: stretch;
+}
 
+.quizLeaderboard .content h1 {
+    color: var(--white);
+    text-align: center;
+    font-family: "Inika", serif;
+    font-size: 68px;
+    font-style: normal;
+    font-weight: bold;
+    line-height: normal;
+    margin: 0;
+}
+
+.quizLeaderboard .content .usersList {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    align-self: stretch;
+}
+
+.quizLeaderboard .content .usersList .quizPlayerCard {
+    width: 100%;
+    max-width: 100%;
+}
+
+@media only screen and (max-width: 480px) {
+    .quizLeaderboard .content h1 {
+        font-size: 32px;
+    }
 }

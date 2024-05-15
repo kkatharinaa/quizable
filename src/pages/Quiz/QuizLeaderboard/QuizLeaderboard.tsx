@@ -8,6 +8,15 @@ import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
+import {QuizPlayerCard} from "../../../components/QuizPlayerCard/QuizPlayerCard.tsx";
+import {QuizPlayerCardType} from "../../../components/QuizPlayerCard/QuizPlayerCardExports.ts";
+import QuizSessionUserStats from "../../../models/QuizSessionUserStats.ts";
+
+enum LeaderboardChange {
+    MovedUp,
+    Stayed,
+    MovedDown
+}
 
 export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSessionManager}) => {
 
@@ -17,9 +26,41 @@ export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, qu
         QuizSessionManager.getInstance().toNextQuestionOrEnd(false)
     }
 
+    const getLeaderboardChange = (userStat: QuizSessionUserStats): LeaderboardChange => {
+        if (quizSessionManager.currentQuestionIsFirstQuestion) return LeaderboardChange.Stayed
+
+        const currentPosition = quizSessionManager.userStatsOrderedByScore?.findIndex(stats => stats.user.id === userStat.user.id)
+        const previousPosition = quizSessionManager.userStatsOrderedByScoreWithoutCurrentQuestion?.findIndex(stats => stats.user.id === userStat.user.id)
+
+        if (currentPosition == undefined || previousPosition == undefined) return LeaderboardChange.Stayed
+
+        if (currentPosition < previousPosition) return LeaderboardChange.MovedUp
+        if (currentPosition > previousPosition) return LeaderboardChange.MovedDown
+
+        return LeaderboardChange.Stayed
+    }
+
+    const getQuizPlayerCardType = (userStat: QuizSessionUserStats): QuizPlayerCardType => {
+        const leaderboardChange = getLeaderboardChange(userStat)
+
+        switch (leaderboardChange) {
+            case LeaderboardChange.MovedUp:
+                return QuizPlayerCardType.DesktopScoreUp
+            case LeaderboardChange.MovedDown:
+                return QuizPlayerCardType.DesktopScoreDown
+            case LeaderboardChange.Stayed:
+                return QuizPlayerCardType.DesktopScore
+        }
+    }
+
+    const showLeaderboard = () => {
+        return quizSessionManager.quiz?.options.isLeaderboardBetween ||
+            quizSessionManager.quiz?.questions[quizSessionManager.quiz?.questions.length-1].id == quizSessionManager.quizSession?.state.currentQuestionId
+    }
+
     useEffect(() => {
         // skip this page if the quizoption says so and we are not on the very last question
-        if (!quizSessionManager.quiz?.options.isLeaderboardBetween && quizSessionManager.quiz?.questions[quizSessionManager.quiz?.questions.length-1].id != quizSessionManager.quizSession?.state.currentQuestionId) {
+        if (!showLeaderboard()) {
             handleContinue()
             return
         }
@@ -33,10 +74,23 @@ export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, qu
             <QuizCodeTag
                 code={quizSessionManager.quizCode}
             />
+            { showLeaderboard() &&
             <div className="content">
-                { /* TODO */ }
+                <h1>Leaderboard</h1>
+                <div className="usersList">
+                    {quizSessionManager.userStats?.map((userStat) => (
+                        <QuizPlayerCard
+                            key={userStat.user.id}
+                            type={getQuizPlayerCardType(userStat)}
+                            playerName={userStat.user.identifier}
+                            playerScore={userStat.score}>
+                        </QuizPlayerCard>
+                    ))}
+                </div>
             </div>
+            }
 
+            { showLeaderboard() &&
             <BottomNavBar
                 secondaryButtonText="End Quiz"
                 secondaryButtonIcon={POWER_ICON_DARK}
@@ -47,6 +101,7 @@ export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, qu
                 onSecondaryClick={endQuizSession}
                 onPrimaryClick={handleContinue}
             />
+            }
         </div>
     );
 }

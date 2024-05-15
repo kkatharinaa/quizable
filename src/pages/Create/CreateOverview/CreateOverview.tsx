@@ -102,10 +102,7 @@ export const CreateOverview: FC = () => {
                 usersStats: [ /**keep it empty at the beginning */],
                 currentQuizState: "lobby"
             },
-            options: quizToBePlayed!.options
         };
-
-        console.log(JSON.stringify(quizToBePlayed!.options))
 
         QuizSessionManager.getInstance().killSession()
 

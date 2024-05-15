@@ -214,22 +214,25 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             {
                 if (quizSession.Value.Id == quizSessionId)
                 {
+                    Question currentQuestion = this.GetQuizSessionCurrentQuestion(quizSessionId);
+                    
                     quizSession.Value.State.UsersStats = quizSession.Value.State.UsersStats.Select(stat =>
                     {
                         if (stat.User.Id == quizUserId)
                         {
+                            // TODO: Formula to calculate the pointsReceived based on the time taken, if currentQuestion.questionPointsModifier is 1 (currently either 0 or 1 for should reaction time be taken into account or not)
                             QuizSessionUserStatsAnswer statsAnswer = new QuizSessionUserStatsAnswer{
                                 QuestionId = questionId,
                                 AnswerId = answer.id,
-                                PointsReceived = answer.correct ? quizSession.Value.Options.QuestionPoints : 0,
+                                PointsReceived = answer.correct ? currentQuestion.questionPoints : 0,
                                 TimeTaken = 0
                             };
                             stat.Answers.Add(statsAnswer);
                             
                             // Calculate user score
+                            stat.Score = 0;
                             stat.Answers.ForEach(answer =>
                             {
-                                // TODO: Formula to calculate the real value.
                                 stat.Score += answer.PointsReceived;
                             });
                         }

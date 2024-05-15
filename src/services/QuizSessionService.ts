@@ -1,6 +1,5 @@
 import "firebase/firestore";
 import QuizSession from "../models/QuizSession";
-import QuizUser from "../models/QuizUser";
 import { Question } from "../models/Question";
 
 export default class QuizSessionService{

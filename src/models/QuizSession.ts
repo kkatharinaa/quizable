@@ -1,6 +1,4 @@
-import {QuizOptions, quizOptionsAreEqual} from "./QuizOptions";
 import QuizSessionState, {quizSessionStatesAreEqual} from "./QuizSessionState";
-import {isEqualNullable} from "../helper/EqualHelpers.ts";
 
 // Note how we use interface instead of class
 // Classes are good for when you also want to give it some functionality
@@ -11,8 +9,7 @@ export default interface QuizSession{
     id: string,
     quizId: string,
     state: QuizSessionState,
-    deviceId: string,
-    options?: QuizOptions
+    deviceId: string
 }
 
 export const quizSessionsAreEqual = (a: QuizSession, b: QuizSession): boolean => {
@@ -20,5 +17,4 @@ export const quizSessionsAreEqual = (a: QuizSession, b: QuizSession): boolean =>
         && a.quizId === b.quizId
         && quizSessionStatesAreEqual(a.state, b.state)
         && a.deviceId === b.deviceId
-        && isEqualNullable(a.options, b.options, quizOptionsAreEqual)
 }

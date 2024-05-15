@@ -6,7 +6,7 @@ import { CHEVRONDOWN_ICON_RED, CHEVRONUP_ICON_GREEN } from "../../assets/Icons"
 
 export const QuizPlayerCard: FC<QuizPlayerCardProps> = (
     {
-        type = QuizPlayerCardType.DesktopScoreUp, 
+        type = QuizPlayerCardType.DesktopNormal,
         playerName,
         playerScore
     }
