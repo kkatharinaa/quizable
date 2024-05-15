@@ -7,9 +7,6 @@
     max-width: 15vw;
     width: 100px;
 }
-.statisticsBar.correct {
-    box-shadow: 0px 0px 40px 4px var(--white);
-}
 
 .statisticsBar .countAndCorrect {
     display: flex;
@@ -58,6 +55,9 @@
 .statisticsBar .bar.amethyst {
     background: linear-gradient(180deg, #730041 0%, #3B0022 100%);
 }
+.statisticsBar.correct .bar {
+    box-shadow: 0px 0px 40px 4px var(--white);
+}
 
 .statisticsBar .answerValue {
     display: flex;
@@ -70,6 +70,9 @@
     background: var(--black);
     position: relative;
     height: calc(84px + 40px);
+}
+.statisticsBar.correct .answerValue {
+    box-shadow: 0px 0px 40px 4px var(--white);
 }
 .statisticsBar .answerValue object {
     z-index: 1;
