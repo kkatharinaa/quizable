@@ -10,16 +10,18 @@ import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundG
 import {Question} from "../../../models/Question.ts";
 import {StatisticsBar} from "../../../components/StatisticsBar/StatisticsBar.tsx";
 import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
+import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
+import {QuizState} from "../../../models/QuizSessionState.ts";
 
-export const QuizResult: FC<QuizMasterChildrenProps> = ({quizCode, quizSession, quiz, endQuizSession}) => {
+export const QuizResult: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSessionManager}) => {
 
-    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(quiz.questions.find(question => question.id == quizSession.state.currentQuestionId) ?? null)
+    const [currentQuestion] = useState<Question | null>(quizSessionManager.currentQuestion)
 
     const getAnswersCountForAnswer = (answerID: string): number => {
-        if (quizSession == null) return 0
-        return quizSession.state.usersStats.reduce((count, userStat) => {
+        if (quizSessionManager.userStats == null) return 0
+        return quizSessionManager.userStats.reduce((count, userStat) => {
             userStat.answers.forEach(answer => {
-                if (answer.questionId === quizSession.state.currentQuestionId && answer.answerId === answerID) {
+                if (answer.questionId === quizSessionManager.currentQuestionId && answer.answerId === answerID) {
                     count++;
                 }
             });
@@ -27,10 +29,10 @@ export const QuizResult: FC<QuizMasterChildrenProps> = ({quizCode, quizSession, 
         }, 0)
     }
     const getTotalAnswersCountForQuestion = (): number => {
-        if (quizSession == null) return 0
-        return quizSession.state.usersStats.reduce((count, userStat) => {
+        if (quizSessionManager.userStats == null) return 0
+        return quizSessionManager.userStats.reduce((count, userStat) => {
             userStat.answers.forEach(answer => {
-                if (answer.questionId === quizSession.state.currentQuestionId) {
+                if (answer.questionId === quizSessionManager.currentQuestionId) {
                     count++;
                 }
             });
@@ -39,7 +41,8 @@ export const QuizResult: FC<QuizMasterChildrenProps> = ({quizCode, quizSession, 
     }
 
     const handleContinue = () => {
-        // TODO: move on to leaderboard, for this the quizstate needs to be set to leaderboard
+        // move on to leaderboard, for this the quizstate needs to be set to leaderboard
+        QuizSessionManager.getInstance().changeState(QuizState.leaderboard)
     }
 
     return (
@@ -48,7 +51,7 @@ export const QuizResult: FC<QuizMasterChildrenProps> = ({quizCode, quizSession, 
                 type={BackgroundGemsType.Primary2}
             />
             <QuizCodeTag
-                code={quizCode}
+                code={quizSessionManager.quizCode}
             />
             <div className="content">
                 <div className="statistics">

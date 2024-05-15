@@ -16,5 +16,21 @@
 }
 
 .quizEnd .content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
 
+.quizEnd .content h1 {
+    color: var(--white);
+    text-align: center;
+    font-family: "Inika", serif;
+    font-size: 48px;
+    font-style: normal;
+    font-weight: bold;
+    line-height: normal;
+    margin: 0;
 }

@@ -7,7 +7,6 @@ import { BackgroundGemsType } from "../../../components/BackgroundGems/Backgroun
 import {RETURN_ICON_DARK} from "../../../assets/Icons.ts";
 import {QuizSlaveChildrenProps} from "../QuizSlave/QuizSlave.tsx";
 
-
 export const QuizSlaveLobby: FC<QuizSlaveChildrenProps> = ({leaveQuizSession}) => {
 
     return (

@@ -32,6 +32,7 @@ export const showPopupLeaveSession = (showPopup: (popup: PopupProps) => void, hi
         },
         onPrimaryClick: () => {
             leaveSession()
+            hidePopup()
             navigate('/')
         },
     }

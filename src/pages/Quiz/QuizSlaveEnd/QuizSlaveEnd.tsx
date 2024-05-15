@@ -12,7 +12,8 @@ export const QuizSlaveEnd: FC<QuizSlaveChildrenProps> = ({leaveQuizSession}) => 
         <div className="quizSlaveEnd">
             <BackgroundGems type={BackgroundGemsType.PrimarySlave2}/>
             <div className="content">
-                { /* TODO */ }
+                <h1>Thank you for playing!</h1>
+                { /* TODO */}
             </div>
             <BottomNavBar
                 secondaryButtonText="To Home"

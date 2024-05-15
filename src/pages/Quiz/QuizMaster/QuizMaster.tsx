@@ -1,16 +1,10 @@
 import {FC, useEffect, useState} from "react"
 import "./QuizMaster.css"
 import {useLocation, useNavigate} from "react-router-dom";
-import QuizSession from "../../../models/QuizSession";
-import * as SignalR from "@microsoft/signalr";
-import QuizUser from "../../../models/QuizUser";
-import {v4 as uuid} from "uuid"
-import {getDeviceId} from "../../../helper/DeviceHelper";
 import {
     ErrorPageLinkedTo, showErrorPageNothingToFind,
     showErrorPageSomethingWentWrong,
 } from "../../ErrorPage/ErrorPageExports.ts";
-import {Quiz} from "../../../models/Quiz.ts";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
 import {AuthenticatedUser, defaultAuthenticatedUser} from "../../../models/AuthenticatedUser.ts";
 import {QuizState} from "../../../models/QuizSessionState.ts";
@@ -22,13 +16,11 @@ import {QuizResult} from "../QuizResult/QuizResult.tsx";
 import {QuizLeaderboard} from "../QuizLeaderboard/QuizLeaderboard.tsx";
 import {QuizPodium} from "../QuizPodium/QuizPodium.tsx";
 import {QuizEnd} from "../QuizEnd/QuizEnd.tsx";
+import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
+import {QuizSessionManager, QuizSessionManagerInterface} from "../../../managers/QuizSessionManager.tsx";
 
 export interface QuizMasterChildrenProps {
-    connection: SignalR.HubConnection
-    quizCode: string
-    quizSession: QuizSession
-    quiz: Quiz
-    authenticatedUser: AuthenticatedUser
+    quizSessionManager: QuizSessionManagerInterface
     endQuizSession: () => void
 }
 
@@ -40,50 +32,10 @@ export const QuizMaster: FC = () => {
     const quizSessionId: string | null = state ? state.quizSessionId : null;
     const quizId: string | null = state ? state.quizId : null;
 
-    const [quiz, setQuiz] = useState<Quiz | null>(null);
-    const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
-    const [quizCode, setQuizCode] = useState<string | null>(null);
-    const [connection, setConnection] = useState<SignalR.HubConnection>();
-    const [authUser, setAuthUser] = useState<AuthenticatedUser | null>(null);
+    const [quizSessionManager, setQuizSessionManager] = useState(QuizSessionManager.getInstanceAsInterface());
 
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
-
-    const initSignalR = async (hostUserId: string): Promise<SignalR.HubConnection> => {
-        // start websocket connection
-        const port: number = 5296
-        const url: string = `http://localhost:${port}`
-        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
-
-        const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
-            .withUrl(url + "/master", {
-                skipNegotiation: true,
-                transport: SignalR.HttpTransportType.WebSockets
-            })
-            .build();
-
-        connection.on(hostUserId, (quizEntryId: string, message: QuizSession) => {
-            // Get the entry id
-            // and quizSession back
-            console.log("Backend Message from: " + quizEntryId)
-
-            setQuizCode(quizEntryId);
-            setQuizSession(message)
-        })
-
-        connection.start()
-            .then(async () => {
-                const quizUser: QuizUser = {
-                    id: uuid(),
-                    identifier: hostUserId,
-                    deviceId: await getDeviceId()
-                }
-                connection.send("requestQuizSession", quizUser, quizSessionId)
-            })
-            .catch((err) => console.error(err))
-
-        return connection
-    }
 
     const setQuizFromFirestore = async (quizID: string) => {
         if (quizID == null) {
@@ -93,27 +45,16 @@ export const QuizMaster: FC = () => {
         return await QuizRepository.getById(quizID)
     }
 
-    const checkUserIsHost = async () => {
-        if (authUser == null || quiz == null || quizSession == null) {
-            showErrorPageSomethingWentWrong(navigate)
-            return
-        }
-        const deviceId = await getDeviceId()
-        if (authUser.id != quiz.quizUser.id || deviceId != quizSession.deviceId) {
-            showErrorPageNothingToFind(navigate)
-        }
-    }
-
-    const statesAreNotNull = (): boolean => {
-        return quiz != null &&
-            quizSession != null &&
-            quizCode != null &&
-            connection != null &&
-            authUser != null
-    }
-
     const handleEndQuizSession = () => {
         // TODO: later also implement being able to go back to the previous question
+        // navigate to quiz end screen, where user can still download a report before the session gets killed on the server - for this the quizstate needs to be set to endscreen
+        // OR if the user is already on the quiz end screen (quizstate is already set to end screen), kill the quiz session and take the user back to home -> no popup in this case
+        if (QuizSessionManager.getInstance().quizState == QuizState.endscreen) {
+            QuizSessionManager.getInstance().killSession()
+            navigate('/')
+            return;
+        }
+
         const endQuizPopup: PopupProps = {
             title: "Are you sure you want to end this quiz session?",
             message: null,
@@ -126,8 +67,12 @@ export const QuizMaster: FC = () => {
                 setShowingPopup(false)
             },
             onPrimaryClick: () => {
-                // TODO: navigate to quiz end screen, where user can still download a report before the session gets killed on the server - for this the quizstate needs to be set to endscreen
-                // TODO: if the user is already on the quiz end screen (quizstate is already set to end screen), kill the quiz session and take the user back to home
+                if (QuizSessionManager.getInstance().quizSession == null) {
+                    showPopupSomethingWentWrong(showPopup, hidePopup)
+                    return
+                }
+                QuizSessionManager.getInstance().changeState(QuizState.endscreen)
+                hidePopup()
             },
         }
         showPopup(endQuizPopup)
@@ -137,10 +82,11 @@ export const QuizMaster: FC = () => {
         setPopupProps(popup)
         setShowingPopup(true)
     }
+    const hidePopup = () => {
+        setShowingPopup(false)
+    }
 
     useEffect(() => {
-        console.log("Quiz session in Quiz Lobby: ", quizSessionId)
-
         // make sure we have all necessary info passed to the route
         if (quizSessionId == null || quizId == null) {
             showErrorPageNothingToFind(navigate)
@@ -149,7 +95,11 @@ export const QuizMaster: FC = () => {
 
         // get authenticated user
         const host: AuthenticatedUser = defaultAuthenticatedUser // TODO: replace with authentication
-        setAuthUser(host)
+
+        const handleQuizSessionManagerChange = () => {
+            setQuizSessionManager(QuizSessionManager.getInstanceAsInterface());
+        };
+        QuizSessionManager.getInstance().subscribe(handleQuizSessionManagerChange);
 
         // get quiz from firebase and setup connection
         const setUp = async () => {
@@ -158,77 +108,52 @@ export const QuizMaster: FC = () => {
                 showErrorPageSomethingWentWrong(navigate)
                 return
             }
-            setQuiz(quiz);
 
-            const connection = await initSignalR(host.id)
-            setConnection(connection);
-
-            // prevent users from illegally opening this route and accessing a session that is not running, not theirs, etc... TODO: check because not working
-            //checkUserIsHost()
+            await QuizSessionManager.getInstance().setUp(quizSessionId, host.id, quiz)
         }
 
         setUp()
+
+        return () => {
+            QuizSessionManager.getInstance().unsubscribe(handleQuizSessionManagerChange);
+        };
     }, [])
 
     return (
         <div className="quizMaster">
-            { (quizSession?.state?.currentQuizState === QuizState.Lobby && statesAreNotNull()) &&
+            { (quizSessionManager.quizState === QuizState.lobby && quizSessionManager.sessionExists) &&
                 <QuizLobby
-                    connection={connection!}
-                    quizCode={quizCode!}
-                    quiz={quiz!}
-                    quizSession={quizSession!}
-                    authenticatedUser={authUser!}
+                    quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
                 />
             }
-            { (quizSession?.state?.currentQuizState === QuizState.Playing && statesAreNotNull()) &&
+            { (quizSessionManager.quizState === QuizState.playing && quizSessionManager.sessionExists) &&
                 <QuizSessionQuestion
-                    connection={connection!}
-                    quizCode={quizCode!}
-                    quiz={quiz!}
-                    quizSession={quizSession!}
-                    authenticatedUser={authUser!}
+                    quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
                 />
             }
-            { (quizSession?.state?.currentQuizState === QuizState.Statistics && statesAreNotNull()) &&
+            { (quizSessionManager.quizState === QuizState.statistics && quizSessionManager.sessionExists) &&
                 <QuizResult
-                    connection={connection!}
-                    quizCode={quizCode!}
-                    quiz={quiz!}
-                    quizSession={quizSession!}
-                    authenticatedUser={authUser!}
+                    quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
                 />
             }
-            { (quizSession?.state?.currentQuizState === QuizState.Leaderboard && statesAreNotNull()) &&
+            { (quizSessionManager.quizState === QuizState.leaderboard && quizSessionManager.sessionExists) &&
                 <QuizLeaderboard
-                    connection={connection!}
-                    quizCode={quizCode!}
-                    quiz={quiz!}
-                    quizSession={quizSession!}
-                    authenticatedUser={authUser!}
+                    quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
                 />
             }
-            { (quizSession?.state?.currentQuizState === QuizState.Podium && statesAreNotNull()) &&
+            { (quizSessionManager.quizState === QuizState.podium && quizSessionManager.sessionExists) &&
                 <QuizPodium
-                    connection={connection!}
-                    quizCode={quizCode!}
-                    quiz={quiz!}
-                    quizSession={quizSession!}
-                    authenticatedUser={authUser!}
+                    quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
                 />
             }
-            { (quizSession?.state?.currentQuizState === QuizState.EndScreen && statesAreNotNull()) &&
+            { (quizSessionManager.quizState === QuizState.endscreen && quizSessionManager.sessionExists) &&
                 <QuizEnd
-                    connection={connection!}
-                    quizCode={quizCode!}
-                    quiz={quiz!}
-                    quizSession={quizSession!}
-                    authenticatedUser={authUser!}
+                    quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
                 />
             }

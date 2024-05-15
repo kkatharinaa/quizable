@@ -11,6 +11,8 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
     public async Task RequestQuizSession(QuizUser quizUser, string quizSessionId)
     {
         (QuizSession? quizSession, string quizEntryId) = quizSessionService.GetQuizSessionById(quizSessionId);
+        
+        // TODO: change it so backend knows who the quiz user is of our quizsession, meaning we don't always have to manually send "userId1" -> required for auth stuff
 
         if (quizSession is not null)
         {
@@ -34,9 +36,6 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             if (hasQuestions)
             {
                 bool isNextQuestion = quizSessionService.TryGetQuizSessionNextQuestion(quizSessionId, out var nextQuestion);
-
-                // use tasks to notify all in parallel and at the same time
-                List<Task> tasks = new ();
                 
                 if (justStarted)
                 {
@@ -48,36 +47,14 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
                     // update the current question id
                     quizSessionService.SetQuizSessionCurrentQuestionId(quizSessionId, nextQuestion.id);
 
-                    string message = justStarted ? "start" : "play";
-                    
-                    // Get the next question
-                    tasks.Add(Task.Run(() => Clients.All.SendAsync($"{message}:{quizSessionId}", quizSessionId, nextQuestion)));
-            
-                    foreach(QuizSessionUserStats quizSessionUserStats in quizUsers)
-                    {
-                        tasks.Add(Task.Run(() =>
-                            slaveContext.Clients.All.SendAsync(
-                                $"{message}:{quizSessionId}/{quizSessionUserStats.User.Identifier}",quizSessionId, nextQuestion, quizSessionUserStats.User)));
-                    }
-
-                    await Task.WhenAll(tasks.ToList());
+                    await NotifyStateChange(quizSessionId);
                 }
                 else
                 {
                     // no next question, end the quiz.
-                    quizSessionService.SetQuizSessionState(quizSessionId, "end");
+                    quizSessionService.SetQuizSessionState(quizSessionId, "podium");
                     
-                    // send end message back to the master and the slave
-                    tasks.Add(Task.Run(() => Clients.All.SendAsync($"end:{quizSessionId}")));
-            
-                    foreach(QuizSessionUserStats quizSessionUserStats in quizUsers)
-                    {
-                        tasks.Add(Task.Run(() =>
-                            slaveContext.Clients.All.SendAsync(
-                                $"end:{quizSessionId}/{quizSessionUserStats.User.Identifier}")));
-                    }
-                    
-                    await Task.WhenAll(tasks.ToList());
+                    await NotifyStateChange(quizSessionId);
                 }
             }
             else logger.LogError("Could not find questions for this quiz session!");
@@ -93,8 +70,6 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
         if (isQuizSessionUser)
         {
             quizSessionService.SetQuizSessionState(quizSessionId, "statistics");
-
-            Question currentQuestion = quizSessionService.GetQuizSessionCurrentQuestion(quizSessionId);
             
             // use tasks to notify all in parallel and at the same time
             List<Task> tasks = new();
@@ -102,10 +77,9 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             tasks.Add(
             Task.Run(
                     () => Clients.All.SendAsync(
-                    $"questionend:userId1", 
-                    quizSessionId, 
+                    $"questionend:userId1",
                     quizUsersStatsList,
-                    currentQuestion)
+                    "statistics")
                 )
             );
             
@@ -114,9 +88,47 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
                 tasks.Add(Task.Run(() =>
                     slaveContext.Clients.All.SendAsync(
                         $"questionend:{quizSessionUserStats.User.Identifier}",
-                            quizSessionId, 
-                            quizUsersStatsList)
+                            quizUsersStatsList,
+                            "statistics")
                     ));
+                
+            }
+
+            await Task.WhenAll(tasks.ToList());
+        }
+    }
+    
+    // Notify everyone of the quiz session state, and can set a new state first if necessary
+    public async Task NotifyStateChange(string quizSessionId, string? newState = null)
+    {
+        bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsersStatsList);
+
+        if (isQuizSessionUser)
+        {
+            if (newState != null) quizSessionService.SetQuizSessionState(quizSessionId, newState);
+            string state = quizSessionService.GetQuizSessionState(quizSessionId);
+            Question currentQuestion = quizSessionService.GetQuizSessionCurrentQuestion(quizSessionId);
+            
+            // use tasks to notify all in parallel and at the same time
+            List<Task> tasks = new();
+            
+            tasks.Add(
+                Task.Run(
+                    () => Clients.All.SendAsync(
+                        $"statechange:userId1",
+                        state,
+                        currentQuestion.id)
+                )
+            );
+            
+            foreach (QuizSessionUserStats quizSessionUserStats in quizUsersStatsList)
+            {
+                tasks.Add(Task.Run(() =>
+                    slaveContext.Clients.All.SendAsync(
+                        $"statechange:{quizSessionUserStats.User.Identifier}",
+                        state,
+                        currentQuestion)
+                ));
                 
             }
 

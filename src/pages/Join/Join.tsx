@@ -9,6 +9,7 @@ import QuizSessionService from "../../services/QuizSessionService";
 import {RETURN_ICON_DARK} from "../../assets/Icons.ts";
 import {InputField} from "../../components/InputField/InputField.tsx";
 import {InputFieldType} from "../../components/InputField/InputFieldExports.ts";
+import {QuizSessionManagerSlave} from "../../managers/QuizSessionManagerSlave.tsx";
 
 interface ValidationState {
     valid: boolean, 
@@ -67,8 +68,10 @@ export const Join: FC = () => {
     const joinQuiz = async () => {
         const userExists: boolean = await QuizSessionService.checkQuizUserAlreadyExists(validQuizCode.quizSessionId,inputValue);
 
-        if(!userExists)
+        if(!userExists) {
+            QuizSessionManagerSlave.getInstance().killSession()
             navigate("/quiz/player", {state: {quizSessionId: validQuizCode.quizSessionId, userName: inputValue}})
+        }
         else {
             setValidation({
                 valid: false,

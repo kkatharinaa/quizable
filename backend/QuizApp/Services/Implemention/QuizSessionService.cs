@@ -241,11 +241,10 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     }
     
     /// <summary>
-    /// Set the quiz session for the respective quiz
+    /// Set the quiz session state for the respective quiz
     /// </summary>
     /// <param name="quizSessionId">id of the quiz session to set state</param>
     /// <param name="state">desired state</param>
-    /// <exception cref="NotImplementedException"></exception>
     public void SetQuizSessionState(string quizSessionId, string state)
     {
         QuizSessions = QuizSessions
@@ -395,5 +394,26 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         
         // Get the current question
         return QuizSessionsQuestions[quizSessionId].Find(question => currentQuestionId == question.id)!;
+    }
+    
+    /// <summary>
+    /// Get the quiz session state for the respective quiz
+    /// </summary>
+    /// <param name="quizSessionId">id of the quiz session to get state from</param>
+    public string GetQuizSessionState(string quizSessionId)
+    {
+        string state = "";
+        
+        QuizSessions = QuizSessions
+            .Select(session =>
+                {
+                    if (session.Value.Id == quizSessionId)
+                        state = session.Value.State.CurrentQuizState;
+                    
+                    return session;
+                }
+            ).ToDictionary();
+        
+        return state;
     }
 }

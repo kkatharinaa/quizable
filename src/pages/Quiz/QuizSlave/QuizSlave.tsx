@@ -1,26 +1,21 @@
 import { FC, useEffect, useState } from "react"
 import "./QuizSlave.css"
 import {useLocation, useNavigate} from "react-router-dom";
-import * as SignalR from "@microsoft/signalr";
 import { getDeviceId } from "../../../helper/DeviceHelper";
 import { v4 as uuid } from "uuid"
 import QuizUser from "../../../models/QuizUser";
 import {showErrorPageNothingToFind} from "../../ErrorPage/ErrorPageExports.ts";
 import {showPopupLeaveSession, showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
-import {Quiz} from "../../../models/Quiz.ts";
-import QuizSession from "../../../models/QuizSession.ts";
 import {QuizState} from "../../../models/QuizSessionState.ts";
 import {QuizSlaveLobby} from "../QuizSlaveLobby/QuizSlaveLobby.tsx";
 import {QuizSlaveSessionQuestion} from "../QuizSlaveSessionQuestion/QuizSlaveSessionQuestion.tsx";
 import {QuizSlaveLeaderboard} from "../QuizSlaveLeaderboard/QuizSlaveLeaderboard.tsx";
 import {QuizSlaveEnd} from "../QuizSlaveEnd/QuizSlaveEnd.tsx";
+import {QuizSessionManagerSlave, QuizSessionManagerSlaveInterface} from "../../../managers/QuizSessionManagerSlave.tsx";
 
 export interface QuizSlaveChildrenProps {
-    connection: SignalR.HubConnection
-    quizSession: QuizSession
-    quiz: Quiz
-    quizUser: QuizUser
+    quizSessionManagerSlave: QuizSessionManagerSlaveInterface
     leaveQuizSession: () => void
     showPopupSthWentWrong: () => void
 }
@@ -33,59 +28,18 @@ export const QuizSlave: FC = () => {
     const quizSessionId: string | null = state ? state.quizSessionId : null;
     const userName: string = state ? state.userName : "";
 
-    const [quiz, setQuiz] = useState<Quiz | null>(null);
-    const [quizSession, setQuizSession] = useState<QuizSession | null>(null);
-    const [connection, setConnection] = useState<SignalR.HubConnection>();
-    const [quizUser, setQuizUser] = useState<QuizUser | null>(null);
+    const [quizSessionManagerSlave, setQuizSessionManagerSlave] = useState(QuizSessionManagerSlave.getInstanceAsInterface());
 
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
 
-    const initSignalR = async (quizUser: QuizUser): Promise<SignalR.HubConnection> => {
-
-        // start websocket connection
-        const port: number = 5296
-        const url: string = `http://localhost:${port}`
-        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
-
-        const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
-            .withUrl(url + "/slave", {
-                skipNegotiation: true,
-                transport: SignalR.HttpTransportType.WebSockets
-            })
-            .build();
-
-        console.log(`play:${quizSessionId}/${userName}`)
-
-        // when the game actually starts and you get messages, navigate to the questions
-        connection.on(`play:${quizSessionId}/${userName}`, async () => {
-            console.log(JSON.stringify(quizUser))
-            // TODO: receive updated quizstate here ("playing") to know which component to render -> not sure if this should be handled here or in QuizSlaveLobby
-        })
-
-        // TODO: receive the quizsession from the backend so it can be saved as a state
-        // TODO: somehow get access to the quiz on firebase so the questions can be displayed... will be solved by singleton? --> only access to the currentquestion should be enough (full object with answers, not just id because slave has no access to firebase)
-
-        connection.start()
-            .then(async () => {
-                console.log("Quiz user new: " + quizUser)
-                connection.send("EnterSlaveQuizSession", quizUser, quizSessionId)
-            })
-            .catch((err) => console.error(err))
-
-        return connection
-    }
-
-    const statesAreNotNull = (): boolean => {
-        return quiz != null &&
-            quizSession != null &&
-            connection != null &&
-            quizUser != null
-    }
-
     const handleLeaveQuizSession = () => {
-        const leaveSession = () => {} // TODO: leave session on server
-        showPopupLeaveSession(showPopup, hidePopup, navigate, leaveSession)
+        if (QuizSessionManagerSlave.getInstance().quizState == QuizState.endscreen) {
+            QuizSessionManagerSlave.getInstance().killSession()
+            navigate('/')
+            return;
+        }
+        showPopupLeaveSession(showPopup, hidePopup, navigate, () => { QuizSessionManagerSlave.getInstance().killSession() })
     }
 
     const showPopup = (popup: PopupProps) => {
@@ -105,59 +59,54 @@ export const QuizSlave: FC = () => {
             return
         }
 
+        const handleQuizSessionManagerSlaveChange = () => {
+            setQuizSessionManagerSlave(QuizSessionManagerSlave.getInstanceAsInterface());
+        };
+        QuizSessionManagerSlave.getInstance().subscribe(handleQuizSessionManagerSlaveChange);
+
         const setUp = async () => {
             const user: QuizUser = {
                 id: uuid(),
                 identifier: userName,
                 deviceId: await getDeviceId()
             }
-            setQuizUser(user)
 
-            const connection = await initSignalR(user)
-            setConnection(connection)
+            await QuizSessionManagerSlave.getInstance().setUp(quizSessionId, user)
         }
 
         setUp()
+
+        return () => {
+            QuizSessionManagerSlave.getInstance().unsubscribe(handleQuizSessionManagerSlaveChange);
+        };
     }, [])
 
     return (
         <div className="quizSlave">
-            { (quizSession?.state?.currentQuizState == QuizState.Lobby && statesAreNotNull()) &&
+            { (quizSessionManagerSlave.quizState == QuizState.lobby && quizSessionManagerSlave.sessionExists) &&
                 <QuizSlaveLobby
-                    connection={connection!}
-                    quizSession={quizSession!}
-                    quiz={quiz!}
-                    quizUser={quizUser!}
+                    quizSessionManagerSlave={quizSessionManagerSlave}
                     leaveQuizSession={handleLeaveQuizSession}
                     showPopupSthWentWrong={showPopupSthWentWrong}
                 />
             }
-            { ((quizSession?.state?.currentQuizState == QuizState.Playing || quizSession?.state?.currentQuizState == QuizState.Statistics) && statesAreNotNull()) &&
+            { ((quizSessionManagerSlave.quizState == QuizState.playing || quizSessionManagerSlave.quizState == QuizState.statistics) && quizSessionManagerSlave.sessionExists && quizSessionManagerSlave.currentQuestion != null) &&
                 <QuizSlaveSessionQuestion
-                    connection={connection!}
-                    quizSession={quizSession!}
-                    quiz={quiz!}
-                    quizUser={quizUser!}
+                    quizSessionManagerSlave={quizSessionManagerSlave}
                     leaveQuizSession={handleLeaveQuizSession}
                     showPopupSthWentWrong={showPopupSthWentWrong}
                 />
             }
-            { ((quizSession?.state?.currentQuizState == QuizState.Leaderboard || quizSession?.state?.currentQuizState == QuizState.Podium) && statesAreNotNull()) &&
+            { ((quizSessionManagerSlave.quizState == QuizState.leaderboard || quizSessionManagerSlave.quizState == QuizState.podium) && quizSessionManagerSlave.sessionExists) &&
                 <QuizSlaveLeaderboard
-                    connection={connection!}
-                    quizSession={quizSession!}
-                    quiz={quiz!}
-                    quizUser={quizUser!}
+                    quizSessionManagerSlave={quizSessionManagerSlave}
                     leaveQuizSession={handleLeaveQuizSession}
                     showPopupSthWentWrong={showPopupSthWentWrong}
                 />
             }
-            { (quizSession?.state?.currentQuizState == QuizState.EndScreen && statesAreNotNull()) &&
+            { (quizSessionManagerSlave.quizState == QuizState.endscreen && quizSessionManagerSlave.sessionExists) &&
                 <QuizSlaveEnd
-                    connection={connection!}
-                    quizSession={quizSession!}
-                    quiz={quiz!}
-                    quizUser={quizUser!}
+                    quizSessionManagerSlave={quizSessionManagerSlave}
                     leaveQuizSession={handleLeaveQuizSession}
                     showPopupSthWentWrong={showPopupSthWentWrong}
                 />

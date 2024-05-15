@@ -13,34 +13,29 @@ import {Question} from "../../../models/Question.ts";
 import {useNavigate} from "react-router-dom";
 import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
 import {showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
+import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 
-export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({connection, quizCode, quizSession, quiz, authenticatedUser, endQuizSession}) => {
+export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQuizSession}) => {
     const navigate = useNavigate();
 
-    const [currentQuestion, setCurrentQuestion] = useState<Question | null>(quiz.questions.find(question => question.id == quizSession.state.currentQuestionId) ?? null);
-    const [playerCount, setPlayerCount] = useState(quizSession.state.usersStats.filter(userStat => {
-        return userStat.answers.some(userAnswer => userAnswer.questionId === quizSession.state.currentQuestionId);
-    }).length);
+    const [currentQuestion] = useState<Question | null>(quizSessionManager.currentQuestion);
+
+    const playerCount = (): number => {
+        return quizSessionManager.userStats?.filter(userStat => {
+            return userStat.answers.some(userAnswer => userAnswer.questionId === quizSessionManager.currentQuestionId);
+        }).length ?? 0
+    }
     
     const handleSkipQuestion = () => {
         // move on to answer statistics screen
-        // TODO: set the quizstate to statistics
+        // TODO: get to work with timer on server?
+        QuizSessionManager.getInstance().skipQuestion()
     }
 
     useEffect(() => {
         if (currentQuestion == null) {
             showErrorPageSomethingWentWrong(navigate)
-            return
         }
-
-        connection.on(`questionend:${authenticatedUser.id}`, () => {
-            console.log("Question end")
-            handleSkipQuestion()
-        })
-
-        connection.on(`useranswered:${authenticatedUser.id}`, () => {
-            setPlayerCount(playerCount + 1)
-        })
     }, []);
 
     return (
@@ -49,7 +44,7 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({connection, qu
                 type={BackgroundGemsType.Primary2}
             />
             <QuizCodeTag
-                code={quizCode}
+                code={quizSessionManager.quizCode}
             />
             <div className="content">
                 <h1>{currentQuestion?.questionText ?? ""}</h1>
@@ -63,7 +58,7 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({connection, qu
                 <div className="answersGroup">
                     <div className="answersInfo">
                         <img src={USER_ICON_LIGHT.path} alt={USER_ICON_LIGHT.alt}/>
-                        <p>{`${playerCount}/${quizSession.state.usersStats.length} answered`}</p>
+                        <p>{`${playerCount()}/${quizSessionManager.userStats?.length ?? "?"} answered`}</p>
                     </div>
                     <div className="answersContainer">
                         {currentQuestion?.answers.map((item, index) => (

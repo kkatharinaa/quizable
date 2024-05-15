@@ -26,15 +26,18 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
             bool isQuizSessionUserOk =
                 quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizSessionUserStatList);
             
-            await masterContext.Clients.All.SendAsync($"message:userId1", quizSessionUserStatList.Select(v => v.User));
+            await masterContext.Clients.All.SendAsync($"userjoined:userId1", quizSessionUserStatList);
 
             if (isQuizSessionUserOk)
             {
                 foreach (QuizSessionUserStats quizSessionUserStats in quizSessionUserStatList)
                 {
-                    await Clients.All.SendAsync($"message:{quizSessionUserStats.User.Identifier}", quizSessionUserStatList.Select(v => v.User));
+                    // currently not implemented since the quiz slave lobby has to be done first
+                    //await Clients.All.SendAsync($"message:{quizSessionUserStats.User.Identifier}", quizSessionUserStatList.Select(v => v.User));
                 }
             }
+
+            await RequestQuizSession(quizUser, quizSessionId);
         }
     }
     
@@ -43,40 +46,38 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
     {
         quizSessionService.AddUserAnswers(quizSessionId, quizUser.Id, questionId, answer);
         
+        quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsersStatsList);
+        
         if (quizSessionService.IsQuestionAnswerAllUsers(quizSessionId, questionId))
         {            
-            quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsersStatsList);
-
             quizSessionService.SetQuizSessionState(quizSessionId, "statistics");
             
-            Question currentQuestion = quizSessionService.GetQuizSessionCurrentQuestion(quizSessionId);
+            // TODO: issue that if there are 2 players and the one who joined first answers first, it will already end the question even though the other person has not answered yet
             
             await masterContext.Clients.All.SendAsync(
                 "questionend:userId1",
-                quizSessionId, 
                 quizUsersStatsList,
-                currentQuestion);
+                "statistics");
             
             foreach(QuizSessionUserStats user in quizUsersStatsList)
             {
                 await Clients.All.SendAsync(
                     $"questionend:{user.User.Identifier}",
-                    quizSessionId, 
-                    quizUsersStatsList
-                    );
+                    quizUsersStatsList,
+                    "statistics");
             }
         }
-        else await masterContext.Clients.All.SendAsync("answer:userId1");
+        else await masterContext.Clients.All.SendAsync("answer:userId1", quizUsersStatsList);
     }
     
-    // Will be unnecessary
-    public async Task EnterSlaveQuizSessionQuestion(QuizUser quizUser, string quizSessionId)
+    // Request Quiz Session
+    public async Task RequestQuizSession(QuizUser quizUser, string quizSessionId)
     {
-        bool quizSessionQuestionsOk = quizSessionService.TryGetQuizSessionQuestions(quizSessionId, out var questions);
+        (QuizSession? quizSession, string quizEntryId) = quizSessionService.GetQuizSessionById(quizSessionId);
 
-        if (quizSessionQuestionsOk)
+        if (quizSession is not null)
         {
-            await Clients.All.SendAsync($"nextquestion:{quizSessionId}/{quizUser.Identifier}", questions);
+            await Clients.All.SendAsync(quizUser.Identifier, quizSession);
         }
     }
 }

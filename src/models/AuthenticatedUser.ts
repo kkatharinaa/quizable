@@ -12,3 +12,9 @@ export const defaultAuthenticatedUser: AuthenticatedUser = {
     email: Email.tryMake("user@email.com")!,
     autoSendLog: true
 }
+
+export const authUsersAreEqual = (a: AuthenticatedUser, b: AuthenticatedUser): boolean => {
+    return a.id === b.id
+        && a.email.value === b.email.value
+        && a.autoSendLog === b.autoSendLog
+}

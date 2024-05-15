@@ -1,8 +1,8 @@
-import { QuizOptions } from "./QuizOptions";
-import QuizSessionState from "./QuizSessionState";
+import {QuizOptions, quizOptionsAreEqual} from "./QuizOptions";
+import QuizSessionState, {quizSessionStatesAreEqual} from "./QuizSessionState";
+import {isEqualNullable} from "../helper/EqualHelpers.ts";
 
-
-// TODO: Note how we use interface instead of class
+// Note how we use interface instead of class
 // Classes are good for when you also want to give it some functionality
 // interface are good to define how a data structure should look like
 // since we do not need any methods for pre-processing the types, interfaces are great
@@ -15,6 +15,10 @@ export default interface QuizSession{
     options?: QuizOptions
 }
 
-/* export const DefaultQuizSession: QuizSession = () => {
-
-} */
+export const quizSessionsAreEqual = (a: QuizSession, b: QuizSession): boolean => {
+    return a.id === b.id
+        && a.quizId === b.quizId
+        && quizSessionStatesAreEqual(a.state, b.state)
+        && a.deviceId === b.deviceId
+        && isEqualNullable(a.options, b.options, quizOptionsAreEqual)
+}

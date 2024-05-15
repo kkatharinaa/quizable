@@ -17,6 +17,7 @@ import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundG
 import {LEAVE_ICON_DARK} from "../../../assets/Icons.ts";
 import {ErrorPageLinkedTo, showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
 import {quizOptionsAreEqual} from "../../../models/QuizOptions.ts";
+import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -105,6 +106,8 @@ export const CreateOverview: FC = () => {
         };
 
         console.log(JSON.stringify(quizToBePlayed!.options))
+
+        QuizSessionManager.getInstance().killSession()
 
         // send the quiz session to the backend
         await QuizSessionService.addSession(quizSessionPlay)

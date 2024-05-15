@@ -1,6 +1,5 @@
-import { FC, useEffect, useState } from "react"
+import { FC } from "react"
 import "./QuizLobby.css"
-import QuizSession from "../../../models/QuizSession";
 import { BottomNavBar } from "../../../components/BottomNavBar/BottomNavBar";
 import { BottomNavBarStyle, BottomNavBarType } from "../../../components/BottomNavBar/BottomNavBarExports";
 import QuizUser from "../../../models/QuizUser";
@@ -10,28 +9,17 @@ import { QuizPlayerCard } from "../../../components/QuizPlayerCard/QuizPlayerCar
 import { QuizPlayerCardType } from "../../../components/QuizPlayerCard/QuizPlayerCardExports";
 import { USER_ICON_LIGHT, PLAY_ICON_LIGHT, POWER_ICON_DARK } from "../../../assets/Icons";
 import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
+import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 
-interface QuizMasterMessage {
-    notifyQuizSession?: QuizSession,
-    notifyNewQuizUser?: QuizUser
-}
+export const QuizLobby: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQuizSession}) => {
 
-export const QuizLobby: FC<QuizMasterChildrenProps> = ({connection, quizCode, quizSession, authenticatedUser, endQuizSession}) => {
-
-    const [joinedQuizUser, setJoinedQuizUser] = useState<QuizUser[]>(quizSession.state.usersStats.map(item => item.user))
-
-    const playQuiz = () => {
-        console.log("Play quiz...")
-        connection?.send("NotifyPlayQuizSession", quizSession?.id) // TODO: this should change the quizstate to playing, set the joinedquizusers in the overall quizsession (already implemented i believe) and set the currentquestionid (already implemented?) so that the quizmaster component can adjust its ui
+    const joinedUsers = (): QuizUser[] => {
+        return quizSessionManager.userStats?.map(item => item.user) ?? []
     }
 
-    useEffect(() => {
-        connection.on(`message:${authenticatedUser.id}`, (masterMessage: QuizMasterMessage) => {
-            console.log(masterMessage.notifyNewQuizUser)
-            joinedQuizUser.push(masterMessage.notifyNewQuizUser ?? {id: "", identifier: "", deviceId: ""})
-            setJoinedQuizUser([...joinedQuizUser]);
-        })
-    }, []);
+    const playQuiz = () => {
+        QuizSessionManager.getInstance().toNextQuestionOrEnd(true)
+    }
 
     return (
         <div className="quizLobby">
@@ -40,18 +28,19 @@ export const QuizLobby: FC<QuizMasterChildrenProps> = ({connection, quizCode, qu
                 <div>
                     <div className="entryIdContent">
                         <p className="entryIdContentTitle">Game code</p>
-                        <p className="entryIdContentGameCode">{quizCode}</p>
+                        <p className="entryIdContentGameCode">{quizSessionManager.quizCode}</p>
                     </div>
                 </div>
-                {joinedQuizUser.length >= 1 && // change this back to joinedQuizUsers
+                {joinedUsers().length >= 1 &&
                     <div className="joinedUserSection">
                         <div className="joinedUsersSectionCount">
                             <img src={USER_ICON_LIGHT.path} alt={USER_ICON_LIGHT.alt}></img>
-                            <p>{joinedQuizUser.length} joined</p>
+                            <p>{joinedUsers().length} joined</p>
                         </div>
                         <div className="joinedUserSectionList">
-                            {joinedQuizUser.map((quizUser) => (
+                            {joinedUsers().map((quizUser) => (
                                 <QuizPlayerCard
+                                    key={quizUser.id}
                                     type={QuizPlayerCardType.DesktopNormal}
                                     playerName={quizUser.identifier}
                                     playerScore={undefined}>

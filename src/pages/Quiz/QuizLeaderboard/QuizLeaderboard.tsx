@@ -7,17 +7,19 @@ import {QuizCodeTag} from "../../../components/QuizCodeTag/QuizCodeTag.tsx";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
+import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 
-export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({quizCode, endQuizSession, quiz, quizSession}) => {
+export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSessionManager}) => {
 
     const handleContinue = () => {
-        // TODO: move on to next question, for this the currentQuestionId of the quizsession has to be set to the id of the next question in the questionsarray of the quiz, and the quizstate has to be set to playing
-        // TODO: however if this is the last question in the questionsarray of the quiz, instead move on to the podium screen by setting the quizstate to podium
+        // move on to next question, for this the currentQuestionId of the quizsession has to be set to the id of the next question in the questionsarray of the quiz, and the quizstate has to be set to playing
+        // however if this is the last question in the questionsarray of the quiz, instead move on to the podium screen by setting the quizstate to podium
+        QuizSessionManager.getInstance().toNextQuestionOrEnd(false)
     }
 
     useEffect(() => {
         // skip this page if the quizoption says so and we are not on the very last question
-        if (!quiz.options.isLeaderboardBetween && quiz.questions[quiz.questions.length-1].id != quizSession.state.currentQuestionId) {
+        if (!quizSessionManager.quiz?.options.isLeaderboardBetween && quizSessionManager.quiz?.questions[quizSessionManager.quiz?.questions.length-1].id != quizSessionManager.quizSession?.state.currentQuestionId) {
             handleContinue()
             return
         }
@@ -29,7 +31,7 @@ export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({quizCode, endQuizS
                 type={BackgroundGemsType.Primary2}
             />
             <QuizCodeTag
-                code={quizCode}
+                code={quizSessionManager.quizCode}
             />
             <div className="content">
                 { /* TODO */ }
