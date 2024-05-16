@@ -10,6 +10,13 @@ namespace QuizApp.Hubs;
 
 public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessionService, IHubContext<SlaveHub> slaveContext): Hub
 {
+    private static IHubCallerClients ClientsCopy { get; set; } // to access the clients within the timer callback
+    public override Task OnConnectedAsync()
+    {
+        ClientsCopy ??= Clients;
+        return base.OnConnectedAsync();
+    }
+    
     // Master sends messages and they arrive here
     // get the data and send it back
     public async Task RequestQuizSession(QuizUser quizUser, string quizSessionId)
@@ -52,6 +59,9 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
                     quizSessionService.SetQuizSessionCurrentQuestionId(quizSessionId, nextQuestion.id);
 
                     await NotifyStateChange(quizSessionId);
+                    
+                    // start timer
+                    await StartNewCountdown(quizSessionId, nextQuestion.maxQuestionTime);
                 }
                 else
                 {
@@ -66,7 +76,6 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
     }
 
     // Notifies every participant that the question has been skipped and we should move on to the next question after scoreboard
-    // TODO: Change Diagram to add quiz user name too
     public async Task NotifyQuestionSkip(string quizSessionId)
     {
         bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsersStatsList);
@@ -80,7 +89,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             
             tasks.Add(
             Task.Run(
-                    () => Clients.All.SendAsync(
+                    () => ClientsCopy.All.SendAsync(
                     $"questionend:userId1",
                     quizUsersStatsList,
                     "statistics")
@@ -147,6 +156,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
 
         if (quizSession is not null)
         {
+            quizSessionService.DeleteSessionExtrasBySessionId(quizSessionId);
             quizSessionService.DeleteSessionByEntryCode(entry);
         }
     }
@@ -210,6 +220,70 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             smtpClient.EnableSsl = true; // Enable SSL for secure transmission
 
             await smtpClient.SendMailAsync(message);
+        }
+    }
+
+    private async Task StartNewCountdown(string quizSessionId, int seconds)
+    {
+        // setup callback function
+        async void TimerCallback(object? state)
+        {
+            var countDownExists = quizSessionService.TryGetQuizSessionCountdown(quizSessionId, out var countDownInService);
+
+            if (countDownExists)
+            {
+                var remainingSeconds = countDownInService.remainingSeconds;
+                if (remainingSeconds > 1)
+                {
+                    remainingSeconds--;
+                    quizSessionService.SetQuizSessionCountdownRemainingSeconds(quizSessionId, remainingSeconds);
+                    await NotifyTimerChange(quizSessionId, remainingSeconds);
+                }
+                else
+                {
+                    // notify that question has ended because the time has run out
+                    await NotifyQuestionSkip(quizSessionId);
+                }
+            }
+        }
+        
+        Timer timer = new Timer(TimerCallback, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        CountDown countDown = new CountDown();
+        countDown.remainingSeconds = seconds+1;
+        countDown.timer = timer;
+        
+        quizSessionService.AddQuizSessionCountdown(quizSessionId, countDown);
+    }
+    
+    // notify everyone of the timer changes -> this will be passed as a callback function when starting a new timer
+    private async Task NotifyTimerChange(string quizSessionId, int remainingSeconds)
+    {
+        bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsersStatsList);
+
+        if (isQuizSessionUser)
+        { 
+            // use tasks to notify all in parallel and at the same time
+            List<Task> tasks = new();
+            
+            tasks.Add(
+                Task.Run(
+                    () => ClientsCopy.All.SendAsync(
+                        $"timerchange:userId1",
+                        remainingSeconds)
+                )
+            );
+            
+            foreach (QuizSessionUserStats quizSessionUserStats in quizUsersStatsList)
+            {
+                tasks.Add(Task.Run(() =>
+                    slaveContext.Clients.All.SendAsync(
+                        $"timerchange:{quizSessionUserStats.User.Identifier}",
+                        remainingSeconds)
+                ));
+                
+            }
+
+            await Task.WhenAll(tasks.ToList());
         }
     }
 }

@@ -19,6 +19,7 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionMan
     const navigate = useNavigate();
 
     const [currentQuestion] = useState<Question | null>(quizSessionManager.currentQuestion);
+    const [remainingTime, setRemainingTime] = useState(quizSessionManager.remainingTime)
 
     const playerCount = (): number => {
         return quizSessionManager.userStats?.filter(userStat => {
@@ -28,7 +29,6 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionMan
     
     const handleSkipQuestion = () => {
         // move on to answer statistics screen
-        // TODO: get to work with timer on server?
         QuizSessionManager.getInstance().skipQuestion()
     }
 
@@ -37,6 +37,10 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionMan
             showErrorPageSomethingWentWrong(navigate)
         }
     }, []);
+
+    useEffect(() => {
+        setRemainingTime(quizSessionManager.remainingTime);
+    }, [quizSessionManager.remainingTime]);
 
     return (
         <div className="quizSessionQuestion">
@@ -48,11 +52,9 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionMan
             />
             <div className="content">
                 <h1>{currentQuestion?.questionText ?? ""}</h1>
-                { (currentQuestion != null && currentQuestion?.maxQuestionTime != 0) &&
+                { (currentQuestion != null && currentQuestion?.maxQuestionTime != 0 && quizSessionManager.remainingTime != 0) &&
                     <Timer
-                        remainingTime={currentQuestion!.maxQuestionTime}
-                        isRunning={true}
-                        onDone={handleSkipQuestion}
+                        remainingTime={remainingTime}
                     />
                 }
                 <div className="answersGroup">

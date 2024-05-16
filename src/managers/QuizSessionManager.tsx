@@ -24,6 +24,7 @@ export interface QuizSessionManagerInterface {
     userStatsOrderedByScoreWithoutCurrentQuestion: QuizSessionUserStats[] | null;
     sessionExists: boolean;
     canSendReport: boolean;
+    remainingTime: number;
 }
 
 export class QuizSessionManager implements QuizSessionManagerInterface {
@@ -34,6 +35,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     private _connection: SignalR.HubConnection | null = null;
     private _canSendReport: boolean = true;
     private _host: AuthenticatedUser | null = null;
+    private _remainingTime: number = 0;
 
     private subscribers: ((quizSessionManager: QuizSessionManager) => void)[] = [];
 
@@ -63,6 +65,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             userStatsOrderedByScoreWithoutCurrentQuestion: instance.userStatsOrderedByScoreWithoutCurrentQuestion,
             sessionExists: instance.sessionExists,
             canSendReport: instance.canSendReport,
+            remainingTime: instance.remainingTime,
         }
     }
 
@@ -73,7 +76,8 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             isEqualNullable(this.quiz, other.quiz, quizzesAreEqual) &&
             this._quizCode === other._quizCode &&
             this._connection === other._connection &&
-            isEqualNullable(this._host, other._host, authUsersAreEqual)
+            isEqualNullable(this._host, other._host, authUsersAreEqual) &&
+            this._remainingTime === other._remainingTime
         );
     }
 
@@ -93,6 +97,9 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     public get host(): AuthenticatedUser | null {
         return this._host;
     }
+    public get remainingTime(): number {
+        return this._remainingTime;
+    }
     public get quizState(): string | null {
         if (this._quizSession == null) return null
         return  this._quizSession.state.currentQuizState
@@ -109,7 +116,6 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         const currentQuestion = this._quiz?.questions.find(question => question.id == this._quizSession?.state.currentQuestionId) ?? null
         const firstQuestion = this._quiz?.questions[0]
         return currentQuestion?.id === firstQuestion?.id;
-
     }
     public get userStats(): QuizSessionUserStats[] | null {
         if (this._quizSession == null) return null
@@ -189,6 +195,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         this._connection = null;
         this._host = null;
         this._canSendReport = true;
+        this._remainingTime = 0;
         this.notifySubscribers()
     }
     public changeState(newState: string): void {
@@ -239,12 +246,18 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         connection.on(`questionend:${hostUserId}`, (quizUserStats: QuizSessionUserStats[], state: string) => {
             if (this._quizSession == null) return
             this._quizSession = {...this._quizSession, state: {...this._quizSession.state, currentQuizState: state, usersStats: quizUserStats}}
+            this._remainingTime = 0
             this.notifySubscribers()
         })
 
         connection.on(`answer:${hostUserId}`, (quizUserStats: QuizSessionUserStats[]) => {
             if (this._quizSession == null) return
             this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
+            this.notifySubscribers()
+        })
+
+        connection.on(`timerchange:${hostUserId}`, (remainingSeconds: number) => {
+            this._remainingTime = remainingSeconds
             this.notifySubscribers()
         })
 

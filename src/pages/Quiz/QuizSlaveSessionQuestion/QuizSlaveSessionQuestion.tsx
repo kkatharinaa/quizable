@@ -1,4 +1,4 @@
-import {FC, useState} from "react";
+import {FC, useEffect, useState} from "react";
 import "./QuizSlaveSessionQuestion.css"
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
 import {RETURN_ICON_DARK} from "../../../assets/Icons.ts";
@@ -17,6 +17,7 @@ import {QuizSessionManagerSlave} from "../../../managers/QuizSessionManagerSlave
 export const QuizSlaveSessionQuestion: FC<QuizSlaveChildrenProps> = ({leaveQuizSession, showPopupSthWentWrong, quizSessionManagerSlave}) => {
 
     const [selectedAnswerID, setSelectedAnswerID] = useState<string>("");
+    const [remainingTime, setRemainingTime] = useState(quizSessionManagerSlave.remainingTime)
 
     const getAnswerStyle = (id: string): AnswerSelectionStyle => {
 
@@ -27,6 +28,7 @@ export const QuizSlaveSessionQuestion: FC<QuizSlaveChildrenProps> = ({leaveQuizS
         }
 
         if (quizSessionManagerSlave.quizState == QuizState.statistics) {
+            if (remainingTime != 0) { setRemainingTime(0) }
             if (answer.correct) return AnswerSelectionStyle.Correct
             if (!answer.correct && answer.id == selectedAnswerID) return AnswerSelectionStyle.Wrong
             return AnswerSelectionStyle.Unselected
@@ -45,6 +47,10 @@ export const QuizSlaveSessionQuestion: FC<QuizSlaveChildrenProps> = ({leaveQuizS
         QuizSessionManagerSlave.getInstance().selectAnswer(answer)
     }
 
+    useEffect(() => {
+        setRemainingTime(quizSessionManagerSlave.remainingTime);
+    }, [quizSessionManagerSlave.remainingTime]);
+
     return (
         <div className="quizSlaveSessionQuestion">
             <BackgroundGems
@@ -52,7 +58,7 @@ export const QuizSlaveSessionQuestion: FC<QuizSlaveChildrenProps> = ({leaveQuizS
             />
             <QuestionSlideInTag
                 questionText={quizSessionManagerSlave.currentQuestion?.questionText ?? "[Error: Could not display question.]"}
-                maxQuestionTime={quizSessionManagerSlave.currentQuestion?.maxQuestionTime ?? 0}
+                remainingTime={remainingTime}
             />
             <div className="content">
                 <div className="answersContainer">

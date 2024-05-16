@@ -14,6 +14,8 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     
     private static Dictionary<string, List<Question>> QuizSessionsQuestions { get; set; } = new();
     
+    private static Dictionary<string, CountDown> QuizSessionsCountdowns { get; set; } = new();
+    
     /// <summary>
     /// Add new quiz session
     /// </summary>
@@ -45,6 +47,16 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     }
 
     /// <summary>
+    /// Add a timer for a specific quizSessionId
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="countDown"></param>
+    public void AddQuizSessionCountdown(string quizSessionId, CountDown countDown)
+    {
+        QuizSessionsCountdowns[quizSessionId] = countDown;
+    }
+
+    /// <summary>
     /// Get Quiz Session by the Id
     /// </summary>
     /// <param name="entryId"></param>
@@ -73,6 +85,16 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     public void DeleteSessionByEntryCode(string entryCode)
     {
         QuizSessions.Remove(entryCode);
+    }
+    
+    /// <summary>
+    /// Delete the quiz session extras (all stuff around the session which is saved on the server to give more info on the session, like the related quiz questions and the timer...) by the session's id
+    /// </summary>
+    /// <param name="quizSessionId">Id of the session that we want to delete the extra info for</param>
+    public void DeleteSessionExtrasBySessionId(string quizSessionId)
+    {
+        QuizSessionsQuestions.Remove(quizSessionId);
+        QuizSessionsCountdowns.Remove(quizSessionId);
     }
     
     /// <summary>
@@ -162,6 +184,22 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         }
 
         quizUsers = [];
+        return false;
+    }
+    
+    /// <summary>
+    /// Tries to get a countdown for the given session id.
+    /// </summary>
+    /// <param name="quizSessionId">Quiz Session ID</param>
+    /// <param name="countDown">Out</param>
+    public bool TryGetQuizSessionCountdown(string quizSessionId, out CountDown countDown)
+    {
+        if (QuizSessionsCountdowns.ContainsKey(quizSessionId))
+        {
+            countDown = QuizSessionsCountdowns[quizSessionId];
+            return true;
+        }
+        countDown = null;
         return false;
     }
 
@@ -259,6 +297,11 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                     return session;
                 }
             ).ToDictionary();
+
+        if (state == "statistics")
+        {
+            DeleteQuizSessionCountdown(quizSessionId);
+        }
     }
     
     /// <summary>
@@ -277,6 +320,19 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                     return session;
                 }
             ).ToDictionary();
+    }
+    
+    /// <summary>
+    /// Update the remaining seconds of a quiz session's countdown
+    /// </summary>
+    /// <param name="quizSessionId">id of the quiz session</param>
+    /// <param name="remainingSeconds">the new value to set as the remaining seconds</param>
+    public void SetQuizSessionCountdownRemainingSeconds(string quizSessionId, int remainingSeconds)
+    {
+        if (QuizSessionsCountdowns.ContainsKey(quizSessionId))
+        {
+            QuizSessionsCountdowns[quizSessionId].remainingSeconds = remainingSeconds;
+        }
     }
 
     /// <summary>
@@ -418,5 +474,18 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             ).ToDictionary();
         
         return state;
+    }
+
+    /// <summary>
+    /// Removes a quiz session's countdown
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    public void DeleteQuizSessionCountdown(string quizSessionId)
+    {
+        if (QuizSessionsCountdowns.ContainsKey(quizSessionId))
+        {
+            QuizSessionsCountdowns[quizSessionId].timer.Dispose();
+            QuizSessionsCountdowns.Remove(quizSessionId);
+        }
     }
 }

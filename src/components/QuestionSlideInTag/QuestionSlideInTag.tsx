@@ -1,17 +1,18 @@
-import {FC, useState} from "react";
+import {FC, useEffect, useState} from "react";
 import "./QuestionSlideInTag.css"
 import {CHEVRONDOWN_ICON_LIGHT, CHEVRONUP_ICON_LIGHT} from "../../assets/Icons.ts";
 import {Timer} from "../Timer/Timer.tsx";
 
 export interface QuestionSlideInTagProps {
     questionText: string
-    maxQuestionTime: number
+    remainingTime: number
 }
 
-export const QuestionSlideInTag: FC<QuestionSlideInTagProps> = ({ questionText, maxQuestionTime }) => {
+export const QuestionSlideInTag: FC<QuestionSlideInTagProps> = ({ questionText, remainingTime }) => {
 
     const [open, setOpen] = useState(false)
     const [chevron, setChevron] = useState(CHEVRONDOWN_ICON_LIGHT)
+    const [time, setTime] = useState(remainingTime)
 
     const handleTagClick = () => {
         setOpen(!open)
@@ -22,16 +23,18 @@ export const QuestionSlideInTag: FC<QuestionSlideInTagProps> = ({ questionText, 
         }
     }
 
+    useEffect(() => {
+        setTime(remainingTime);
+    }, [remainingTime]);
+
     return (
         <div className="questionSlideInTagContainer">
             <div className={`questionSlideInTag ${open ? "open" : ""}`}>
                 <div className="content">
                     <h1>{questionText}</h1>
-                    { (maxQuestionTime != 0) &&
+                    { (remainingTime != 0) &&
                         <Timer
-                            remainingTime={maxQuestionTime}
-                            isRunning={true}
-                            onDone={() => {}} // handled by master, not slave!
+                            remainingTime={time}
                         />
                     }
                 </div>
