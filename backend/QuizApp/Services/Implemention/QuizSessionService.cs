@@ -371,23 +371,14 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             .Values.ToList()
             .FirstOrDefault(session => session.Id == quizSessionId);
 
-        var isAnswered = true;
-
-        quizSession?.State.UsersStats.ForEach(stat =>
+        if (quizSession == null)
         {
-            var isQuestionIdFound = false;
-            stat.Answers.ForEach(answer =>
-            {
-                if (answer.QuestionId == questionId)
-                {
-                    isQuestionIdFound = true;
-                }
-            });
+            return false;
+        }
 
-            isAnswered = isQuestionIdFound;
-        });
-
-        return isAnswered;
+        // check if all users have answered the current question
+        return quizSession.State.UsersStats.All(stat =>
+            stat.Answers.Any(answer => answer.QuestionId == questionId));
     }
     
     /// <summary>
