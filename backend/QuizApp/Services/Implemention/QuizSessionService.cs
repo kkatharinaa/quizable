@@ -258,12 +258,13 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                     {
                         if (stat.User.Id == quizUserId)
                         {
-                            // TODO: Formula to calculate the pointsReceived based on the time taken, if currentQuestion.questionPointsModifier is 1 (currently either 0 or 1 for should reaction time be taken into account or not)
+                            var countDownExists = TryGetQuizSessionCountdown(quizSessionId, out var countDown);
+                            
                             QuizSessionUserStatsAnswer statsAnswer = new QuizSessionUserStatsAnswer{
                                 QuestionId = questionId,
                                 AnswerId = answer.id,
                                 PointsReceived = answer.correct ? currentQuestion.questionPoints : 0,
-                                TimeTaken = 0
+                                TimeTaken = countDownExists ? (int)countDown.stopwatch.ElapsedMilliseconds : 0,
                             };
                             stat.Answers.Add(statsAnswer);
                             
@@ -276,6 +277,63 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                         }
                         return stat;
                     }).ToList();
+                }
+                return quizSession;
+            }).ToDictionary();
+    }
+    
+    /// <summary>
+    /// Update the pointsreceived based on the reaction time (should be called after the question has ended and everyone has answered)
+    /// If the questionPointsModifier is set to 0, will not change anything
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="questionId"></param>
+    private void CalculatePoints(string quizSessionId)
+    {
+        QuizSessions = QuizSessions
+            .Select(quizSession =>
+            {
+                if (quizSession.Value.Id == quizSessionId)
+                {
+                    Question currentQuestion = this.GetQuizSessionCurrentQuestion(quizSessionId);
+                    var maxPoints = currentQuestion.questionPoints;
+                    
+                    // only update the points if our settings say so or if we have a high enough max points value so that the points can be distributed among players...
+                    if (currentQuestion.questionPointsModifier == 1 && maxPoints > 1)
+                    {
+                        const double minPointsRatio = 0.5; // If you get it right but are slow, you should at least get half of the points
+                        var minPoints = (int)Math.Round(maxPoints * minPointsRatio);
+                        
+                        var allAnswersForQuestion = quizSession.Value.State.UsersStats
+                            .SelectMany(stats => stats.Answers, (stats, answer) => new { stats, answer })
+                            .Where(x => x.answer.QuestionId == currentQuestion.id)
+                            .ToList();
+                        
+                        // get the fastest and slowest time in ms
+                        var fastestTime = allAnswersForQuestion.Min(x => x.answer.TimeTaken);
+                        var slowestTime = allAnswersForQuestion.Max(x => x.answer.TimeTaken);
+
+                        foreach (var userStat in quizSession.Value.State.UsersStats)
+                        {
+                            var userStatAnswer = userStat.Answers.FirstOrDefault(userStatAnswer => userStatAnswer.QuestionId == currentQuestion.id);
+
+                            // only change correct answers, the wrong answers can stay at 0
+                            if (userStatAnswer != null && userStatAnswer.PointsReceived != 0)
+                            {
+                                var normalizedTime = (double)(userStatAnswer.TimeTaken - fastestTime) / (slowestTime - fastestTime);
+                                var points = (int)Math.Round(maxPoints - (normalizedTime * (maxPoints - minPoints)));
+
+                                userStatAnswer.PointsReceived = points;
+                                
+                                // recalculate user score
+                                userStat.Score = 0;
+                                userStat.Answers.ForEach(answer =>
+                                {
+                                    userStat.Score += answer.PointsReceived;
+                                });
+                            }
+                        }
+                    }
                 }
                 return quizSession;
             }).ToDictionary();
@@ -300,6 +358,7 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
 
         if (state == "statistics")
         {
+            CalculatePoints(quizSessionId);
             DeleteQuizSessionCountdown(quizSessionId);
         }
     }
@@ -475,6 +534,7 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     {
         if (QuizSessionsCountdowns.ContainsKey(quizSessionId))
         {
+            QuizSessionsCountdowns[quizSessionId].stopwatch.Stop();
             QuizSessionsCountdowns[quizSessionId].timer.Dispose();
             QuizSessionsCountdowns.Remove(quizSessionId);
         }

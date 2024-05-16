@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -251,6 +252,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
         CountDown countDown = new CountDown();
         countDown.remainingSeconds = seconds+1;
         countDown.timer = timer;
+        countDown.stopwatch = Stopwatch.StartNew();
         
         quizSessionService.AddQuizSessionCountdown(quizSessionId, countDown);
     }
