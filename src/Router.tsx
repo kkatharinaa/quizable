@@ -1,5 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-import About from "./pages/About/About";
 import Home from "./pages/Home/Home";
 import { CreateSendEmail } from "./pages/Create/CreateSendEmail/CreateSendEmail";
 import { Join } from "./pages/Join/Join";
@@ -23,11 +22,6 @@ const pagesData: RouterType[] = [
       path: "",
       element: <Home />,
       title: "Home | Quizable"
-    },
-    {
-      path: "about",
-      element: <About />,
-      title: "About | Quizable"
     },
     {
         path: "error",

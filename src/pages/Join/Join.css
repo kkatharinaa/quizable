@@ -20,7 +20,11 @@
     height: 100%;
 }
 
-.contentJoin .inputFieldJoinValidation {
+.contentJoin .inputFieldWithValidationText {
+    position: relative;
+}
+
+.contentJoin .inputFieldWithValidationText .inputFieldJoinValidation {
     position: absolute;
     font-size: 24px;
     color: var(--white);
@@ -30,7 +34,7 @@
 }
 
 @media only screen and (max-width: 480px) {
-    .contentJoin .inputFieldJoinValidation {
+    .contentJoin .inputFieldWithValidationText .inputFieldJoinValidation {
         font-size: 18px;
     }
 }

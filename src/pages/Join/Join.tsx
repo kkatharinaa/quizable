@@ -128,7 +128,7 @@ export const Join: FC = () => {
         <div className="joinPage">
             <BackgroundGems type={BackgroundGemsType.PrimarySlave}></BackgroundGems>
             <div className="contentJoin">
-                <div>
+                <div className="inputFieldWithValidationText">
                     <InputField
                         value={inputValue}
                         onChange={validQuizCode.code.length == 0 ? validateInputLive : updateInput}

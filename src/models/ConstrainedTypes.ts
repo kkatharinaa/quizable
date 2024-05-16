@@ -38,7 +38,6 @@ export class Email {
 
     static tryMake(input: string): Email | null {
         if (input.length === 0) return null
-        // TODO: check if fits email criteria
         return new Email(input)
     }
 }

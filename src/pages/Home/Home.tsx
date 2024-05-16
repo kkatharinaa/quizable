@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC } from "react";
 import "./Home.css"
 import { ButtonComponent } from "../../components/Button/Button";
 import {CREATE_ICON_DARK, ENTER_ICON_LIGHT} from "../../assets/Icons";
@@ -10,21 +10,12 @@ import { useNavigate } from "react-router-dom";
 const Home: FC = () => {
   const navigate = useNavigate();
 
-  // const [quiz, setQuiz] = useState([]);
-  const fetchFireStore = async () => {
-    console.log("Get firestore stuff")
-  }
-
-  useEffect(() => {
-    fetchFireStore()
-  }, [])
-
   const navigateJoinQuiz = () => {
     navigate("join")
   }
 
   const navigateCreateQuiz = () => {
-    navigate("overview")
+    navigate("login")
   }
 
   return (

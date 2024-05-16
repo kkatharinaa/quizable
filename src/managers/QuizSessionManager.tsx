@@ -201,7 +201,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         this._connection?.send("NotifyQuestionSkip", this._quizSession?.id)
     }
     public sendReport(): void {
-        this._connection?.send("SendReportToEmail", this._quizSession?.id, this._host?.email.value, this._quiz?.name)
+        this._connection?.send("SendReportToEmail", this._quizSession?.id, this._host?.email, this._quiz?.name)
         this._canSendReport = false
         this.notifySubscribers()
     }

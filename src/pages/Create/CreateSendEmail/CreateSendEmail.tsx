@@ -1,10 +1,90 @@
-import { FC } from "react"
+import {FC, useEffect, useState} from "react"
 import "./CreateSendEmail.css"
+import {useNavigate} from "react-router-dom";
+import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
+import {RETURN_ICON_DARK, SEND_ICON_DISABLED, SEND_ICON_LIGHT} from "../../../assets/Icons.ts";
+import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
+import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
+import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
+import {InputField} from "../../../components/InputField/InputField.tsx";
+import {InputFieldType} from "../../../components/InputField/InputFieldExports.ts";
+import {ButtonStyle} from "../../../components/Button/ButtonExports.ts";
 
 export const CreateSendEmail: FC = () => {
+    const navigate = useNavigate()
+
+    const [ inputValue, setInputValue ] = useState("")
+    const [ infoText, setInfoText ] = useState("")
+    const [ canSend, setCanSend ] = useState(true)
+    const [ sentEmail, setSentEmail ] = useState(false)
+
+    const updateInput = (newValue: string) => {
+        setInputValue(newValue)
+    }
+
+    const canSendEmail = ():boolean => {
+        // just generally check if there is something written in the input field that could in some way be an email address, firebase auth will do the proper checking
+        return canSend && inputValue.length >= 3 && inputValue.includes('@')
+    }
+
+    const navigateHome = () => {
+        navigate("/");
+    }
+
+    const handleSendEmail = () => {
+        if (!canSendEmail()) return
+        setCanSend(false)
+        setSentEmail(true)
+
+        // TODO: send email to user which will provide the user with an authenticated link - it seems firebase handles the email validation by itself, meaning I will setInfoText based on if the auth promise is fulfilled or if an error is thrown
+        /*const auth = getAuth();
+        sendSignInLinkToEmail(auth, inputValue, actionCodeSettings)
+            .then(() => {
+                window.localStorage.setItem('emailForSignIn', email);
+                setInfoText("We have just sent you an email! Please follow the instructions within the email to login.")
+                setCanSend(true)
+            })
+            .catch((error) => {
+                setInfoText("Something went wrong. Please check that the email address you entered is valid or try again later.")
+                setCanSend(true)
+            });
+         */
+    }
+
+    useEffect(() => {
+        // TODO: if we are logged in, skip this page and automatically navigate to overview with the following line:
+        //navigate("/overview")
+    }, []);
+
+    // TODO in general: we need a way to check if the user is authenticated (and get the authenticateduser object) when opening another route (eg the create overview screen) -> only if authenticated should we see the view, else it should redirect to home.
+
     return (
-        <div className="page_styling">
-            <h1>Create - Send Email to Users</h1>
+        <div className="login">
+            <BackgroundGems type={BackgroundGemsType.Primary}></BackgroundGems>
+            <div className="content">
+                <div className="inputFieldWithInfoText">
+                    <p className="infoText">{"Logging in is as simple as possible - just put in your email and we will send you an email!"}</p>
+                    <InputField
+                        value={inputValue}
+                        onChange={updateInput}
+                        type={InputFieldType.Email}
+                    />
+                    {infoText != "" &&
+                        <p className="infoText">{infoText}</p>
+                    }
+                </div>
+            </div>
+            <BottomNavBar
+                secondaryButtonText="Home"
+                secondaryButtonIcon={RETURN_ICON_DARK}
+                primaryButtonText={sentEmail ? "Resend Link" : "Send Link"}
+                primaryButtonIcon={!canSendEmail() ? SEND_ICON_DISABLED : SEND_ICON_LIGHT}
+                type={BottomNavBarType.Default}
+                style={BottomNavBarStyle.Long}
+                onPrimaryClick={handleSendEmail}
+                onSecondaryClick={navigateHome}
+                alternativePrimaryButtonStyle={!canSendEmail() ? ButtonStyle.Disabled : undefined}
+            />
         </div>
     )
 }

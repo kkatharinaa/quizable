@@ -31,19 +31,25 @@ export const InputField: FC<InputFieldProps> = ({ value, onChange, type}) => {
             placeholder = "Enter user name"
             maxCharacters = 20
             break
+        case InputFieldType.Email:
+            placeholder = "Type your email here"
+            maxCharacters = 0
+            break
     }
 
     // TODO for inputs: when clicking on input jump to end of input
 
     return (
         <div className="inputField">
-            <p className="characterCount">{`${value.length}/${maxCharacters}`}</p>
+            { maxCharacters != 0 &&
+                <p className="characterCount">{`${value.length}/${maxCharacters}`}</p>
+            }
             <input
                 type="text"
                 value={value}
                 onChange={handleInputChange}
                 placeholder={placeholder}
-                maxLength={maxCharacters}
+                maxLength={maxCharacters != 0 ? maxCharacters : undefined}
             />
         </div>
     )
