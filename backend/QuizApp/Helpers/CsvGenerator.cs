@@ -31,12 +31,12 @@ public class CsvGenerator
         for (var i = 0; i < statsCopy.Count; i++)
         {
             QuizSessionUserStats stat = statsCopy[i];
+            var rankingIndex = statsCopy.FindIndex(userStat => userStat.Score == stat.Score);
 
             for (var j = 0; j < stat.Answers.Count; j++)
             {
                 QuizSessionUserStatsAnswer userStatsAnswer = stat.Answers[j];
-
-                var rankingIndex = statsCopy.FindIndex(userStat => userStat.Score == stat.Score);
+                
                 Question? currentQuestion = questions.Find(question => question.id == userStatsAnswer.QuestionId);
                 var currentQuestionIndex = questions.FindIndex(question => question.id == userStatsAnswer.QuestionId);
                 Answer? selectedAnswer = currentQuestion?.answers.Find(answer => answer.id == userStatsAnswer.AnswerId);

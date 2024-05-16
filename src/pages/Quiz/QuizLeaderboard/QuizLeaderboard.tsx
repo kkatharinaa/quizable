@@ -29,8 +29,9 @@ export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, qu
     const getLeaderboardChange = (userStat: QuizSessionUserStats): LeaderboardChange => {
         if (quizSessionManager.currentQuestionIsFirstQuestion) return LeaderboardChange.Stayed
 
-        const currentPosition = quizSessionManager.userStatsOrderedByScore?.findIndex(stats => stats.user.id === userStat.user.id)
-        const previousPosition = quizSessionManager.userStatsOrderedByScoreWithoutCurrentQuestion?.findIndex(stats => stats.user.id === userStat.user.id)
+        const previousScore = quizSessionManager.userStatsOrderedByScoreWithoutCurrentQuestion?.find(stats => stats.user.id === userStat.user.id)?.score
+        const currentPosition = quizSessionManager.userStatsOrderedByScore?.findIndex(stats => stats.score === userStat.score)
+        const previousPosition = quizSessionManager.userStatsOrderedByScoreWithoutCurrentQuestion?.findIndex(stats => stats.score === previousScore)
 
         if (currentPosition == undefined || previousPosition == undefined) return LeaderboardChange.Stayed
 
