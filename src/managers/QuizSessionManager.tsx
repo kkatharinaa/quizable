@@ -7,12 +7,14 @@ import {getDeviceId} from "../helper/DeviceHelper.ts";
 import {Question} from "../models/Question.ts";
 import QuizSessionUserStats from "../models/QuizSessionUserStats.ts";
 import {isEqualNullable} from "../helper/EqualHelpers.ts";
+import {AuthenticatedUser, authUsersAreEqual} from "../models/AuthenticatedUser.ts";
 
 export interface QuizSessionManagerInterface {
     quizSession: QuizSession | null;
     quiz: Quiz | null;
     quizCode: string;
     connection: SignalR.HubConnection | null;
+    host: AuthenticatedUser | null;
     quizState: string | null;
     currentQuestionId: string | null;
     currentQuestion: Question | null;
@@ -21,6 +23,7 @@ export interface QuizSessionManagerInterface {
     userStatsOrderedByScore: QuizSessionUserStats[] | null;
     userStatsOrderedByScoreWithoutCurrentQuestion: QuizSessionUserStats[] | null;
     sessionExists: boolean;
+    canSendReport: boolean;
 }
 
 export class QuizSessionManager implements QuizSessionManagerInterface {
@@ -29,6 +32,8 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     private _quiz: Quiz | null = null;
     private _quizCode: string = "";
     private _connection: SignalR.HubConnection | null = null;
+    private _canSendReport: boolean = true;
+    private _host: AuthenticatedUser | null = null;
 
     private subscribers: ((quizSessionManager: QuizSessionManager) => void)[] = [];
 
@@ -48,6 +53,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             quiz: instance.quiz,
             quizCode: instance.quizCode,
             connection: instance.connection,
+            host: instance.host,
             quizState: instance.quizState,
             currentQuestionId: instance.currentQuestionId,
             currentQuestion: instance.currentQuestion,
@@ -56,6 +62,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             userStatsOrderedByScore: instance.userStatsOrderedByScore,
             userStatsOrderedByScoreWithoutCurrentQuestion: instance.userStatsOrderedByScoreWithoutCurrentQuestion,
             sessionExists: instance.sessionExists,
+            canSendReport: instance.canSendReport,
         }
     }
 
@@ -65,7 +72,8 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             isEqualNullable(this.quizSession, other.quizSession, quizSessionsAreEqual) &&
             isEqualNullable(this.quiz, other.quiz, quizzesAreEqual) &&
             this._quizCode === other._quizCode &&
-            this._connection === other._connection
+            this._connection === other._connection &&
+            isEqualNullable(this._host, other._host, authUsersAreEqual)
         );
     }
 
@@ -81,6 +89,9 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     }
     public get connection(): SignalR.HubConnection | null {
         return this._connection;
+    }
+    public get host(): AuthenticatedUser | null {
+        return this._host;
     }
     public get quizState(): string | null {
         if (this._quizSession == null) return null
@@ -111,7 +122,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
                 return b.score - a.score;
             } else {
                 // If scores are equal, sort alphabetically by user id
-                return a.user.id.localeCompare(b.user.id);
+                return a.user.identifier.localeCompare(b.user.identifier);
             }
         })
     }
@@ -131,7 +142,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
                 return b.score - a.score;
             } else {
                 // If scores are equal, sort alphabetically by user id
-                return a.user.id.localeCompare(b.user.id);
+                return a.user.identifier.localeCompare(b.user.identifier);
             }
         })
     }
@@ -140,6 +151,9 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             this._quiz != null &&
             this._quizCode != "" &&
             this._connection != null
+    }
+    public get canSendReport(): boolean {
+        return this._canSendReport
     }
 
     // setters
@@ -159,16 +173,22 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         this._connection = connection;
         this.notifySubscribers()
     }
+    public set host(host: AuthenticatedUser) {
+        this._host = host;
+        this.notifySubscribers()
+    }
 
     // functions
     public killSession(): void {
         // kill session on the server
-        this._connection?.send("NotifyKillQuiz", this._quizSession?.id, false)
+        this._connection?.send("NotifyKillQuiz", this._quizSession?.id)
 
         this._quizSession = null;
         this._quiz = null;
         this._quizCode = "";
         this._connection = null;
+        this._host = null;
+        this._canSendReport = true;
         this.notifySubscribers()
     }
     public changeState(newState: string): void {
@@ -180,9 +200,15 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     public skipQuestion(): void {
         this._connection?.send("NotifyQuestionSkip", this._quizSession?.id)
     }
-    public async setUp(quizSessionId: string, hostUserId: string, quiz: Quiz): Promise<void> {
+    public sendReport(): void {
+        this._connection?.send("SendReportToEmail", this._quizSession?.id, this._host?.email.value, this._quiz?.name)
+        this._canSendReport = false
+        this.notifySubscribers()
+    }
+    public async setUp(quizSessionId: string, host: AuthenticatedUser, quiz: Quiz): Promise<void> {
         this._quiz =  quiz
-        this._connection = await this.initSignalR(quizSessionId, hostUserId)
+        this._host = host
+        this._connection = await this.initSignalR(quizSessionId, host.id)
         this.notifySubscribers();
     }
     private async initSignalR(quizSessionId: string, hostUserId: string): Promise<SignalR.HubConnection> {
@@ -225,6 +251,11 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         connection.on(`userjoined:${hostUserId}`, (quizUserStats: QuizSessionUserStats[]) => {
             if (this._quizSession == null) return
             this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
+            this.notifySubscribers()
+        })
+
+        connection.on(`canResendReport:${hostUserId}`, () => {
+            this._canSendReport = true
             this.notifySubscribers()
         })
 

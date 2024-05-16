@@ -96,6 +96,10 @@ export const SEND_ICON_LIGHT: Icon = {
     path: '/assets/icon-send-light.svg',
     alt: 'Send',
 };
+export const SEND_ICON_DISABLED: Icon = {
+    path: '/assets/icon-send-disabled.svg',
+    alt: 'Send',
+};
 
 export const SKIP_ICON_LIGHT: Icon = {
     path: '/assets/icon-skip-light.svg',

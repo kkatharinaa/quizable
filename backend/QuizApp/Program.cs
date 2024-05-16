@@ -18,6 +18,7 @@ builder.Services.AddLogging(builder => builder.AddConsole());
 builder.Services.AddSingleton<IQuizSessionService, QuizSessionService>();
 builder.Services.AddSignalR();
 
+DotNetEnv.Env.Load();
 var port = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrEmpty(port)) {
     builder.WebHost.UseUrls($"http://*:{port}");

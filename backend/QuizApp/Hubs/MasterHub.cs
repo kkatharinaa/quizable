@@ -1,6 +1,10 @@
+using System.Net;
+using System.Net.Mail;
+using System.Text;
 using Microsoft.AspNetCore.SignalR;
 using QuizApp.Models;
 using QuizApp.Services.Interface;
+using QuizApp.Helpers;
 
 namespace QuizApp.Hubs;
 
@@ -137,13 +141,75 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
     }
 
     // Kills the quiz session
-    public async Task NotifyKillQuiz(string quizSessionId, bool sendPdf)
+    public async Task NotifyKillQuiz(string quizSessionId)
     {
         (QuizSession? quizSession, string entry) = quizSessionService.GetQuizSessionById(quizSessionId);
 
         if (quizSession is not null)
         {
             quizSessionService.DeleteSessionByEntryCode(entry);
+        }
+    }
+    
+    // Sends the report as a CSV file to the user's email address
+    public async Task SendReportToEmail(string quizSessionId, string emailAddress, string quizTitle)
+    {
+        bool isQuizSessionUser = quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizUsersStatsList);
+        bool hasQuestions = quizSessionService.TryGetQuizSessionQuestions(quizSessionId, out var questions);
+
+        if (isQuizSessionUser && hasQuestions)
+        {
+            // generate csv
+            var csvGenerator = new CsvGenerator();
+            var csvContent = csvGenerator.GenerateCsvForUserStats(questions, quizUsersStatsList);
+            
+            // prepare quizTitle for filename
+            char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
+            var validQuizTitle = new string(quizTitle.Where(character => !invalidFileNameChars.Contains(character)).ToArray());
+            validQuizTitle = validQuizTitle.Replace(" ", "-");
+
+            // prepare attachment
+            var csvBytes = Encoding.UTF8.GetBytes(csvContent);
+            var attachment = new Attachment(new MemoryStream(csvBytes), $"Report_{validQuizTitle}.csv", "text/csv");
+            
+            Console.WriteLine(csvContent);
+
+            await SendEmailAsync(emailAddress, "Quiz Report", "Attached please find the requested quiz report. Thank you for using Quizable!", attachment);
+            
+            // wait for a bit until the email can be sent again
+            await Task.Delay(TimeSpan.FromMinutes(2));
+            await Clients.All.SendAsync("canResendReport:userId1");
+        }
+    }
+
+    private async Task SendEmailAsync(string email, string subject, string body, Attachment attachment)
+    {
+        // read secrets
+        var smtp = Environment.GetEnvironmentVariable("EMAIL_SMTP");
+        var port = Environment.GetEnvironmentVariable("EMAIL_PORT");
+        var address = Environment.GetEnvironmentVariable("EMAIL_ADDRESS");
+        var password = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
+
+        if (smtp == null || port == null || address == null || password == null)
+        {
+            logger.LogError("Could not send email. One of the following was not specified at backend/QuizApp/.env: EMAIL_SMTP, EMAIL_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD");
+            return;
+        }
+        
+        var message = new MailMessage();
+        message.From = new MailAddress(address);
+        message.To.Add(new MailAddress(email));
+        message.Subject = subject;
+        message.Body = body;
+        message.Attachments.Add(attachment);
+        
+        using (var smtpClient = new SmtpClient(smtp))
+        {
+            smtpClient.Port = int.Parse(port);
+            smtpClient.Credentials = new NetworkCredential(address, password);
+            smtpClient.EnableSsl = true; // Enable SSL for secure transmission
+
+            await smtpClient.SendMailAsync(message);
         }
     }
 }

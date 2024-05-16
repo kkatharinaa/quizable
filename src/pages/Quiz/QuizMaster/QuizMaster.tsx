@@ -109,7 +109,7 @@ export const QuizMaster: FC = () => {
                 return
             }
 
-            await QuizSessionManager.getInstance().setUp(quizSessionId, host.id, quiz)
+            await QuizSessionManager.getInstance().setUp(quizSessionId, host, quiz)
         }
 
         setUp()
