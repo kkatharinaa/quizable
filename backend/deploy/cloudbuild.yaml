@@ -1,7 +1,26 @@
 steps:
+  - name: 'ubuntu'
+    entrypoint: bash
+    args:
+    - -c
+    - |
+      source .env
+      echo $$GCLOUD_PROJECT_NAME > _PROJECT_NAME
+      echo $$GCLOUD_PROJECT_ID > _PROJECT_ID
+      echo $$GCLOUD_PROJECT_REPO_NAME > _REPO_NAME
+      echo $$GCLOUD_PROJECT_REGION > _REGION
+#  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#    entrypoint: sh
+#    args: [ '-c', 'gcloud artifacts repositories create quizapp-repo --repository-format=docker --location=europe-central2 --description="Docker repository"']
+#    allowFailure: true
   - name: 'gcr.io/cloud-builders/docker'
-    script: |
-      docker build -t europe-central2-docker.pkg.dev/quizzabletest/hello-repo/quizapp-image:quizapp .
-    automapSubstitutions: true
-images:
-  - 'europe-central2-docker.pkg.dev/quizzabletest/hello-repo/quizapp-image:quizapp'
+    entrypoint: sh
+    args: [ '-c', 'docker build -t $(cat _REGION)-docker.pkg.dev/$(cat _PROJECT_ID)/$(cat _REPO_NAME)/$(cat _PROJECT_NAME)-image:$(cat _PROJECT_NAME) ./backend' ]
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: sh
+    args: [ '-c', 'docker push $(cat _REGION)-docker.pkg.dev/$(cat _PROJECT_ID)/$(cat _REPO_NAME)/$(cat _PROJECT_NAME)-image:$(cat _PROJECT_NAME)']
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: sh
+    args: [ '-c', 'gcloud run deploy $(cat _PROJECT_NAME) --region=$(cat _REGION) --image $(cat _REGION)-docker.pkg.dev/$(cat _PROJECT_ID)/$(cat _REPO_NAME)/$(cat _PROJECT_NAME)-image:$(cat _PROJECT_NAME) --allow-unauthenticated' ]
+
+

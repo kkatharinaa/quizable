@@ -64,16 +64,10 @@ gcloud artifacts repositories create quizapp-repo --repository-format=docker --l
 
 ### Build and submit the program to gcloud
 
-Note the region must be us-west2
+To build 
 
 ```shell 
-gcloud builds submit --region=us-west2 --config ./deploy/cloudbuild.yaml
-```
-
-### Start the program in the cloud.
-
-```shell
-gcloud run deploy quizapp --region=europe-west2 --image europe-central2-docker.pkg.dev/quizzabletest/hello-repo/quizapp-image:quizapp
+npm run deploy-backend
 ```
 
 ## Full list of commands
@@ -82,8 +76,6 @@ gcloud run deploy quizapp --region=europe-west2 --image europe-central2-docker.p
 gcloud auth login
 gcloud config set project <your_project_id_here>
 gcloud artifacts repositories create quizapp-repo --repository-format=docker --location=europe-central2 --description="Docker repository"
-gcloud builds submit --region=us-west2 --config ./deploy/cloudbuild.yaml
-gcloud run deploy quizapp --region=europe-west2 --image europe-central2-docker.pkg.dev/quizzabletest/hello-repo/quizapp-image:quizapp
 ```
 
 Enjoy!
