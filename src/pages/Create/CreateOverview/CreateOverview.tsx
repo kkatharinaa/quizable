@@ -18,6 +18,8 @@ import {LEAVE_ICON_DARK} from "../../../assets/Icons.ts";
 import {ErrorPageLinkedTo, showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
 import {quizOptionsAreEqual} from "../../../models/QuizOptions.ts";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
+import {auth, sendEmailLink, logInWithEmailLink, logOutUser} from "../../../firebase/auth.ts";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -35,6 +37,16 @@ export const CreateOverview: FC = () => {
     const [showingPopup, setShowingPopup] = useState(false);
 
     // TODO: check if we are logged in!! else redirect to home
+    // checking login state
+    const [user, loading, error] = useAuthState(auth);
+    useEffect(() => {
+        if(loading) {
+            // TODO: add loading screen
+            return;
+        }
+        if (user) navigate("/overview");
+        else navigate("/login");
+    }, [user, loading, navigate]);
 
     // get all of this user's quizzes from firebase TODO: only get it from the logged in user!
     const setQuizzesFromFirestore = async () => {
@@ -193,7 +205,8 @@ export const CreateOverview: FC = () => {
                 hidePopup()
             },
             onPrimaryClick: () => {
-                // TODO: log out from firebase auth
+                // TODO: log out from firebase auth 
+                logOutUser();
                 navigate(`/`)
             },
         }

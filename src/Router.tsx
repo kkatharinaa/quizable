@@ -8,7 +8,7 @@ import {ErrorPage} from "./pages/ErrorPage/ErrorPage.tsx";
 import {QuizMaster} from "./pages/Quiz/QuizMaster/QuizMaster.tsx";
 import {QuizSlave} from "./pages/Quiz/QuizSlave/QuizSlave.tsx";
 
-// TODO: only make master routes accessible if you are logged in
+// TODO: only make master routes accessible if you are logged in, refactor router to use switch between public and protected routes
 
 export interface RouterType {
     title: string;

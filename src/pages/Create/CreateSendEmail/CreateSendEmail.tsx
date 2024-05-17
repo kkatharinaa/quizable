@@ -10,6 +10,10 @@ import {InputField} from "../../../components/InputField/InputField.tsx";
 import {InputFieldType} from "../../../components/InputField/InputFieldExports.ts";
 import {ButtonStyle} from "../../../components/Button/ButtonExports.ts";
 
+// Auth stuff
+import {auth, sendEmailLink} from "../../../firebase/auth.ts";
+import {useAuthState} from "react-firebase-hooks/auth";
+
 export const CreateSendEmail: FC = () => {
     const navigate = useNavigate()
 
@@ -37,6 +41,7 @@ export const CreateSendEmail: FC = () => {
         setSentEmail(true)
 
         // TODO: send email to user which will provide the user with an authenticated link - it seems firebase handles the email validation by itself, meaning I will setInfoText based on if the auth promise is fulfilled or if an error is thrown
+        sendEmailLink(inputValue)
         /*const auth = getAuth();
         sendSignInLinkToEmail(auth, inputValue, actionCodeSettings)
             .then(() => {
@@ -51,10 +56,16 @@ export const CreateSendEmail: FC = () => {
          */
     }
 
+    // checking login state
+    const [user, loading, error] = useAuthState(auth);
     useEffect(() => {
-        // TODO: if we are logged in, skip this page and automatically navigate to overview with the following line:
-        //navigate("/overview")
-    }, []);
+        if(loading) {
+            // TODO: add loading screen
+            return;
+        }
+        if (user) navigate("/overview");
+        else navigate("/login");
+    }, [user, loading, navigate]);
 
     // TODO in general: we need a way to check if the user is authenticated (and get the authenticateduser object) when opening another route (eg the create overview screen) -> only if authenticated should we see the view, else it should redirect to home.
 

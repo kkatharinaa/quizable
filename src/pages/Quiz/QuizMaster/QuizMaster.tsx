@@ -18,6 +18,8 @@ import {QuizPodium} from "../QuizPodium/QuizPodium.tsx";
 import {QuizEnd} from "../QuizEnd/QuizEnd.tsx";
 import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
 import {QuizSessionManager, QuizSessionManagerInterface} from "../../../managers/QuizSessionManager.tsx";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../../../firebase/auth.ts";
 
 export interface QuizMasterChildrenProps {
     quizSessionManager: QuizSessionManagerInterface
@@ -37,6 +39,17 @@ export const QuizMaster: FC = () => {
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
 
+    // checking login state
+    const [user, loading, error] = useAuthState(auth);
+    useEffect(() => {
+        if(loading) {
+            // TODO: add loading screen
+            return;
+        }
+        if (user) navigate("/overview");
+        else navigate("/login");
+    }, [user, loading, navigate]);
+    
     const setQuizFromFirestore = async (quizID: string) => {
         if (quizID == null) {
             showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
