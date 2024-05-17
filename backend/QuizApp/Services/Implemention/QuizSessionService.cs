@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Diagnostics.CodeAnalysis;
 using QuizApp.Models;
@@ -11,9 +12,10 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     /// Quiz Sessions Dictionary. Key is the Entry ID
     /// </summary>
     private static Dictionary<string, QuizSession> QuizSessions { get; set; } = new();
-    
     private static Dictionary<string, List<Question>> QuizSessionsQuestions { get; set; } = new();
     
+    // key: quizUserDeviceId, value: connectionId
+    private static Dictionary<string, string> QuizSessionConnections { get; set; } = new();
     private static Dictionary<string, CountDown> QuizSessionsCountdowns { get; set; } = new();
     
     /// <summary>
@@ -86,7 +88,7 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     {
         QuizSessions.Remove(entryCode);
     }
-    
+
     /// <summary>
     /// Delete the quiz session extras (all stuff around the session which is saved on the server to give more info on the session, like the related quiz questions and the timer...) by the session's id
     /// </summary>
@@ -129,7 +131,28 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                 return quizSession;
             }).ToDictionary();
     }
-    
+
+    public void RemoveUserFromQuizSession(string quizSessionId, QuizUser quizUser)
+    {
+        QuizSessions = QuizSessions.Select(quizSession =>
+        {
+            if (quizSession.Value.Id.Equals(quizSessionId))
+            {
+                // check if user does not already exist inside the quiz
+                bool quizUserExists = quizSession.Value.State.UsersStats
+                    .Any(u => u.User.Identifier == quizUser.Identifier);
+                
+                // if it does not exist, add it
+                if (quizUserExists)
+                {
+                    QuizSessionUserStats? userStats = GetQuizSessionUserStats(quizUser.Id);
+                    quizSession.Value.State.UsersStats.Remove(userStats!);
+                }
+            }
+            return quizSession;
+        }).ToDictionary();
+    }
+
     /// <summary>
     /// Tries to get a quiz user for the give identifier and session id.
     /// </summary>
@@ -524,6 +547,33 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             ).ToDictionary();
         
         return state;
+    }
+    
+    public void AddQuizSessionSlaveConnection(QuizUser quizUser, string connectionId) => QuizSessionConnections.Add(quizUser.DeviceId, connectionId);
+
+    public QuizSessionUserStats? GetSlaveConnectionUser(string connectionId)
+    {   
+        var deviceId = QuizSessionConnections[connectionId];
+
+        return QuizSessions
+            .SelectMany(kVp => kVp.Value.State.UsersStats)
+            .FirstOrDefault(userStats => userStats.User.DeviceId == deviceId);
+    }
+
+    public QuizSession GetSlaveConnectionQuizSession(string connectionId)
+    {
+        var deviceId = QuizSessionConnections[connectionId];
+        var quizSessionContainingQuizUser = 
+            QuizSessions.FirstOrDefault(kVp => 
+                kVp.Value.State.UsersStats.Any(val => val.User.DeviceId == deviceId)).Value;
+
+        return quizSessionContainingQuizUser;
+    }
+
+    public void RemoveQuizSessionSlaveConnection(string connectionId)
+    {
+        var key = QuizSessionConnections.FirstOrDefault(kVp => kVp.Value == connectionId).Key;
+        QuizSessionConnections.Remove(key ?? "");
     }
 
     /// <summary>

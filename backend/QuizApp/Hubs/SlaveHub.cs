@@ -16,8 +16,29 @@ namespace QuizApp.Hubs;
 
 public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionService, IHubContext<MasterHub> masterContext) : Hub
 {
+    public override Task OnDisconnectedAsync(Exception? exception)
+    {
+        logger.LogInformation($"Connection lost: {Context.ConnectionId}");
 
-    public async Task NotifySlaveEnterQuiz(QuizUser quizUser, string quizSessionId)
+        // Get the user from quiz session from connectionId
+        
+        
+        // Remove user from quiz session
+        
+        
+        QuizSession quizSessionConnectionUser = quizSessionService.GetSlaveConnectionQuizSession(Context.ConnectionId);
+        List<QuizSessionUserStats> userStatsList = quizSessionConnectionUser.State.UsersStats;
+        
+        // Nofity master of user left
+        
+        masterContext.Clients.All.SendAsync($"userleft:userId1", userStatsList);
+        quizSessionService.RemoveQuizSessionSlaveConnection(Context.ConnectionId);
+        return base.OnDisconnectedAsync(exception);
+    }
+    
+    public string GetConnectionId => Context.ConnectionId;
+
+    public async Task NotifySlaveEnterQuiz(string connectionId, QuizUser quizUser, string quizSessionId)
     {
         if (!quizSessionService.TryGetQuizSessionUser(quizSessionId, quizUser.Identifier, out var _))
         {
@@ -80,4 +101,5 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
             await Clients.All.SendAsync(quizUser.Identifier, quizSession);
         }
     }
+    
 }

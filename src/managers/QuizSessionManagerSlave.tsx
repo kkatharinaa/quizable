@@ -124,14 +124,18 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
         this._quizUser = null;
         this.notifySubscribers()
     }
+
+
     public selectAnswer(answer: Answer): void {
         this._connection?.send("NotifySlaveAnswered", this._quizUser, this._quizSession?.id, this._currentQuestion?.id, answer);
     }
+
     public async setUp(quizSessionId: string, quizUser: QuizUser): Promise<void> {
         this._connection = await this.initSignalR(quizSessionId, quizUser)
         this._quizUser = quizUser;
         this.notifySubscribers();
     }
+
     private async initSignalR(quizSessionId: string, quizUser: QuizUser): Promise<SignalR.HubConnection> {
         // start websocket connection
         const port: number = 5296
@@ -170,7 +174,11 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
 
         connection.start()
             .then(async () => {
-                connection?.send("NotifySlaveEnterQuiz", quizUser, quizSessionId)
+                connection.invoke('GetConnectionId')
+                    .then((connectionId: string) => {
+                        console.log("Connection ID: " + connectionId)
+                        connection?.send("NotifySlaveEnterQuiz", connectionId, quizUser, quizSessionId)
+                    })
             })
             .catch((err) => console.error(err))
 

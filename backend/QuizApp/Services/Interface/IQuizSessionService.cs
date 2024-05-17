@@ -19,6 +19,7 @@ public interface IQuizSessionService
     public string GetQuizSessionState(string quizSessionId);
     
     public void AddUserToQuizSession(string quizSessionId, QuizUser quizUser);
+    public void RemoveUserFromQuizSession(string quizSessionId, QuizUser quizUser);
     public string AddQuizSession(QuizSession quizSession);
     public void AddQuizSessionQuestions(string quizSessionId, List<Question> questions);
     public void AddQuizSessionCountdown(string quizSessionId, CountDown countDown);
@@ -32,4 +33,9 @@ public interface IQuizSessionService
     public void DeleteSessionByEntryCode(string entryCode);
     public void DeleteSessionExtrasBySessionId(string quizSessionId);
     public void DeleteQuizSessionCountdown(string quizSessionId);
+
+    public void AddQuizSessionSlaveConnection(QuizUser quizUser, string connectionId);
+    public QuizSession GetSlaveConnectionQuizSession(string connectionId);
+    public QuizSessionUserStats? GetSlaveConnectionUser(string connectionId);
+    public void RemoveQuizSessionSlaveConnection(string connectionId);
 }

@@ -42,8 +42,6 @@ export default class QuizSessionService{
             await fetch(`${this.url}/api/session/user/${quizSessionId}/${quizUserIdentifier}`)
         )
 
-        console.log("Status code: " + quizUserExistResponse.status)
-
         if(quizUserExistResponse.status == 404){
             return false;  
         }
