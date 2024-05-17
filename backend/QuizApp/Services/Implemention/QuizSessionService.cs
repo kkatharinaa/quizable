@@ -132,6 +132,11 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             }).ToDictionary();
     }
 
+    /// <summary>
+    /// Remove a user from the quiz session
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="quizUser"></param>
     public void RemoveUserFromQuizSession(string quizSessionId, QuizUser quizUser)
     {
         QuizSessions = QuizSessions.Select(quizSession =>
@@ -469,7 +474,6 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     /// <param name="quizSessionId"></param>
     /// <param name="question"></param>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
     public bool TryGetQuizSessionNextQuestion(string quizSessionId,[MaybeNullWhen(false)] out Question question)
     {
         // Get the current quiz question id 
@@ -551,18 +555,27 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     
     public void AddQuizSessionSlaveConnection(QuizUser quizUser, string connectionId) => QuizSessionConnections.Add(quizUser.DeviceId, connectionId);
 
+    /// <summary>
+    /// Get the quiz user based on the connection id
+    /// </summary>
+    /// <param name="connectionId"></param>
+    /// <returns></returns>
     public QuizSessionUserStats? GetSlaveConnectionUser(string connectionId)
     {   
-        var deviceId = QuizSessionConnections[connectionId];
-
+        var deviceId = QuizSessionConnections.FirstOrDefault(x => x.Value == connectionId).Key;
         return QuizSessions
             .SelectMany(kVp => kVp.Value.State.UsersStats)
             .FirstOrDefault(userStats => userStats.User.DeviceId == deviceId);
     }
 
+    /// <summary>
+    /// Get the quiz session containing the quiz user connection id
+    /// </summary>
+    /// <param name="connectionId"></param>
+    /// <returns></returns>
     public QuizSession GetSlaveConnectionQuizSession(string connectionId)
     {
-        var deviceId = QuizSessionConnections[connectionId];
+        var deviceId = QuizSessionConnections.FirstOrDefault(x => x.Value == connectionId).Key;
         var quizSessionContainingQuizUser = 
             QuizSessions.FirstOrDefault(kVp => 
                 kVp.Value.State.UsersStats.Any(val => val.User.DeviceId == deviceId)).Value;
@@ -570,6 +583,10 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         return quizSessionContainingQuizUser;
     }
 
+    /// <summary>
+    /// Remove a quiz session slave connection
+    /// </summary>
+    /// <param name="connectionId"></param>
     public void RemoveQuizSessionSlaveConnection(string connectionId)
     {
         var key = QuizSessionConnections.FirstOrDefault(kVp => kVp.Value == connectionId).Key;

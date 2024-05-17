@@ -264,6 +264,15 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         connection.on(`userjoined:${hostUserId}`, (quizUserStats: QuizSessionUserStats[]) => {
             if (this._quizSession == null) return
             this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
+            console.log("Lost the connection!")
+            this.notifySubscribers()
+        })
+
+        // basically the same as userjoined
+        // TODO: merge userjoined and userleft
+        connection.on(`userleft:${hostUserId}`, (quizUserStats: QuizSessionUserStats[]) => {
+            if (this._quizSession == null) return
+            this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
             this.notifySubscribers()
         })
 

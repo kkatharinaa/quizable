@@ -19,30 +19,31 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         logger.LogInformation($"Connection lost: {Context.ConnectionId}");
-
-        // Get the user from quiz session from connectionId
         
+        // Get the user from quiz session from connectionId
+        QuizSessionUserStats? quizUser = quizSessionService.GetSlaveConnectionUser(Context.ConnectionId);
+        QuizSession quizSessionConnectionUser = quizSessionService.GetSlaveConnectionQuizSession(Context.ConnectionId);
         
         // Remove user from quiz session
-        
-        
-        QuizSession quizSessionConnectionUser = quizSessionService.GetSlaveConnectionQuizSession(Context.ConnectionId);
-        List<QuizSessionUserStats> userStatsList = quizSessionConnectionUser.State.UsersStats;
+        quizSessionService.RemoveUserFromQuizSession(quizSessionConnectionUser.Id, quizUser!.User);
+        quizSessionService.RemoveQuizSessionSlaveConnection(Context.ConnectionId);
         
         // Nofity master of user left
+        List<QuizSessionUserStats> userStatsList = quizSessionService.GetQuizSessionById(quizSessionConnectionUser.Id).Item1!.State.UsersStats;
         
         masterContext.Clients.All.SendAsync($"userleft:userId1", userStatsList);
-        quizSessionService.RemoveQuizSessionSlaveConnection(Context.ConnectionId);
+        
         return base.OnDisconnectedAsync(exception);
     }
     
-    public string GetConnectionId => Context.ConnectionId;
+    public string GetConnectionId() => Context.ConnectionId;
 
     public async Task NotifySlaveEnterQuiz(string connectionId, QuizUser quizUser, string quizSessionId)
     {
         if (!quizSessionService.TryGetQuizSessionUser(quizSessionId, quizUser.Identifier, out var _))
         {
             quizSessionService.AddUserToQuizSession(quizSessionId, quizUser);
+            quizSessionService.AddQuizSessionSlaveConnection(quizUser, connectionId);
             
             bool isQuizSessionUserOk =
                 quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizSessionUserStatList);
