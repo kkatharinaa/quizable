@@ -29,12 +29,12 @@ const pagesData: RouterType[] = [
         title: "Error | Quizable"
     },
     {
-      path: "overview",
+      path: "overview", // needs authentication
       element: <CreateOverview/>,
       title: "Overview | Quizable"
     },
     {
-      path: "overview/editor",
+      path: "overview/editor", // needs authentication
       element: <CreateEditor/>,
       title: "Edit | Quizable"
     },
@@ -49,7 +49,7 @@ const pagesData: RouterType[] = [
       title: "Join Quiz | Quizable"
     },
     {
-        path: "quiz",
+        path: "quiz", // needs authentication
         element: <QuizMaster />,
         title: "Quiz | Quizable"
     },

@@ -13,6 +13,7 @@ import {ButtonStyle} from "../../../components/Button/ButtonExports.ts";
 // Auth stuff
 import {auth, sendEmailLink} from "../../../firebase/auth.ts";
 import {useAuthState} from "react-firebase-hooks/auth";
+import {Loading} from "../../Loading/Loading.tsx";
 
 export const CreateSendEmail: FC = () => {
     const navigate = useNavigate()
@@ -21,9 +22,14 @@ export const CreateSendEmail: FC = () => {
     const [ infoText, setInfoText ] = useState("")
     const [ canSend, setCanSend ] = useState(true)
     const [ sentEmail, setSentEmail ] = useState(false)
+    const [user, loading, error] = useAuthState(auth);
 
     const updateInput = (newValue: string) => {
         setInputValue(newValue)
+    }
+
+    const navigateHome = () => {
+        navigate("/");
     }
 
     const canSendEmail = ():boolean => {
@@ -31,40 +37,24 @@ export const CreateSendEmail: FC = () => {
         return canSend && inputValue.length >= 3 && inputValue.includes('@')
     }
 
-    const navigateHome = () => {
-        navigate("/");
-    }
-
     const handleSendEmail = () => {
         if (!canSendEmail()) return
         setCanSend(false)
         setSentEmail(true)
+        setInfoText("We have just sent you an email! Please follow the instructions within the email to login. The email may take a few minutes to arrive.")
 
-        // TODO: send email to user which will provide the user with an authenticated link - it seems firebase handles the email validation by itself, meaning I will setInfoText based on if the auth promise is fulfilled or if an error is thrown
-        sendEmailLink(inputValue)
-        /*const auth = getAuth();
-        sendSignInLinkToEmail(auth, inputValue, actionCodeSettings)
+        // send email to user which will provide the user with an authenticated link - it seems firebase handles the email validation by itself, meaning I will setInfoText based on if the auth promise is fulfilled or if an error is thrown
+        sendEmailLink(inputValue, () => {
+        }, () => {
+            setInfoText("Something went wrong. Please check that the email address you entered is valid or try again later.")
+        })
             .then(() => {
-                window.localStorage.setItem('emailForSignIn', email);
-                setInfoText("We have just sent you an email! Please follow the instructions within the email to login.")
                 setCanSend(true)
             })
-            .catch((error) => {
-                setInfoText("Something went wrong. Please check that the email address you entered is valid or try again later.")
-                setCanSend(true)
-            });
-         */
     }
 
-    // checking login state
-    const [user, loading, error] = useAuthState(auth);
     useEffect(() => {
-        if(loading) {
-            // TODO: add loading screen
-            return;
-        }
         if (user) navigate("/overview");
-        else navigate("/login");
     }, [user, loading, navigate]);
 
     // TODO in general: we need a way to check if the user is authenticated (and get the authenticateduser object) when opening another route (eg the create overview screen) -> only if authenticated should we see the view, else it should redirect to home.
@@ -72,19 +62,24 @@ export const CreateSendEmail: FC = () => {
     return (
         <div className="login">
             <BackgroundGems type={BackgroundGemsType.Primary}></BackgroundGems>
-            <div className="content">
-                <div className="inputFieldWithInfoText">
-                    <p className="infoText">{"Logging in is as simple as possible - just put in your email and we will send you an email!"}</p>
-                    <InputField
-                        value={inputValue}
-                        onChange={updateInput}
-                        type={InputFieldType.Email}
-                    />
-                    {infoText != "" &&
-                        <p className="infoText">{infoText}</p>
-                    }
+
+            { loading ? (
+                <Loading/>
+            ) : (
+                <div className="content">
+                    <div className="inputFieldWithInfoText">
+                        <p className="infoText">{"Logging in is as simple as possible - just put in your email and we will send you an email!"}</p>
+                        <InputField
+                            value={inputValue}
+                            onChange={updateInput}
+                            type={InputFieldType.Email}
+                        />
+                        {infoText != "" &&
+                            <p className="infoText">{infoText}</p>
+                        }
+                    </div>
                 </div>
-            </div>
+            )}
             <BottomNavBar
                 secondaryButtonText="Home"
                 secondaryButtonIcon={RETURN_ICON_DARK}

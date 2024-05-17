@@ -58,6 +58,19 @@
     background: transparent;
 }
 
+.popupField .inputField {
+    width: 90%;
+}
+.popupField .inputField input {
+    padding: 18px 20px;
+    font-size: 24px;
+}
+.popupField .inputField .characterCount {
+    right: 6px;
+    top: 6px;
+    font-size: 12px;
+}
+
 @media only screen and (max-width: 480px) {
     .popupField, .popupField .bottomNavBar {
         max-width: 90vw;

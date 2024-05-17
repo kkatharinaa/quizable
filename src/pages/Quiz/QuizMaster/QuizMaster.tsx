@@ -20,6 +20,8 @@ import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExport
 import {QuizSessionManager, QuizSessionManagerInterface} from "../../../managers/QuizSessionManager.tsx";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../../../firebase/auth.ts";
+import {LoadingPage} from "../../Loading/Loading.tsx";
+import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 
 export interface QuizMasterChildrenProps {
     quizSessionManager: QuizSessionManagerInterface
@@ -169,6 +171,9 @@ export const QuizMaster: FC = () => {
                     quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
                 />
+            }
+            { (loading || quizSessionManager.quizState == null || !quizSessionManager.sessionExists) &&
+                <LoadingPage hasBottomNavBar={false}/>
             }
 
             { (showingPopup && popupProps != null) &&
