@@ -1,6 +1,7 @@
 import "firebase/firestore";
 import QuizSession from "../models/QuizSession";
 import { Question } from "../models/Question";
+import QuizUser from "../models/QuizUser";
 
 export default class QuizSessionService{
    
@@ -55,4 +56,9 @@ export default class QuizSessionService{
         return await (await fetch(`${this.url}/api/session`)).json()
     }
 
+    public static async checkQuizUserReconnection(deviceId: string) : Promise<{quizUser: QuizUser, quizSession: QuizSession}|null> {
+        return fetch(`${this.url}/api/session/device/${deviceId}`)
+            .then((text) => text.json())
+            .catch(() => null)
+    }
 }

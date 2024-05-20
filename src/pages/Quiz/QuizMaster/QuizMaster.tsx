@@ -74,8 +74,8 @@ export const QuizMaster: FC = () => {
                 QuizSessionManager.getInstance().changeState(QuizState.endscreen)
                 hidePopup()
             },
-        }
-        showPopup(endQuizPopup)
+        };
+        showPopup(endQuizPopup);
     }
 
     const showPopup = (popup: PopupProps) => {

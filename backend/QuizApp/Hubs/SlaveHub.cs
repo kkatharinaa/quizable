@@ -23,15 +23,18 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
         // Get the user from quiz session from connectionId
         QuizSessionUserStats? quizUser = quizSessionService.GetSlaveConnectionUser(Context.ConnectionId);
         QuizSession quizSessionConnectionUser = quizSessionService.GetSlaveConnectionQuizSession(Context.ConnectionId);
+
+        if (quizSessionConnectionUser.State.CurrentQuizState == "lobby")
+        {
+            // Remove user from quiz session
+            quizSessionService.RemoveUserFromQuizSession(quizSessionConnectionUser.Id, quizUser!.User);
+            quizSessionService.RemoveQuizSessionSlaveConnection(Context.ConnectionId);
         
-        // Remove user from quiz session
-        quizSessionService.RemoveUserFromQuizSession(quizSessionConnectionUser.Id, quizUser!.User);
-        quizSessionService.RemoveQuizSessionSlaveConnection(Context.ConnectionId);
+            // Nofity master of user left
+            List<QuizSessionUserStats> userStatsList = quizSessionService.GetQuizSessionById(quizSessionConnectionUser.Id).Item1!.State.UsersStats;
         
-        // Nofity master of user left
-        List<QuizSessionUserStats> userStatsList = quizSessionService.GetQuizSessionById(quizSessionConnectionUser.Id).Item1!.State.UsersStats;
-        
-        masterContext.Clients.All.SendAsync($"userleft:userId1", userStatsList);
+            masterContext.Clients.All.SendAsync($"userleft:userId1", userStatsList);
+        }
         
         return base.OnDisconnectedAsync(exception);
     }
@@ -42,24 +45,39 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
     {
         if (!quizSessionService.TryGetQuizSessionUser(quizSessionId, quizUser.Identifier, out var _))
         {
-            quizSessionService.AddUserToQuizSession(quizSessionId, quizUser);
-            quizSessionService.AddQuizSessionSlaveConnection(quizUser, connectionId);
-            
-            bool isQuizSessionUserOk =
-                quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizSessionUserStatList);
-            
-            await masterContext.Clients.All.SendAsync($"userjoined:userId1", quizSessionUserStatList);
+            // Check if the quiz session has the user
+            (QuizSession? quizSession, _) = quizSessionService.GetQuizSessionById(quizSessionId);
 
-            if (isQuizSessionUserOk)
+            if (quizSession is not null)
             {
-                foreach (QuizSessionUserStats quizSessionUserStats in quizSessionUserStatList)
+                if (quizSession.State.CurrentQuizState == "play")
                 {
-                    // currently not implemented since the quiz slave lobby has to be done first
-                    //await Clients.All.SendAsync($"message:{quizSessionUserStats.User.Identifier}", quizSessionUserStatList.Select(v => v.User));
+                    // User is trying to reconnect
+                    bool wasUserInQuizSession = true;
+                    
+                    return;
                 }
-            }
 
-            await RequestQuizSession(quizUser, quizSessionId);
+                quizSessionService.AddUserToQuizSession(quizSessionId, quizUser);
+                quizSessionService.AddQuizSessionSlaveConnection(quizUser, connectionId);
+
+                bool isQuizSessionUserOk =
+                    quizSessionService.TryGetQuizSessionUserStats(quizSessionId, out var quizSessionUserStatList);
+
+                await masterContext.Clients.All.SendAsync($"userjoined:userId1", quizSessionUserStatList);
+
+                if (isQuizSessionUserOk)
+                {
+                    foreach (QuizSessionUserStats quizSessionUserStats in quizSessionUserStatList)
+                    {
+                        // currently not implemented since the quiz slave lobby has to be done first
+                        await Clients.All.SendAsync($"message:{quizSessionUserStats.User.Identifier}",
+                            quizSessionUserStatList.Select(v => v.User));
+                    }
+                }
+
+                await RequestQuizSession(quizUser, quizSessionId);
+            }
         }
     }
     

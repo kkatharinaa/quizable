@@ -33,11 +33,6 @@ public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizS
         return Ok("Added questions to quiz");
     }
     
-    /// <summary>
-    /// Returns quizSessionId if the quiz code is valid
-    /// </summary>
-    /// <param name="code"></param>
-    /// <returns></returns>
     [HttpGet]
     [Route("validate/{code}")]
     public IActionResult ValidateQuizCode(string code)
@@ -70,11 +65,25 @@ public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizS
         return NotFound("Quiz user not found!");
     }
     
-    
     [HttpGet]
     [Route("session/{entryId}/")]
     public IActionResult GetSessionByEntryId(string entryId)
     {
         return Ok(quizSessionService.GetQuizSessionByEntryId(entryId));
     }
+    
+    [HttpGet]
+    [Route("device/{deviceId}")]
+    public ActionResult IsDeviceIdInQuizSession(string deviceId)
+    {
+        logger.LogInformation("Getting reconnect");
+        bool isDeviceIdInQuizSession = quizSessionService.TryGetQuizSessionUserByDeviceId(deviceId, out var quizUser, out var quizSession);
+        return isDeviceIdInQuizSession ? Ok(new Dictionary<string, object>
+        {
+            { "quizUser", quizUser },
+            { "quizSession", quizSession }
+        }) : NotFound(null);
+    }
+    
+    
 }

@@ -1,15 +1,13 @@
-using Microsoft.AspNetCore.SignalR;
 using QuizApp.Models;
 
 namespace QuizApp.Services.Interface;
 
 public interface IQuizSessionService
 {
-
     public QuizSession? GetQuizSessionByEntryId(string entryId);
     public (QuizSession?, string) GetQuizSessionById(string quizSessionId);
     public bool TryGetQuizSessionUser(string quizSessionId, string identifier, out QuizUser quizUser);
-    // This is used to get the user quiz
+    public bool TryGetQuizSessionUserByDeviceId(string deviceId, out QuizUser quizUser, out QuizSession quizSession);
     public bool TryGetQuizSessionUserStats(string quizSessionId, out List<QuizSessionUserStats> quizUsers);
     public bool TryGetQuizSessionQuestions(string quizSessionId, out List<Question> questions);
     public bool TryGetQuizSessionNextQuestion(string quizSessionId, out Question question);

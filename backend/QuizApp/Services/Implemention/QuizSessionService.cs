@@ -191,7 +191,36 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         quizUser = null;
         return false;
     }
-    
+
+    public bool TryGetQuizSessionUserByDeviceId(string deviceId, out QuizUser quizUser, out QuizSession quizSession)
+    {
+        QuizSession? quizSessionQuery = QuizSessions
+            .Values
+            .FirstOrDefault(qz => qz.State.UsersStats.Any(u => u.User.DeviceId == deviceId));
+        
+        QuizUser? quizUserQuery = QuizSessions
+            .Values
+            .ToList()
+            .SelectMany(session => session.State.UsersStats)
+            .ToList()
+            .FirstOrDefault(s => s.User.DeviceId.Equals(deviceId))
+            ?.User;
+        
+        logger.LogInformation("Quiz Sessssion is null: " + (quizSessionQuery is null));
+        logger.LogInformation("Quiz User is null: " + (quizUserQuery is null));
+        
+        if (quizUserQuery is not null && quizSessionQuery is not null)
+        {
+            quizUser = quizUserQuery;
+            quizSession = quizSessionQuery;
+            return true;
+        }
+        
+        quizUser = null;
+        quizSession = null;
+        return false;
+    }
+
     /// <summary>
     /// Get quiz users for quiz session and their session
     /// </summary>
