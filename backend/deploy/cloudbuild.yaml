@@ -9,18 +9,25 @@ steps:
       echo $$GCLOUD_PROJECT_ID > _PROJECT_ID
       echo $$GCLOUD_PROJECT_REPO_NAME > _REPO_NAME
       echo $$GCLOUD_PROJECT_REGION > _REGION
+      echo $$GCLOUD_PROJECT_REGION-docker.pkg.dev/$$GCLOUD_PROJECT_ID/$$GCLOUD_PROJECT_REPO_NAME/$$GCLOUD_PROJECT_NAME-image:$$GCLOUD_PROJECT_NAME > _TAG
 #  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
 #    entrypoint: sh
 #    args: [ '-c', 'gcloud artifacts repositories create quizapp-repo --repository-format=docker --location=europe-central2 --description="Docker repository"']
 #    allowFailure: true
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: sh
-    args: [ '-c', 'docker build -t $(cat _REGION)-docker.pkg.dev/$(cat _PROJECT_ID)/$(cat _REPO_NAME)/$(cat _PROJECT_NAME)-image:$(cat _PROJECT_NAME) ./backend' ]
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: sh
-    args: [ '-c', 'docker push $(cat _REGION)-docker.pkg.dev/$(cat _PROJECT_ID)/$(cat _REPO_NAME)/$(cat _PROJECT_NAME)-image:$(cat _PROJECT_NAME)']
+  # - name: 'gcr.io/cloud-builders/docker'
+  #   entrypoint: bash
+  #   args: 
+  #     - -c
+  #     - |
+  #       docker build -t  $(cat _TAG | tr -d '\r') ./backend
+  # - name: 'gcr.io/cloud-builders/docker'
+  #   entrypoint: bash
+  #   args: 
+  #     - -c
+  #     - docker push $(cat _TAG | tr -d '\r')
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: sh
-    args: [ '-c', 'gcloud run deploy $(cat _PROJECT_NAME) --region=$(cat _REGION) --image $(cat _REGION)-docker.pkg.dev/$(cat _PROJECT_ID)/$(cat _REPO_NAME)/$(cat _PROJECT_NAME)-image:$(cat _PROJECT_NAME) --allow-unauthenticated' ]
-
+    entrypoint: bash
+    args: 
+      - -c 
+      - gcloud run deploy $(cat _PROJECT_NAME | tr -d '\r') --region=$(cat _REGION | tr -d '\r') --image $(cat _TAG | tr -d '\r') --allow-unauthenticated
 
