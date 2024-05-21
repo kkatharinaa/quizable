@@ -50,6 +50,7 @@ export const Popup: FC<PopupProps> = ({ title, message, secondaryButtonText, sec
                     <InputField
                         value={inputValue}
                         onChange={handleInputValueChange}
+                        onEnter={handlePrimaryClick}
                         type={InputFieldType.Email}/>
                 }
                 <BottomNavBar

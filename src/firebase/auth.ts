@@ -2,6 +2,8 @@ import app from './config';
 import { browserLocalPersistence, createUserWithEmailAndPassword, getAuth, isSignInWithEmailLink, sendSignInLinkToEmail, setPersistence, signInWithEmailLink, signOut } from 'firebase/auth';
 import QuizRepository from "../repositories/QuizRepository.ts";
 import {AuthenticatedUser} from "../models/AuthenticatedUser.ts";
+import {PopupProps} from "../components/Popup/Popup.tsx";
+import {BottomNavBarType} from "../components/BottomNavBar/BottomNavBarExports.ts";
 
 // Initialize Auth
 const auth = getAuth(app);
@@ -48,12 +50,12 @@ const sendSignInLinkToEmailWrapper = async (email: string, successCallback?: () 
 };
 
 // Signin with email link function
-const logInWithEmailLink = async (url: string, showPrompt: (title: string, url: string, onSubmitSuccess: (email: string, url: string, onError: () => void) => Promise<void>, onError: () => void) => void, onError: () => void) => {
+const logInWithEmailLink = async (url: string, onError: () => void, showPopup: (popup: PopupProps) => void, hidePopup: () => void) => {
     setPersistence(auth, browserLocalPersistence);
     if(isSignInWithEmailLink(auth, url)) {
         const email = window.localStorage.getItem('emailForSignIn');
         if (!email) {
-            showPrompt('Please provide your email for confirmation', url, logInWithEmailLinkCallback, onError)
+            showPromptForEmailConfirmation(url, onError, showPopup, hidePopup)
             return
         }
         await logInWithEmailLinkCallback(email, url, onError)
@@ -76,4 +78,27 @@ const logOutUser = async () => {
     await signOut(auth)
 };
 
-export { auth, sendEmailLink, logInWithEmailLink, logOutUser };
+const showPromptForEmailConfirmation = (url: string, onError: () => void, showPopup: (popup: PopupProps) => void, hidePopup: () => void) => {
+    const promptPopup: PopupProps = {
+        title: 'Please provide your email for confirmation',
+        message: null,
+        secondaryButtonText: "Cancel",
+        secondaryButtonIcon: null,
+        primaryButtonText: "Submit",
+        primaryButtonIcon: null,
+        type: BottomNavBarType.Default,
+        onSecondaryClick: () => {
+            hidePopup()
+            onError()
+        },
+        onPrimaryClick: (inputValue: string) => {
+            logInWithEmailLinkCallback(inputValue, url, onError).then(() => {
+                hidePopup()
+            })
+        },
+        isPrompt: true
+    }
+    showPopup(promptPopup)
+}
+
+export { auth, sendEmailLink, logInWithEmailLink, logOutUser, showPromptForEmailConfirmation };

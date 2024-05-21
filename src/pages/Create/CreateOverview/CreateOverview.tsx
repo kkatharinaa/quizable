@@ -74,9 +74,9 @@ export const CreateOverview: FC = () => {
         window.addEventListener('resize', handleResize);
 
         const setUp = async () => {
-            await logInWithEmailLink(window.location.href, showPrompt, () => {
+            await logInWithEmailLink(window.location.href, () => {
                 navigate("/login")
-            })
+            }, showPopup, hidePopup)
             if (user) await setQuizzesFromFirestore(user.uid)
             setIsSetUp(true)
         }
@@ -97,30 +97,6 @@ export const CreateOverview: FC = () => {
         }
         if (error) console.log(error)
     }, [user, loading, navigate]);
-
-    // prompt for auth
-    const showPrompt = (title: string, url: string, onSubmitSuccess: (email: string, url: string, onError: () => void) => Promise<void>, onError: () => void) => {
-        const promptPopup: PopupProps = {
-            title: title,
-            message: null,
-            secondaryButtonText: "Cancel",
-            secondaryButtonIcon: null,
-            primaryButtonText: "Submit",
-            primaryButtonIcon: null,
-            type: BottomNavBarType.Default,
-            onSecondaryClick: () => {
-                hidePopup()
-                onError()
-            },
-            onPrimaryClick: (inputValue: string) => {
-                onSubmitSuccess(inputValue, url, onError).then(() => {
-                    hidePopup()
-                })
-            },
-            isPrompt: true,
-        }
-        showPopup(promptPopup)
-    }
 
     // quiz functions
     const findQuizByID = (id: string): Quiz | undefined => {

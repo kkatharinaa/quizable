@@ -46,8 +46,10 @@ export const QuizMaster: FC = () => {
             showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
             return
         }
-        if (user?.uid != null) await QuizRepository.getById(user!.uid!, quizID)
-        else showPopupSomethingWentWrong(showPopup, hidePopup)
+        if (user?.uid != null) return await QuizRepository.getById(user!.uid!, quizID)
+
+        showPopupSomethingWentWrong(showPopup, hidePopup)
+        return
     }
 
     const handleEndQuizSession = () => {
@@ -115,11 +117,11 @@ export const QuizMaster: FC = () => {
 
         // get quiz from firebase and setup connection
         const setUp = async () => {
-            await logInWithEmailLink(window.location.href, showPrompt, () => {
+            await logInWithEmailLink(window.location.href, () => {
                 navigate("/login")
-            })
+            }, showPopup, hidePopup)
             const quiz = await setQuizFromFirestore(quizId)
-            if (quiz == null) {
+            if (quiz == undefined) {
                 console.log("no quiz id or quiz session")
                 showErrorPageSomethingWentWrong(navigate)
                 return
@@ -142,30 +144,6 @@ export const QuizMaster: FC = () => {
         if (!user && isSetUp && !showingPopup) navigate("/login");
         if (error) console.log(error)
     }, [user, loading, navigate]);
-
-    // prompt for auth
-    const showPrompt = (title: string, url: string, onSubmitSuccess: (email: string, url: string, onError: () => void) => Promise<void>, onError: () => void) => {
-        const promptPopup: PopupProps = {
-            title: title,
-            message: null,
-            secondaryButtonText: "Cancel",
-            secondaryButtonIcon: null,
-            primaryButtonText: "Submit",
-            primaryButtonIcon: null,
-            type: BottomNavBarType.Default,
-            onSecondaryClick: () => {
-                setShowingPopup(false)
-                onError()
-            },
-            onPrimaryClick: (inputValue: string) => {
-                onSubmitSuccess(inputValue, url, onError).then(() => {
-                    setShowingPopup(false)
-                })
-            },
-            isPrompt: true,
-        }
-        showPopup(promptPopup)
-    }
 
     return (
         <div className="quizMaster">
