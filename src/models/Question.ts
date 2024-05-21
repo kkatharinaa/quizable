@@ -1,5 +1,5 @@
 //import {QuestionName} from "./ConstrainedTypes.ts";
-import {Answer, answerArraysAreEqual, makeAnswer} from "./Answer.ts";
+import {Answer, answerArraysAreEqual, isAnswer, makeAnswer} from "./Answer.ts";
 import { v4 as uuid } from "uuid";
 
 export enum QuestionType {
@@ -47,4 +47,22 @@ export const questionArraysAreEqual = (a: Question[], b: Question[]): boolean =>
         if (!questionsAreEqual(a[i],b[i])) return false;
     }
     return true;
+}
+
+export const isQuestion = (object: any): object is Question => {
+    return (
+        typeof object === "object" &&
+        typeof object.id === "string" &&
+        typeof object.questionText === "string" &&
+        Array.isArray(object.answers) && object.answers.every((answer: any) => isAnswer(answer)) &&
+        typeof object.maxQuestionTime === "number" &&
+        typeof object.questionPoints === "number" &&
+        typeof object.questionPointsModifier === "number" &&
+        isQuestionType(object.questionType) &&
+        typeof object.showLiveStats === "boolean"
+    )
+}
+
+export const isQuestionType = (value: any): value is QuestionType => {
+    return Object.values(QuestionType).includes(value);
 }

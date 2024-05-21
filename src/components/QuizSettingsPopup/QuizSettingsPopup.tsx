@@ -1,7 +1,7 @@
 import {FC, useState} from "react";
 import "./QuizSettingsPopup.css"
-import {ButtonStyle} from "../Button/ButtonExports.ts";
-import {Quiz} from "../../models/Quiz.ts";
+import {ButtonStyle, ButtonType} from "../Button/ButtonExports.ts";
+import {isQuiz, Quiz, quizzesAreEqual} from "../../models/Quiz.ts";
 import {BottomNavBar} from "../BottomNavBar/BottomNavBar.tsx";
 import {BottomNavBarStyle, BottomNavBarType} from "../BottomNavBar/BottomNavBarExports.ts";
 import {InputField} from "../InputField/InputField.tsx";
@@ -18,7 +18,8 @@ import {SettingsField} from "../SettingsField/SettingsField.tsx";
 import {SettingsFieldType} from "../SettingsField/SettingsFieldExports.ts";
 import {Question} from "../../models/Question.ts";
 import {PopupProps} from "../Popup/Popup.tsx";
-import {showPopupSomethingWentWrong} from "../Popup/PopupExports.ts";
+import {showPopupInfoOnly, showPopupSomethingWentWrong} from "../Popup/PopupExports.ts";
+import {ButtonComponent} from "../Button/Button.tsx";
 
 export interface QuizSettingsPopupProps {
     selectedQuiz: Quiz
@@ -32,6 +33,7 @@ export interface QuizSettingsPopupProps {
 
 export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, onSave, onClose, onEditQuestions, showPopup, hidePopup, newlyAdded }) => {
 
+    const [quiz, setQuiz] = useState<Quiz>(selectedQuiz) // only needed for importing a quiz from json
     const [quizOptions, setQuizOptions] = useState<QuizOptions>(selectedQuiz.options);
     const [quizName, setQuizName] = useState(selectedQuiz.name)
 
@@ -78,7 +80,7 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                 type: BottomNavBarType.PrimaryOnly,
                 onPrimaryClick: () => {
                     handleSave().then(() => {
-                        onEditQuestions(selectedQuiz.id)
+                        onEditQuestions(quiz.id)
                     })
                 },
             }
@@ -86,23 +88,23 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
         } else {
             showSaveConfirmationPopup("When clicking on either one of the buttons below, you will be taken to the questions editor.", () => {
                 // proceed without saving
-                onEditQuestions(selectedQuiz.id)
+                onEditQuestions(quiz.id)
             }, () => {
                 // proceed WITH saving
                 handleSave().then(() => {
-                    onEditQuestions(selectedQuiz.id)
+                    onEditQuestions(quiz.id)
                 })
             })
         }
     }
     const handleSave = async (): Promise<void> => {
         const updatedQuestions = handleRevertOverrides()
-        const updatedQuiz = {...selectedQuiz, name: quizName, options: quizOptions, questions: updatedQuestions}
-        return await onSave(selectedQuiz.id, updatedQuiz)
+        const updatedQuiz = {...quiz, name: quizName, options: quizOptions, questions: updatedQuestions}
+        return await onSave(quiz.id, updatedQuiz)
     }
     const handleRevertOverrides = (): Question[] => {
-        const updatedQuestions = [... selectedQuiz.questions]
-        if (quizOptionsAreEqualForQuestions(quizOptions, selectedQuiz.options)) {
+        const updatedQuestions = [... quiz.questions]
+        if (quizOptionsAreEqualForQuestions(quizOptions, quiz.options)) {
             return updatedQuestions
         }
         updatedQuestions.forEach((question) => {
@@ -115,7 +117,7 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
     }
     const showSaveConfirmationPopup = (extraMessage: string | null, onSecondaryClick: () => void, onPrimaryClick: () => void) => {
         // check if sth has been changed, if yes show this popup, else just perform the primaryClick
-        if (quizName == selectedQuiz.name && quizOptionsAreEqual(quizOptions, selectedQuiz.options)) {
+        if (quizName == selectedQuiz.name && quizOptionsAreEqual(quizOptions, selectedQuiz.options) && quizzesAreEqual(quiz, selectedQuiz)) {
             onPrimaryClick()
             hidePopup()
             return
@@ -180,6 +182,75 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
         handleColourSchemeInputChange(newValue)
     }
 
+    // import and export quiz
+    const handleImportQuiz = () => {
+        const popup: PopupProps = {
+            title: "Are you sure you want to import a quiz?",
+            message: "The current quiz will be overridden.",
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null,
+            primaryButtonText: "Yes, I Am Sure",
+            primaryButtonIcon: null,
+            type: BottomNavBarType.Default,
+            onSecondaryClick: () => {
+                hidePopup()
+            },
+            onPrimaryClick: () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = handleFileChange;
+                input.click();
+                hidePopup()
+            }
+        }
+        showPopup(popup)
+    }
+    const handleExportQuiz = () => {
+        // export quiz as if the newest changes have already been saved
+        const updatedQuestions = handleRevertOverrides()
+        const updatedQuiz = {...quiz, name: quizName, options: quizOptions, questions: updatedQuestions}
+        // also make sure we do not export the quiz user or the id of the quiz to keep some privacy
+        const { quizUser, id, ...updatedQuizForExport } = updatedQuiz;
+
+        const json = JSON.stringify(updatedQuizForExport, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Quiz-Export.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    const handleFileChange = async (event: Event) => {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const text = await file.text();
+            try {
+                const json = JSON.parse(text);
+
+                // add the missing quiz user, replace the id as to not cause any firestore issues and update the createdOn value
+                json.quizUser = selectedQuiz.quizUser
+                json.id = selectedQuiz.id
+                json.createdOn = selectedQuiz.createdOn
+
+                const quizFromJson = json as Quiz;
+                if (!isQuiz(quizFromJson)) {
+                    showPopupInfoOnly(showPopup, hidePopup, "File is not valid.")
+                    return
+                }
+                setQuiz(quizFromJson)
+                setQuizOptions(quizFromJson.options)
+                setQuizName(quizFromJson.name)
+            } catch (error) {
+                showPopupInfoOnly(showPopup, hidePopup, "File is not valid.")
+            }
+        }
+    }
+
     return (
         <div className="popup quizSettingsPopup">
             <div className="popupBackground">
@@ -194,8 +265,8 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                             type={InputFieldType.Quizname}
                         />
                         <div className="quizText">
-                            <p>{`Total: ${selectedQuiz.questions.length} Question${selectedQuiz.questions.length != 1 ? "s" : ""}`}</p>
-                            <p>{`Created on: ${formattedDate(selectedQuiz.createdOn)}`}</p>
+                            <p>{`Total: ${quiz.questions.length} Question${quiz.questions.length != 1 ? "s" : ""}`}</p>
+                            <p>{`Created on: ${formattedDate(quiz.createdOn)}`}</p>
                         </div>
                     </div>
                     <div className="quizSettingsAll">
@@ -238,6 +309,22 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                             currentValue={quizOptions.colourScheme}
                             onChange={handleColourSchemeToggle}
                             placeholder={null}/>
+                        <div className="exportImport">
+                            <ButtonComponent
+                                text={"Import Quiz"}
+                                icon={null}
+                                type={ButtonType.Medium}
+                                style={ButtonStyle.Secondary}
+                                onClick={handleImportQuiz}
+                            />
+                            <ButtonComponent
+                                text={"Export Quiz"}
+                                icon={null}
+                                type={ButtonType.Medium}
+                                style={ButtonStyle.Secondary}
+                                onClick={handleExportQuiz}
+                            />
+                        </div>
                     </div>
                 </div>
                 <div className="quizSettingsNav">

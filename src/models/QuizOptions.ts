@@ -38,3 +38,19 @@ export const quizOptionsAreEqualForQuestions = (a: QuizOptions, b: QuizOptions):
         && a.questionPointsModifier === b.questionPointsModifier
         && a.showLiveStats === b.showLiveStats
 }
+
+export const isQuizOptions = (object: any): object is QuizOptions => {
+    return (
+        typeof object === "object" &&
+        typeof object.isLeaderboardBetween === "boolean" &&
+        typeof object.maxQuestionTime === "number" &&
+        typeof object.questionPoints === "number" &&
+        typeof object.questionPointsModifier === "number" &&
+        typeof object.showLiveStats === "boolean" &&
+        isColourScheme(object.colourScheme)
+    )
+}
+
+export const isColourScheme = (value: any): value is ColourScheme => {
+    return Object.values(ColourScheme).includes(value);
+}

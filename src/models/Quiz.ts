@@ -1,7 +1,7 @@
 //import {QuizName} from "./ConstrainedTypes.ts";
-import {makeQuizOptions, QuizOptions, quizOptionsAreEqual} from "./QuizOptions.ts";
-import {AuthenticatedUser, authUsersAreEqual} from "./AuthenticatedUser.ts";
-import {makeQuestion, Question, questionArraysAreEqual} from "./Question.ts";
+import {isQuizOptions, makeQuizOptions, QuizOptions, quizOptionsAreEqual} from "./QuizOptions.ts";
+import {AuthenticatedUser, authUsersAreEqual, isAuthenticatedUser} from "./AuthenticatedUser.ts";
+import {makeQuestion, Question, questionArraysAreEqual, isQuestion} from "./Question.ts";
 import { v4 as uuid } from "uuid";
 
 export interface Quiz {
@@ -34,4 +34,17 @@ export const quizzesAreEqual = (a: Quiz, b: Quiz): boolean => {
         && authUsersAreEqual(a.quizUser, b.quizUser)
         && a.createdOn === b.createdOn
         && a.lastTimePlayed === b.lastTimePlayed
+}
+
+export const isQuiz = (object: any): object is Quiz => {
+    return (
+        typeof object === "object" &&
+        typeof object.id === "string" &&
+        typeof object.name === "string" &&
+        Array.isArray(object.questions) && object.questions.every((question: any) => isQuestion(question)) &&
+        isQuizOptions(object.options) &&
+        isAuthenticatedUser(object.quizUser) &&
+        typeof !isNaN(Date.parse(object.createdOn)) &&
+        (object.lastTimePlayed === null || (!isNaN(Date.parse(object.lastTimePlayed))))
+    )
 }

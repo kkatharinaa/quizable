@@ -28,3 +28,12 @@ export const answerArraysAreEqual = (a: Answer[], b: Answer[]): boolean => {
     }
     return true;
 }
+
+export const isAnswer = (object: any): object is Answer => {
+    return (
+        typeof object === "object" &&
+        typeof object.id === "string" &&
+        typeof object.value === "string" &&
+        typeof object.correct === "boolean"
+    )
+}

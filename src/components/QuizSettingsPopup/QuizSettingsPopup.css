@@ -62,6 +62,11 @@
     align-self: stretch;
     overflow-y: scroll;
 }
+.quizSettingsContent .quizSettingsAll .exportImport {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
 
 .quizSettingsNav {
     width: 100%;
