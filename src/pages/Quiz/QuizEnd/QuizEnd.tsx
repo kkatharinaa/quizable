@@ -9,6 +9,7 @@ import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
 import {ButtonComponent} from "../../../components/Button/Button.tsx";
 import {SEND_ICON_DISABLED, SEND_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {ButtonStyle, ButtonType} from "../../../components/Button/ButtonExports.ts";
+import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 
 export const QuizEnd: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQuizSession}) => {
 
@@ -16,8 +17,7 @@ export const QuizEnd: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQui
 
     const sendReport = () => {
         setSentReport(true)
-        // TODO: working but only enable if authenticated user email is not a fake email! completely enable only once auth is implemented. for testing purposes replace the email address of the defaultAuthenticatedUser and then uncomment the next line
-        //QuizSessionManager.getInstance().sendReport()
+        QuizSessionManager.getInstance().sendReport()
     }
 
     return (
@@ -45,7 +45,7 @@ export const QuizEnd: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQui
             </div>
 
             <BottomNavBar
-                secondaryButtonText="To Home"
+                secondaryButtonText="To Overview"
                 secondaryButtonIcon={null}
                 primaryButtonText={""}
                 primaryButtonIcon={null}

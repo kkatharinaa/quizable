@@ -7,7 +7,7 @@
     align-items: center;
     flex-direction: column;
     justify-content: space-between;
-    overflow-y: hidden;
+    overflow: hidden;
 }
 
 .quizLobby .content {
@@ -16,6 +16,7 @@
     align-items: center;
     flex: 1 0 0;
     align-self: stretch;
+    overflow-x: hidden;
     overflow-y: scroll;
     padding: 40px 100px 0 100px;
     gap: 80px;

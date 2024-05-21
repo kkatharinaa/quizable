@@ -28,3 +28,10 @@
     font-weight: normal;
     line-height: normal;
 }
+
+.createEditor .contentAndMenu .questionEditor .titleAndSettings {
+    max-width: 100%;
+}
+.createEditor .contentAndMenu .questionEditor .titleAndSettings .inputField {
+    max-width: 80%;
+}

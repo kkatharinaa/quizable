@@ -1,5 +1,7 @@
 import app from './config';
 import { browserLocalPersistence, createUserWithEmailAndPassword, getAuth, isSignInWithEmailLink, sendSignInLinkToEmail, setPersistence, signInWithEmailLink, signOut } from 'firebase/auth';
+import QuizRepository from "../repositories/QuizRepository.ts";
+import {AuthenticatedUser} from "../models/AuthenticatedUser.ts";
 
 // Initialize Auth
 const auth = getAuth(app);
@@ -17,11 +19,16 @@ const sendEmailLink = async (email: string, successCallback?: () => void, failur
     // replace register
     const password = 'password123';
     await createUserWithEmailAndPassword(auth, email!, password)
-        .then(() => {
-            // const user = result.user;
+        .then((result) => {
+            const user: AuthenticatedUser = {
+                id: result.user.uid,
+                email: email,
+                autoSendLog: false,
+            }
+            QuizRepository.addUser(user)
         })
         .catch((error) => {
-            if(error.code = 'auth/email-already-in-use') {
+            if(error.code == 'auth/email-already-in-use') {
                 sendSignInLinkToEmailWrapper(email, successCallback, failureCallback)
             }
         });
@@ -65,11 +72,8 @@ const logInWithEmailLinkCallback = async (email: string, url: string, onError: (
         });
 };
 
-// TODO: refactor firestore paths to use quiz subcollection of user
-
 const logOutUser = async () => {
     await signOut(auth)
 };
-
 
 export { auth, sendEmailLink, logInWithEmailLink, logOutUser };

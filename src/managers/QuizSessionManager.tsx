@@ -213,9 +213,9 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         this.notifySubscribers()
     }
     public async setUp(quizSessionId: string, host: AuthenticatedUser, quiz: Quiz): Promise<void> {
-        this._quiz =  quiz
+        this._quiz = quiz
         this._host = host
-        this._connection = await this.initSignalR(quizSessionId, host.id)
+        this._connection = await this.initSignalR(quizSessionId, "userId1")
         this.notifySubscribers();
     }
     private async initSignalR(quizSessionId: string, hostUserId: string): Promise<SignalR.HubConnection> {

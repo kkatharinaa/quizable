@@ -19,6 +19,9 @@ import {
 import {makeAnswer} from "../../../models/Answer.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
+import {useAuthState} from "react-firebase-hooks/auth";
+import {auth, logInWithEmailLink} from "../../../firebase/auth.ts";
+import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
 
 export const CreateEditor: FC = () => {
 
@@ -26,8 +29,6 @@ export const CreateEditor: FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
-
-    // TODO: check that we are logged in!! else redirect to home
 
     //const { quizID } = useParams();
     const quizID = searchParams.get('id');
@@ -41,6 +42,8 @@ export const CreateEditor: FC = () => {
     const [showingQuestionSettingsPopup, setShowingQuestionSettingsPopup] = useState(false);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
+    const [user, loading, error] = useAuthState(auth);
+    const [isSetUp, setIsSetUp] = useState(false);
 
     // get quiz from Firebase using the quizID
     const setQuizFromFirestore = async () => {
@@ -48,15 +51,67 @@ export const CreateEditor: FC = () => {
             showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
             return
         }
-        const quizFromFirestore: Quiz = await QuizRepository.getById(quizID)
+        if (user?.uid == null) {
+            showPopupSomethingWentWrong(showPopup, () => setShowingPopup(false))
+            return
+        }
+        const quizFromFirestore: Quiz = await QuizRepository.getById(user!.uid!, quizID)
         setQuestions(quizFromFirestore.questions)
         setCurrentQuestionIndex(0)
         setOriginalQuiz(quizFromFirestore)
     }
 
     useEffect(() => {
-        setQuizFromFirestore()
+        // redirect if the screen is too narrow
+        const handleResize = () => {
+            if (window.innerWidth <= 768) {
+                navigate('/')
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
+        const setUp = async () => {
+            await logInWithEmailLink(window.location.href, showPrompt, () => {
+                navigate("/login")
+            })
+            await setQuizFromFirestore()
+            setIsSetUp(true)
+        }
+        setUp()
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
     }, []);
+    useEffect(() => {
+        if (!user && isSetUp && !showingPopup) navigate("/login");
+        if (error) console.log(error)
+    }, [user, loading, navigate]);
+
+    // prompt for auth
+    const showPrompt = (title: string, url: string, onSubmitSuccess: (email: string, url: string, onError: () => void) => Promise<void>, onError: () => void) => {
+        const promptPopup: PopupProps = {
+            title: title,
+            message: null,
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null,
+            primaryButtonText: "Submit",
+            primaryButtonIcon: null,
+            type: BottomNavBarType.Default,
+            onSecondaryClick: () => {
+                setShowingPopup(false)
+                onError()
+            },
+            onPrimaryClick: (inputValue: string) => {
+                onSubmitSuccess(inputValue, url, onError).then(() => {
+                    setShowingPopup(false)
+                })
+            },
+            isPrompt: true,
+        }
+        showPopup(promptPopup)
+    }
 
     // question functions
     const handleQuestionTitleInputChange = (value: string) => {
@@ -239,7 +294,7 @@ export const CreateEditor: FC = () => {
         }
         if (!questionArraysAreEqual(originalQuiz.questions, questions)) {
             const updatedQuiz = {...originalQuiz, questions: questions}
-            QuizRepository.add(updatedQuiz)
+            if (user?.uid != null) QuizRepository.add(user.uid, updatedQuiz)
         }
         navigateToOverview()
     };

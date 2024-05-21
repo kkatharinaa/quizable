@@ -1,6 +1,6 @@
 //import {QuizName} from "./ConstrainedTypes.ts";
 import {makeQuizOptions, QuizOptions, quizOptionsAreEqual} from "./QuizOptions.ts";
-import {AuthenticatedUser, authUsersAreEqual, defaultAuthenticatedUser} from "./AuthenticatedUser.ts";
+import {AuthenticatedUser, authUsersAreEqual} from "./AuthenticatedUser.ts";
 import {makeQuestion, Question, questionArraysAreEqual} from "./Question.ts";
 import { v4 as uuid } from "uuid";
 
@@ -14,13 +14,13 @@ export interface Quiz {
     lastTimePlayed: Date | null
 }
 
-export const makeQuiz = (id?: string, name?: /*QuizName*/string, questions?: Question[], options?: QuizOptions, quizUser?: AuthenticatedUser, createdOn?: Date, lastTimePlayed?: Date | null): Quiz => {
+export const makeQuiz = (quizUser: AuthenticatedUser, id?: string, name?: /*QuizName*/string, questions?: Question[], options?: QuizOptions, createdOn?: Date, lastTimePlayed?: Date | null): Quiz => {
     return {
         id: id ?? uuid(),
         name: name ?? "",
         questions: questions ?? [makeQuestion()],
         options: options ?? makeQuizOptions(),
-        quizUser: quizUser ?? defaultAuthenticatedUser, // TODO: remove default when authentication gets added
+        quizUser: quizUser,
         createdOn: createdOn ?? new Date(),
         lastTimePlayed: lastTimePlayed ?? null
     }

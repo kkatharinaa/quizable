@@ -6,7 +6,6 @@ import {
     showErrorPageSomethingWentWrong,
 } from "../../ErrorPage/ErrorPageExports.ts";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
-import {AuthenticatedUser, defaultAuthenticatedUser} from "../../../models/AuthenticatedUser.ts";
 import {QuizState} from "../../../models/QuizSessionState.ts";
 import {QuizLobby} from "../QuizLobby/QuizLobby.tsx";
 import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
@@ -19,9 +18,8 @@ import {QuizEnd} from "../QuizEnd/QuizEnd.tsx";
 import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
 import {QuizSessionManager, QuizSessionManagerInterface} from "../../../managers/QuizSessionManager.tsx";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../../../firebase/auth.ts";
+import {auth, logInWithEmailLink} from "../../../firebase/auth.ts";
 import {LoadingPage} from "../../Loading/Loading.tsx";
-import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 
 export interface QuizMasterChildrenProps {
     quizSessionManager: QuizSessionManagerInterface
@@ -40,24 +38,16 @@ export const QuizMaster: FC = () => {
 
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
-
-    // checking login state
     const [user, loading, error] = useAuthState(auth);
-    useEffect(() => {
-        if(loading) {
-            // TODO: add loading screen
-            return;
-        }
-        if (user) navigate("/overview");
-        else navigate("/login");
-    }, [user, loading, navigate]);
+    const [isSetUp, setIsSetUp] = useState(false);
     
     const setQuizFromFirestore = async (quizID: string) => {
         if (quizID == null) {
             showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
             return
         }
-        return await QuizRepository.getById(quizID)
+        if (user?.uid != null) await QuizRepository.getById(user!.uid!, quizID)
+        else showPopupSomethingWentWrong(showPopup, hidePopup)
     }
 
     const handleEndQuizSession = () => {
@@ -66,7 +56,7 @@ export const QuizMaster: FC = () => {
         // OR if the user is already on the quiz end screen (quizstate is already set to end screen), kill the quiz session and take the user back to home -> no popup in this case
         if (QuizSessionManager.getInstance().quizState == QuizState.endscreen) {
             QuizSessionManager.getInstance().killSession()
-            navigate('/')
+            navigate('/overview')
             return;
         }
 
@@ -79,7 +69,7 @@ export const QuizMaster: FC = () => {
             primaryButtonIcon: null,
             type: BottomNavBarType.Default,
             onSecondaryClick: () => {
-                setShowingPopup(false)
+                hidePopup()
             },
             onPrimaryClick: () => {
                 if (QuizSessionManager.getInstance().quizSession == null) {
@@ -102,6 +92,15 @@ export const QuizMaster: FC = () => {
     }
 
     useEffect(() => {
+        // redirect if the screen is too narrow
+        const handleResize = () => {
+            if (window.innerWidth <= 768) {
+                navigate('/')
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
         // make sure we have all necessary info passed to the route
         if (quizSessionId == null || quizId == null) {
             console.log("no quiz id or quiz session")
@@ -109,23 +108,24 @@ export const QuizMaster: FC = () => {
             return
         }
 
-        // get authenticated user
-        const host: AuthenticatedUser = defaultAuthenticatedUser // TODO: replace with authentication
-
         const handleQuizSessionManagerChange = () => {
             setQuizSessionManager(QuizSessionManager.getInstanceAsInterface());
         };
-
         QuizSessionManager.getInstance().subscribe(handleQuizSessionManagerChange);
 
         // get quiz from firebase and setup connection
         const setUp = async () => {
+            await logInWithEmailLink(window.location.href, showPrompt, () => {
+                navigate("/login")
+            })
             const quiz = await setQuizFromFirestore(quizId)
             if (quiz == null) {
                 console.log("no quiz id or quiz session")
                 showErrorPageSomethingWentWrong(navigate)
                 return
             }
+            const host = quiz.quizUser
+            setIsSetUp(true)
 
             await QuizSessionManager.getInstance().setUp(quizSessionId, host, quiz)
         }
@@ -134,8 +134,38 @@ export const QuizMaster: FC = () => {
 
         return () => {
             QuizSessionManager.getInstance().unsubscribe(handleQuizSessionManagerChange);
+            window.removeEventListener('resize', handleResize);
         };
     }, [])
+
+    useEffect(() => {
+        if (!user && isSetUp && !showingPopup) navigate("/login");
+        if (error) console.log(error)
+    }, [user, loading, navigate]);
+
+    // prompt for auth
+    const showPrompt = (title: string, url: string, onSubmitSuccess: (email: string, url: string, onError: () => void) => Promise<void>, onError: () => void) => {
+        const promptPopup: PopupProps = {
+            title: title,
+            message: null,
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null,
+            primaryButtonText: "Submit",
+            primaryButtonIcon: null,
+            type: BottomNavBarType.Default,
+            onSecondaryClick: () => {
+                setShowingPopup(false)
+                onError()
+            },
+            onPrimaryClick: (inputValue: string) => {
+                onSubmitSuccess(inputValue, url, onError).then(() => {
+                    setShowingPopup(false)
+                })
+            },
+            isPrompt: true,
+        }
+        showPopup(promptPopup)
+    }
 
     return (
         <div className="quizMaster">

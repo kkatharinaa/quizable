@@ -22,6 +22,7 @@ export const CreateSendEmail: FC = () => {
     const [ infoText, setInfoText ] = useState("")
     const [ canSend, setCanSend ] = useState(true)
     const [ sentEmail, setSentEmail ] = useState(false)
+    const [ isSetUp, setIsSetUp ] = useState(false)
     const [user, loading, error] = useAuthState(auth);
     
     const updateInput = (newValue: string) => {
@@ -41,10 +42,10 @@ export const CreateSendEmail: FC = () => {
         if (!canSendEmail()) return
         setCanSend(false)
         setSentEmail(true)
-        setInfoText("We have just sent you an email! Please follow the instructions within the email to login. The email may take a few minutes to arrive.")
 
         // send email to user which will provide the user with an authenticated link - it seems firebase handles the email validation by itself, meaning I will setInfoText based on if the auth promise is fulfilled or if an error is thrown
         sendEmailLink(inputValue, () => {
+            setInfoText("We have just sent you an email! Please follow the instructions within the email to login. The email may take a few minutes to arrive.")
         }, () => {
             setInfoText("Something went wrong. Please check that the email address you entered is valid or try again later.")
         })
@@ -54,24 +55,40 @@ export const CreateSendEmail: FC = () => {
     }
 
     useEffect(() => {
-        if (user) navigate("/overview");
-    }, [user, loading, navigate]);
+        // redirect if the screen is too narrow
+        const handleResize = () => {
+            if (window.innerWidth <= 768) {
+                navigate('/')
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
 
-    // TODO in general: we need a way to check if the user is authenticated (and get the authenticateduser object) when opening another route (eg the create overview screen) -> only if authenticated should we see the view, else it should redirect to home.
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+    useEffect(() => {
+        if (user) navigate("/overview");
+        setInfoText("If this is your first time, your account will be created immediately. Else we will send you an email to sign in.")
+        setIsSetUp(true)
+        if (error) console.log(error)
+    }, [user, loading, navigate]);
 
     return (
         <div className="login">
             <BackgroundGems type={BackgroundGemsType.Primary}></BackgroundGems>
 
-            { loading ? (
+            { (loading || !isSetUp) ? (
                 <Loading/>
             ) : (
                 <div className="content">
                     <div className="inputFieldWithInfoText">
-                        <p className="infoText">{"Logging in is as simple as possible - just put in your email and we will send you an email!"}</p>
+                        <p className="infoText">{"Logging in is as simple as possible - just put in your email!"}</p>
                         <InputField
                             value={inputValue}
                             onChange={updateInput}
+                            onEnter={handleSendEmail}
                             type={InputFieldType.Email}
                         />
                         {infoText != "" &&
@@ -80,17 +97,19 @@ export const CreateSendEmail: FC = () => {
                     </div>
                 </div>
             )}
-            <BottomNavBar
-                secondaryButtonText="Home"
-                secondaryButtonIcon={RETURN_ICON_DARK}
-                primaryButtonText={sentEmail ? "Resend Link" : "Send Link"}
-                primaryButtonIcon={!canSendEmail() ? SEND_ICON_DISABLED : SEND_ICON_LIGHT}
-                type={BottomNavBarType.Default}
-                style={BottomNavBarStyle.Long}
-                onPrimaryClick={handleSendEmail}
-                onSecondaryClick={navigateHome}
-                alternativePrimaryButtonStyle={!canSendEmail() ? ButtonStyle.Disabled : undefined}
-            />
+            { (!loading && isSetUp) &&
+                <BottomNavBar
+                    secondaryButtonText="Home"
+                    secondaryButtonIcon={RETURN_ICON_DARK}
+                    primaryButtonText={sentEmail ? "Resend Link" : "Send Link"}
+                    primaryButtonIcon={!canSendEmail() ? SEND_ICON_DISABLED : SEND_ICON_LIGHT}
+                    type={BottomNavBarType.Default}
+                    style={BottomNavBarStyle.Long}
+                    onPrimaryClick={handleSendEmail}
+                    onSecondaryClick={navigateHome}
+                    alternativePrimaryButtonStyle={!canSendEmail() ? ButtonStyle.Disabled : undefined}
+                />
+            }
         </div>
     )
 }
