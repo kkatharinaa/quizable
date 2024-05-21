@@ -1,4 +1,4 @@
-import {ChangeEvent, FC} from "react";
+import React, {ChangeEvent, FC, useRef} from "react";
 import "./SettingsField.css"
 import {SettingsFieldType} from "./SettingsFieldExports.ts";
 
@@ -14,6 +14,8 @@ interface SettingsFieldProps {
 
 export const SettingsField: FC<SettingsFieldProps> = ({ text, type, currentValue, onChange, placeholder, unitText, unlimitedAtO }) => {
 
+    const inputRef = useRef<HTMLInputElement>(null);
+
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         const inputValue = event.target.value;
         // Check if input value is a number
@@ -24,6 +26,13 @@ export const SettingsField: FC<SettingsFieldProps> = ({ text, type, currentValue
     const handleToggleClick = () => {
         onChange()
     }
+    const handleOnEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            if (inputRef.current) {
+                inputRef.current.blur(); // remove focus from the input to close the keyboard on mobile
+            }
+        }
+    };
 
     return (
         <div className="settingsField">
@@ -40,7 +49,9 @@ export const SettingsField: FC<SettingsFieldProps> = ({ text, type, currentValue
                         type="text"
                         value={(unlimitedAtO === true && currentValue === 0) ? "" : currentValue.toString()}
                         onChange={handleInputChange}
+                        onKeyDown={handleOnEnter}
                         placeholder={(unlimitedAtO === true) ? "∞" : placeholder ?? ""}
+                        ref={inputRef}
                     />
                     {unitText != undefined &&
                         <span>{unitText}</span>
