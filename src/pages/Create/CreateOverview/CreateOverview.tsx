@@ -20,6 +20,7 @@ import {quizOptionsAreEqual} from "../../../models/QuizOptions.ts";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 import {auth, sendEmailLink, logInWithEmailLink, logOutUser} from "../../../firebase/auth.ts";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { Loading } from "../../Loading/Loading.tsx";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -35,23 +36,13 @@ export const CreateOverview: FC = () => {
     const [showingQuizSettingsPopup, setShowingQuizSettingsPopup] = useState(false);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
-
-    // TODO: check if we are logged in!! else redirect to home
-    // checking login state
     const [user, loading, error] = useAuthState(auth);
-    useEffect(() => {
-        if(loading) {
-            // TODO: add loading screen
-            return;
-        }
-        if (user) navigate("/overview");
-        else navigate("/login");
-    }, [user, loading, navigate]);
-
+    const [isSetUp, setIsSetUp] = useState(false);
+    
     // get all of this user's quizzes from firebase TODO: only get it from the logged in user!
     const setQuizzesFromFirestore = async () => {
         const quizzesFromFirestore: Quiz[] = await QuizRepository.getAll()
-
+        
         // sort quizzes by createdOn date, and display newest at the start
         const sortByCreatedOn = (a: Quiz, b: Quiz) => {
             if (a.createdOn < b.createdOn) { return 1 }
@@ -61,7 +52,7 @@ export const CreateOverview: FC = () => {
         const sortedQuizzes = quizzesFromFirestore.slice().sort(sortByCreatedOn)
         setQuizzes(sortedQuizzes)
     }
-
+    
     // if we just came back from somewhere and we still want to see the quiz settings, do so based on the query parameter
     const showPopupForQuery = () => {
         if (showingPopupForID == null) return
@@ -70,13 +61,48 @@ export const CreateOverview: FC = () => {
         setQuizSettingsPopupProps([showingPopupForQuiz, false])
         setShowingQuizSettingsPopup(true)
     }
-
+    
     useEffect(() => {
-        setQuizzesFromFirestore()
+        const setUp = async () => {
+            await logInWithEmailLink(window.location.href, showPrompt, () => {
+                navigate("/login")
+            })
+            setQuizzesFromFirestore()
+            setIsSetUp(true)
+        }
+        setUp()
     }, []);
     useEffect(() => {
         showPopupForQuery()
     }, [quizzes]);
+    useEffect(() => {
+        if (!user && isSetUp && !showingPopup) navigate("/login");
+        if (user && isSetUp && !showingPopup) navigate("/overview");
+    }, [user, loading, navigate]);
+
+    // prompt for auth
+    const showPrompt = (title: string, url: string, onSubmitSuccess: (email: string, url: string, onError: () => void) => Promise<void>, onError: () => void) => {
+        const promptPopup: PopupProps = {
+            title: title,
+            message: null,
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null,
+            primaryButtonText: "Submit",
+            primaryButtonIcon: null,
+            type: BottomNavBarType.Default,
+            onSecondaryClick: () => {
+                hidePopup()
+                onError()
+            },
+            onPrimaryClick: (inputValue: string) => {
+                onSubmitSuccess(inputValue, url, onError).then(() => {
+                    hidePopup()
+                })
+            },
+            isPrompt: true,
+        }
+        showPopup(promptPopup)
+    }
 
     // quiz functions
     const findQuizByID = (id: string): Quiz | undefined => {
@@ -204,8 +230,7 @@ export const CreateOverview: FC = () => {
             onSecondaryClick: () => {
                 hidePopup()
             },
-            onPrimaryClick: () => {
-                // TODO: log out from firebase auth 
+            onPrimaryClick: () => { 
                 logOutUser();
                 navigate(`/`)
             },
@@ -223,16 +248,21 @@ export const CreateOverview: FC = () => {
     return (
         <div className="createOverview">
             <BackgroundGems type={BackgroundGemsType.Primary}/>
-            <div className="content">
-                <h1>Welcome, User</h1>
-                <QuizCardContainer
-                    quizzes={quizzes}
-                    onEdit={handleEditQuiz}
-                    onPlay={handlePlayQuiz}
-                    onAdd={handleAddQuiz}
-                    onDelete={handleDeleteQuiz}
-                />
-            </div>
+
+            {(loading || !isSetUp) ? (
+                <Loading/>
+            ) : (
+                <div className="content">
+                    <h1>Welcome, User</h1>
+                    <QuizCardContainer
+                        quizzes={quizzes}
+                        onEdit={handleEditQuiz}
+                        onPlay={handlePlayQuiz}
+                        onAdd={handleAddQuiz}
+                        onDelete={handleDeleteQuiz}
+                    />
+                </div>
+            )}
 
             <BottomNavBar
                 secondaryButtonText="Logout"
@@ -266,6 +296,7 @@ export const CreateOverview: FC = () => {
                     type={popupProps.type}
                     onSecondaryClick={popupProps.onSecondaryClick}
                     onPrimaryClick={popupProps.onPrimaryClick}
+                    isPrompt={popupProps.isPrompt}
                 />
             }
         </div>

@@ -23,7 +23,7 @@ export const CreateSendEmail: FC = () => {
     const [ canSend, setCanSend ] = useState(true)
     const [ sentEmail, setSentEmail ] = useState(false)
     const [user, loading, error] = useAuthState(auth);
-
+    
     const updateInput = (newValue: string) => {
         setInputValue(newValue)
     }
