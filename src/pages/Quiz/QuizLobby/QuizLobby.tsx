@@ -1,4 +1,4 @@
-import { FC } from "react"
+import { FC, useEffect } from "react"
 import "./QuizLobby.css"
 import { BottomNavBar } from "../../../components/BottomNavBar/BottomNavBar";
 import { BottomNavBarStyle, BottomNavBarType } from "../../../components/BottomNavBar/BottomNavBarExports";
@@ -10,6 +10,7 @@ import { QuizPlayerCardType } from "../../../components/QuizPlayerCard/QuizPlaye
 import { USER_ICON_LIGHT, PLAY_ICON_LIGHT, POWER_ICON_DARK } from "../../../assets/Icons";
 import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
+import QRCodeHelper from "../../../helper/QRCodeHelper.ts";
 
 export const QuizLobby: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQuizSession}) => {
 
@@ -21,14 +22,21 @@ export const QuizLobby: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQ
         QuizSessionManager.getInstance().toNextQuestionOrEnd(true)
     }
 
+    useEffect(() => {
+        QRCodeHelper.generateQRCodeForQuiz("canvasQrCode", quizSessionManager.quizCode!, {width: 240})
+    }, [])
+
     return (
         <div className="quizLobby">
             <BackgroundGems type={BackgroundGemsType.Primary}/>
             <div className="content">
                 <div>
                     <div className="entryIdContent">
-                        <p className="entryIdContentTitle">Game code</p>
-                        <p className="entryIdContentGameCode">{quizSessionManager.quizCode}</p>
+                        <div >   
+                            <p className="entryIdContentTitle">Game code</p>
+                            <p className="entryIdContentGameCode">{quizSessionManager.quizCode}</p>
+                        </div>
+                        <canvas id="canvasQrCode"></canvas>
                     </div>
                 </div>
                 {joinedUsers().length >= 1 &&

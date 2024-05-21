@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => {
     define: {
       
       
+    },
+    server: {
+      host: true
     }
   }
 })
