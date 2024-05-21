@@ -1,28 +1,72 @@
-.page_styling {
+.quizSlaveLobby {
     display: flex;
     width: 100vw;
     max-width: 100vw;
     height: 100vh;
     max-height: 100vh;
     flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
 }
 
-.quizSlaveSessionLobbyTitle {
+.quizSlaveLobby .content {
+    display: flex;
+    padding: 50px 20px 0 20px;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    flex: 1 0 0;
+    align-self: stretch;
+    overflow-y: scroll;
+}
+
+.quizSlaveLobby .content h1 {
+    margin: 0;
     color: var(--white);
     text-align: center;
-    font-size: 48px;
+    font-family: "Inika", serif;
+    font-size: 52px;
     font-style: normal;
-    font-weight: bold;
+    font-weight: 700;
     line-height: normal;
-    margin: 0;
 }
 
-.quizSlaveSessionLobbyContent {
+.quizSlaveLobby .content .joinedUserSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    align-self: stretch;
+}
+
+.quizSlaveLobby .joinedUsersSectionCount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.quizSlaveLobby .joinedUsersSectionCount p {
+    color: var(--white);
+    font-size: 24px;
+    text-align: center;
+    margin: 0;
+    font-weight: bold;
+}
+.quizSlaveLobby .joinedUsersSectionCount img {
+    width: 24px;
+    height: 24px;
+}
+
+.quizSlaveLobby .joinedUserSectionList {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    flex: 1 0 0;
     align-self: stretch;
-    overflow: hidden;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+.quizSlaveLobby .joinedUserSectionList .quizPlayerCard {
+    max-width: 80vw;
 }
