@@ -19,7 +19,7 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         logger.LogInformation($"Connection lost: {Context.ConnectionId}");
-        
+
         // Get the user from quiz session from connectionId
         QuizSessionUserStats? quizUser = quizSessionService.GetSlaveConnectionUser(Context.ConnectionId);
         QuizSession quizSessionConnectionUser = quizSessionService.GetSlaveConnectionQuizSession(Context.ConnectionId);
@@ -29,16 +29,16 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
             // Remove user from quiz session
             quizSessionService.RemoveUserFromQuizSession(quizSessionConnectionUser.Id, quizUser!.User);
             quizSessionService.RemoveQuizSessionSlaveConnection(Context.ConnectionId);
-        
+
             // Nofity master of user left
             List<QuizSessionUserStats> userStatsList = quizSessionService.GetQuizSessionById(quizSessionConnectionUser.Id).Item1!.State.UsersStats;
-        
+
             masterContext.Clients.All.SendAsync($"userleft:userId1", userStatsList);
         }
-        
+
         return base.OnDisconnectedAsync(exception);
     }
-    
+
     public string GetConnectionId() => Context.ConnectionId;
 
     public async Task NotifySlaveEnterQuiz(string connectionId, QuizUser quizUser, string quizSessionId)
@@ -54,7 +54,7 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
                 {
                     // User is trying to reconnect
                     bool wasUserInQuizSession = true;
-                    
+
                     return;
                 }
 
@@ -70,9 +70,7 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
                 {
                     foreach (QuizSessionUserStats quizSessionUserStats in quizSessionUserStatList)
                     {
-                        // currently not implemented since the quiz slave lobby has to be done first
-                        await Clients.All.SendAsync($"message:{quizSessionUserStats.User.Identifier}",
-                            quizSessionUserStatList.Select(v => v.User));
+                        await Clients.All.SendAsync($"userjoined:{quizSessionUserStats.User.Identifier}", quizSessionUserStatList);
                     }
                 }
 
@@ -120,5 +118,4 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
             await Clients.All.SendAsync(quizUser.Identifier, quizSession);
         }
     }
-    
 }

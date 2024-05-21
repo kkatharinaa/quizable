@@ -43,7 +43,6 @@ export const Join: FC = () => {
         if(validation.valid){
 
             // make request to QuizService if code exists
-            // if it does not return an empty string
             const quizSessionCodeValid = await QuizSessionService.isQuizCodeValid(inputValue)
             if(quizSessionCodeValid.valid){
                 setValidQuizCode({
@@ -51,10 +50,14 @@ export const Join: FC = () => {
                     quizSessionId: quizSessionCodeValid.sessionId
                 })
                 setInputValue("")
+            } else {
+                const newValidationState = {
+                    valid: false,
+                    validationText: "Quiz code is invalid, no quiz session found!"
+                }
+                setValidation(newValidationState)
             }
         }
-        // if the quiz code is valid, navigate to a new page with the routing parameters
-        // other page with create the websocket connection
     }
 
     const validateInputLive = (newValue: string) => {
@@ -126,12 +129,13 @@ export const Join: FC = () => {
 
     return (
         <div className="joinPage">
-            <BackgroundGems type={BackgroundGemsType.PrimarySlave}></BackgroundGems>
+            <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary : BackgroundGemsType.PrimarySlave}></BackgroundGems>
             <div className="contentJoin">
                 <div>
                     <InputField
                         value={inputValue}
                         onChange={validQuizCode.code.length == 0 ? validateInputLive : updateInput}
+                        onEnter={validQuizCode.code.length == 0 ? validateQuizCode : joinQuiz}
                         type={validQuizCode.code.length == 0 ? InputFieldType.Quizcode : InputFieldType.Username}
                     />
                     {!validation.valid &&

@@ -14,90 +14,85 @@ import { BottomNavBarType } from "../../components/BottomNavBar/BottomNavBarExpo
 import QuizSession from "../../models/QuizSession";
 
 const Home: FC = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
-  const [showingPopup, setShowingPopup] = useState(false);
+    const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
+    const [showingPopup, setShowingPopup] = useState(false);
 
-  // const [quiz, setQuiz] = useState([]);
-  const fetchFireStore = async () => {
-    console.log("Get firestore stuff")
-  }
+    const checkReconnection = async () => {
+        const deviceId: string = await getDeviceId();
+        const reconnect: {quizUser: QuizUser, quizSession: QuizSession} | null = await QuizSessionService.checkQuizUserReconnection(deviceId)
 
-  const checkReconnection = async () => {
-    const deviceId: string = await getDeviceId();
-    const reconnect: {quizUser: QuizUser, quizSession: QuizSession} | null = await QuizSessionService.checkQuizUserReconnection(deviceId)
-
-    if(reconnect){
-      console.log("Got reconnect")
-      setPopupProps({
-        title: "Do you want to reconnect?",
-        message: `This device was connected as "${reconnect.quizUser.identifier}" in a quiz`,
-        type: BottomNavBarType.Default,
-        onPrimaryClick: () => {
-          navigate('/quiz', {state: {quizSessionId: reconnect.quizSession.id, quizId: reconnect.quizUser.id}})
-        },
-        primaryButtonText: "Reconnect",
-        primaryButtonIcon: PLAY_ICON_LIGHT,
-        onSecondaryClick: () => {
-          setShowingPopup(false);
-          setPopupProps(null);
-        },
-        secondaryButtonText: "Cancel",
-        secondaryButtonIcon: LEAVE_ICON_DARK
-      })
-      setShowingPopup(true)
+        if (reconnect) {
+            console.log("Got reconnect")
+            setPopupProps({
+                title: "Do you want to reconnect?",
+                message: `This device was connected as "${reconnect.quizUser.identifier}" in a quiz`,
+                type: BottomNavBarType.Default,
+                onPrimaryClick: () => {
+                    navigate('/quiz', {state: {quizSessionId: reconnect.quizSession.id, quizId: reconnect.quizUser.id}})
+                },
+                primaryButtonText: "Reconnect",
+                primaryButtonIcon: PLAY_ICON_LIGHT,
+                onSecondaryClick: () => {
+                    setShowingPopup(false);
+                    setPopupProps(null);
+            },
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: LEAVE_ICON_DARK
+          })
+          setShowingPopup(true)
+        }
     }
-  }
 
-  useEffect(() => {
-    fetchFireStore()
-    checkReconnection()
-  }, [])
+    useEffect(() => {
+        checkReconnection()
+    }, [])
 
-  const navigateJoinQuiz = () => {
-    navigate("join")
-  }
+    const navigateJoinQuiz = () => {
+        navigate("join")
+    }
 
-  const navigateCreateQuiz = () => {
-    navigate("overview")
-  }
+    const navigateCreateQuiz = () => {
+        navigate("overview")
+    }
 
-  return (
-    <div className="home">
-      <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary : BackgroundGemsType.PrimarySlave}/>
-      <h1 className="quizableTitle">Quizable</h1>
-      <div className="homeButtons">
-        <ButtonComponent
-          text="Join Quiz"
-          icon={ENTER_ICON_LIGHT}
-          type={ButtonType.Long}
-          style={ButtonStyle.Primary}
-          onClick={navigateJoinQuiz}
-        />
-        <ButtonComponent
-          text="Create Quiz"
-          icon={CREATE_ICON_DARK}
-          type={ButtonType.Long}
-          style={ButtonStyle.Secondary}
-          onClick={navigateCreateQuiz}
-        />
-      </div>
-      {(showingPopup && popupProps != null) &&
-        <Popup
-            title={popupProps.title}
-            message={popupProps.message}
-            secondaryButtonText={popupProps.secondaryButtonText}
-            secondaryButtonIcon={popupProps.secondaryButtonIcon}
-            primaryButtonText={popupProps.primaryButtonText}
-            primaryButtonIcon={popupProps.primaryButtonIcon}
-            type={popupProps.type}
-            onSecondaryClick={popupProps.onSecondaryClick}
-            onPrimaryClick={popupProps.onPrimaryClick}
-        />
-      }
-    </div>
-  );
+    return (
+        <div className="home">
+            <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary : BackgroundGemsType.PrimarySlave}/>
+            <h1 className="quizableTitle">Quizable</h1>
+            <div className="homeButtons">
+                <ButtonComponent
+                    text="Join Quiz"
+                    icon={ENTER_ICON_LIGHT}
+                    type={ButtonType.Long}
+                    style={ButtonStyle.Primary}
+                    onClick={navigateJoinQuiz}
+                />
+                <ButtonComponent
+                    text="Create Quiz"
+                    icon={CREATE_ICON_DARK}
+                    type={ButtonType.Long}
+                    style={ButtonStyle.Secondary}
+                    onClick={navigateCreateQuiz}
+                />
+            </div>
+
+            {(showingPopup && popupProps != null) &&
+            <Popup
+                title={popupProps.title}
+                message={popupProps.message}
+                secondaryButtonText={popupProps.secondaryButtonText}
+                secondaryButtonIcon={popupProps.secondaryButtonIcon}
+                primaryButtonText={popupProps.primaryButtonText}
+                primaryButtonIcon={popupProps.primaryButtonIcon}
+                type={popupProps.type}
+                onSecondaryClick={popupProps.onSecondaryClick}
+                onPrimaryClick={popupProps.onPrimaryClick}
+            />
+        }
+        </div>
+    );
 };
 
 export default Home;

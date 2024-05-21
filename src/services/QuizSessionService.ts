@@ -35,7 +35,7 @@ export default class QuizSessionService{
 
     public static async isQuizCodeValid(quizCode: string): Promise<{valid: boolean, sessionId: string}> {
         const textReturn: string = await (await fetch(`${this.url}/api/session/validate/${quizCode}`)).text()
-        return {valid: textReturn != "", sessionId: textReturn};
+        return {valid: textReturn != "Code is not valid.", sessionId: textReturn};
     }
 
     public static async checkQuizUserAlreadyExists(quizSessionId: string, quizUserIdentifier: string): Promise<boolean> {
