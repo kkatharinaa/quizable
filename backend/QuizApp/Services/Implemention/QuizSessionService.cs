@@ -308,29 +308,32 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                             .SelectMany(stats => stats.Answers, (stats, answer) => new { stats, answer })
                             .Where(x => x.answer.QuestionId == currentQuestion.id)
                             .ToList();
-                        
-                        // get the fastest and slowest time in ms
-                        var fastestTime = allAnswersForQuestion.Min(x => x.answer.TimeTaken);
-                        var slowestTime = allAnswersForQuestion.Max(x => x.answer.TimeTaken);
 
-                        foreach (var userStat in quizSession.Value.State.UsersStats)
+                        if (allAnswersForQuestion.Count > 0)
                         {
-                            var userStatAnswer = userStat.Answers.FirstOrDefault(userStatAnswer => userStatAnswer.QuestionId == currentQuestion.id);
+                            // get the fastest and slowest time in ms
+                            var fastestTime = allAnswersForQuestion.Min(x => x.answer.TimeTaken);
+                            var slowestTime = allAnswersForQuestion.Max(x => x.answer.TimeTaken);
 
-                            // only change correct answers, the wrong answers can stay at 0
-                            if (userStatAnswer != null && userStatAnswer.PointsReceived != 0)
+                            foreach (var userStat in quizSession.Value.State.UsersStats)
                             {
-                                var normalizedTime = (double)(userStatAnswer.TimeTaken - fastestTime) / (slowestTime - fastestTime);
-                                var points = (int)Math.Round(maxPoints - (normalizedTime * (maxPoints - minPoints)));
+                                var userStatAnswer = userStat.Answers.FirstOrDefault(userStatAnswer => userStatAnswer.QuestionId == currentQuestion.id);
 
-                                userStatAnswer.PointsReceived = points;
-                                
-                                // recalculate user score
-                                userStat.Score = 0;
-                                userStat.Answers.ForEach(answer =>
+                                // only change correct answers, the wrong answers can stay at 0
+                                if (userStatAnswer != null && userStatAnswer.PointsReceived != 0)
                                 {
-                                    userStat.Score += answer.PointsReceived;
-                                });
+                                    var normalizedTime = (double)(userStatAnswer.TimeTaken - fastestTime) / (slowestTime - fastestTime);
+                                    var points = (int)Math.Round(maxPoints - (normalizedTime * (maxPoints - minPoints)));
+
+                                    userStatAnswer.PointsReceived = points;
+                                
+                                    // recalculate user score
+                                    userStat.Score = 0;
+                                    userStat.Answers.ForEach(answer =>
+                                    {
+                                        userStat.Score += answer.PointsReceived;
+                                    });
+                                }
                             }
                         }
                     }

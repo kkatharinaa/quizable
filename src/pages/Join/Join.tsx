@@ -126,7 +126,7 @@ export const Join: FC = () => {
 
     return (
         <div className="joinPage">
-            <BackgroundGems type={BackgroundGemsType.PrimarySlave}></BackgroundGems>
+            <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary : BackgroundGemsType.PrimarySlave}></BackgroundGems>
             <div className="contentJoin">
                 <div>
                     <InputField

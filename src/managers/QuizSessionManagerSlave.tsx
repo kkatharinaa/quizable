@@ -163,6 +163,12 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
             this.notifySubscribers()
         })
 
+        connection.on(`userjoined:${quizUser.identifier}`, (quizUserStats: QuizSessionUserStats[]) => {
+            if (this._quizSession == null) return
+            this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
+            this.notifySubscribers()
+        })
+
         connection.on(`timerchange:${quizUser.identifier}`, (remainingSeconds: number) => {
             this._remainingTime = remainingSeconds
             this.notifySubscribers()

@@ -32,8 +32,7 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
             {
                 foreach (QuizSessionUserStats quizSessionUserStats in quizSessionUserStatList)
                 {
-                    // currently not implemented since the quiz slave lobby has to be done first
-                    //await Clients.All.SendAsync($"message:{quizSessionUserStats.User.Identifier}", quizSessionUserStatList.Select(v => v.User));
+                    await Clients.All.SendAsync($"userjoined:{quizSessionUserStats.User.Identifier}", quizSessionUserStatList);
                 }
             }
 

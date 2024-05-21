@@ -54,7 +54,7 @@ export const QuizSlaveSessionQuestion: FC<QuizSlaveChildrenProps> = ({leaveQuizS
     return (
         <div className="quizSlaveSessionQuestion">
             <BackgroundGems
-                type={BackgroundGemsType.PrimarySlave2}
+                type={window.innerWidth > 480 ? BackgroundGemsType.Primary2 : BackgroundGemsType.PrimarySlave2}
             />
             <QuestionSlideInTag
                 questionText={quizSessionManagerSlave.currentQuestion?.questionText ?? "[Error: Could not display question.]"}

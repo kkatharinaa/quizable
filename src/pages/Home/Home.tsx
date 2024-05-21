@@ -10,15 +10,6 @@ import { useNavigate } from "react-router-dom";
 const Home: FC = () => {
   const navigate = useNavigate();
 
-  // const [quiz, setQuiz] = useState([]);
-  const fetchFireStore = async () => {
-    console.log("Get firestore stuff")
-  }
-
-  useEffect(() => {
-    fetchFireStore()
-  }, [])
-
   const navigateJoinQuiz = () => {
     navigate("join")
   }
