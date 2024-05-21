@@ -104,6 +104,7 @@ export const QuizMaster: FC = () => {
     useEffect(() => {
         // make sure we have all necessary info passed to the route
         if (quizSessionId == null || quizId == null) {
+            console.log("no quiz id or quiz session")
             showErrorPageNothingToFind(navigate)
             return
         }
@@ -114,12 +115,14 @@ export const QuizMaster: FC = () => {
         const handleQuizSessionManagerChange = () => {
             setQuizSessionManager(QuizSessionManager.getInstanceAsInterface());
         };
+
         QuizSessionManager.getInstance().subscribe(handleQuizSessionManagerChange);
 
         // get quiz from firebase and setup connection
         const setUp = async () => {
             const quiz = await setQuizFromFirestore(quizId)
             if (quiz == null) {
+                console.log("no quiz id or quiz session")
                 showErrorPageSomethingWentWrong(navigate)
                 return
             }

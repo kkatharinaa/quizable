@@ -15,6 +15,7 @@ export interface QuizSessionManagerSlaveInterface {
     userStats: QuizSessionUserStats[] | null;
     sessionExists: boolean;
     quizUser: QuizUser | null;
+    remainingTime: number;
 }
 
 export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface {
@@ -23,6 +24,7 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
     private _currentQuestion: Question | null = null;
     private _connection: SignalR.HubConnection | null = null;
     private _quizUser: QuizUser | null = null;
+    private _remainingTime: number = 0;
 
     private subscribers: ((quizSessionManagerSlave: QuizSessionManagerSlave) => void)[] = [];
 
@@ -45,7 +47,8 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
             currentQuestion: instance.currentQuestion,
             userStats: instance.userStats,
             sessionExists: instance.sessionExists,
-            quizUser: instance.quizUser
+            quizUser: instance.quizUser,
+            remainingTime: instance.remainingTime
         }
     }
 
@@ -55,7 +58,8 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
             isEqualNullable(this.quizSession, other.quizSession, quizSessionsAreEqual) &&
             isEqualNullable(this.currentQuestion, other.currentQuestion, questionsAreEqual) &&
             this._connection === other._connection &&
-            isEqualNullable(this.quizUser, other.quizUser, quizUsersAreEqual)
+            isEqualNullable(this.quizUser, other.quizUser, quizUsersAreEqual),
+            this._remainingTime === other._remainingTime
         );
     }
 
@@ -87,6 +91,9 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
     }
     public get quizUser(): QuizUser | null {
         return this._quizUser;
+    }
+    public get remainingTime(): number {
+        return this._remainingTime;
     }
 
     // setters
@@ -153,6 +160,17 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
         connection.on(`questionend:${quizUser.identifier}`, (quizUserStats: QuizSessionUserStats[], state: string) => {
             if (this._quizSession == null) return
             this._quizSession = ({...this._quizSession, state: {...this._quizSession.state, currentQuizState: state, usersStats: quizUserStats}})
+            this.notifySubscribers()
+        })
+
+        connection.on(`userjoined:${quizUser.identifier}`, (quizUserStats: QuizSessionUserStats[]) => {
+            if (this._quizSession == null) return
+            this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
+            this.notifySubscribers()
+        })
+
+        connection.on(`timerchange:${quizUser.identifier}`, (remainingSeconds: number) => {
+            this._remainingTime = remainingSeconds
             this.notifySubscribers()
         })
 

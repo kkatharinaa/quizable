@@ -14,6 +14,8 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     
     private static Dictionary<string, List<Question>> QuizSessionsQuestions { get; set; } = new();
     
+    private static Dictionary<string, CountDown> QuizSessionsCountdowns { get; set; } = new();
+    
     /// <summary>
     /// Add new quiz session
     /// </summary>
@@ -45,6 +47,16 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     }
 
     /// <summary>
+    /// Add a timer for a specific quizSessionId
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="countDown"></param>
+    public void AddQuizSessionCountdown(string quizSessionId, CountDown countDown)
+    {
+        QuizSessionsCountdowns[quizSessionId] = countDown;
+    }
+
+    /// <summary>
     /// Get Quiz Session by the Id
     /// </summary>
     /// <param name="entryId"></param>
@@ -73,6 +85,16 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     public void DeleteSessionByEntryCode(string entryCode)
     {
         QuizSessions.Remove(entryCode);
+    }
+    
+    /// <summary>
+    /// Delete the quiz session extras (all stuff around the session which is saved on the server to give more info on the session, like the related quiz questions and the timer...) by the session's id
+    /// </summary>
+    /// <param name="quizSessionId">Id of the session that we want to delete the extra info for</param>
+    public void DeleteSessionExtrasBySessionId(string quizSessionId)
+    {
+        QuizSessionsQuestions.Remove(quizSessionId);
+        QuizSessionsCountdowns.Remove(quizSessionId);
     }
     
     /// <summary>
@@ -164,6 +186,22 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         quizUsers = [];
         return false;
     }
+    
+    /// <summary>
+    /// Tries to get a countdown for the given session id.
+    /// </summary>
+    /// <param name="quizSessionId">Quiz Session ID</param>
+    /// <param name="countDown">Out</param>
+    public bool TryGetQuizSessionCountdown(string quizSessionId, out CountDown countDown)
+    {
+        if (QuizSessionsCountdowns.ContainsKey(quizSessionId))
+        {
+            countDown = QuizSessionsCountdowns[quizSessionId];
+            return true;
+        }
+        countDown = null;
+        return false;
+    }
 
     /// <summary>
     /// Get the user stats from the quiz user ID
@@ -220,12 +258,13 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                     {
                         if (stat.User.Id == quizUserId)
                         {
-                            // TODO: Formula to calculate the pointsReceived based on the time taken, if currentQuestion.questionPointsModifier is 1 (currently either 0 or 1 for should reaction time be taken into account or not)
+                            var countDownExists = TryGetQuizSessionCountdown(quizSessionId, out var countDown);
+                            
                             QuizSessionUserStatsAnswer statsAnswer = new QuizSessionUserStatsAnswer{
                                 QuestionId = questionId,
                                 AnswerId = answer.id,
                                 PointsReceived = answer.correct ? currentQuestion.questionPoints : 0,
-                                TimeTaken = 0
+                                TimeTaken = countDownExists ? (int)countDown.stopwatch.ElapsedMilliseconds : 0,
                             };
                             stat.Answers.Add(statsAnswer);
                             
@@ -238,6 +277,66 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                         }
                         return stat;
                     }).ToList();
+                }
+                return quizSession;
+            }).ToDictionary();
+    }
+    
+    /// <summary>
+    /// Update the pointsreceived based on the reaction time (should be called after the question has ended and everyone has answered)
+    /// If the questionPointsModifier is set to 0, will not change anything
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="questionId"></param>
+    private void CalculatePoints(string quizSessionId)
+    {
+        QuizSessions = QuizSessions
+            .Select(quizSession =>
+            {
+                if (quizSession.Value.Id == quizSessionId)
+                {
+                    Question currentQuestion = this.GetQuizSessionCurrentQuestion(quizSessionId);
+                    var maxPoints = currentQuestion.questionPoints;
+                    
+                    // only update the points if our settings say so or if we have a high enough max points value so that the points can be distributed among players...
+                    if (currentQuestion.questionPointsModifier == 1 && maxPoints > 1)
+                    {
+                        const double minPointsRatio = 0.5; // If you get it right but are slow, you should at least get half of the points
+                        var minPoints = (int)Math.Round(maxPoints * minPointsRatio);
+                        
+                        var allAnswersForQuestion = quizSession.Value.State.UsersStats
+                            .SelectMany(stats => stats.Answers, (stats, answer) => new { stats, answer })
+                            .Where(x => x.answer.QuestionId == currentQuestion.id)
+                            .ToList();
+
+                        if (allAnswersForQuestion.Count > 0)
+                        {
+                            // get the fastest and slowest time in ms
+                            var fastestTime = allAnswersForQuestion.Min(x => x.answer.TimeTaken);
+                            var slowestTime = allAnswersForQuestion.Max(x => x.answer.TimeTaken);
+
+                            foreach (var userStat in quizSession.Value.State.UsersStats)
+                            {
+                                var userStatAnswer = userStat.Answers.FirstOrDefault(userStatAnswer => userStatAnswer.QuestionId == currentQuestion.id);
+
+                                // only change correct answers, the wrong answers can stay at 0
+                                if (userStatAnswer != null && userStatAnswer.PointsReceived != 0)
+                                {
+                                    var normalizedTime = (double)(userStatAnswer.TimeTaken - fastestTime) / (slowestTime - fastestTime);
+                                    var points = (int)Math.Round(maxPoints - (normalizedTime * (maxPoints - minPoints)));
+
+                                    userStatAnswer.PointsReceived = points;
+                                
+                                    // recalculate user score
+                                    userStat.Score = 0;
+                                    userStat.Answers.ForEach(answer =>
+                                    {
+                                        userStat.Score += answer.PointsReceived;
+                                    });
+                                }
+                            }
+                        }
+                    }
                 }
                 return quizSession;
             }).ToDictionary();
@@ -259,6 +358,12 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                     return session;
                 }
             ).ToDictionary();
+
+        if (state == "statistics")
+        {
+            CalculatePoints(quizSessionId);
+            DeleteQuizSessionCountdown(quizSessionId);
+        }
     }
     
     /// <summary>
@@ -277,6 +382,19 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                     return session;
                 }
             ).ToDictionary();
+    }
+    
+    /// <summary>
+    /// Update the remaining seconds of a quiz session's countdown
+    /// </summary>
+    /// <param name="quizSessionId">id of the quiz session</param>
+    /// <param name="remainingSeconds">the new value to set as the remaining seconds</param>
+    public void SetQuizSessionCountdownRemainingSeconds(string quizSessionId, int remainingSeconds)
+    {
+        if (QuizSessionsCountdowns.ContainsKey(quizSessionId))
+        {
+            QuizSessionsCountdowns[quizSessionId].remainingSeconds = remainingSeconds;
+        }
     }
 
     /// <summary>
@@ -315,23 +433,14 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             .Values.ToList()
             .FirstOrDefault(session => session.Id == quizSessionId);
 
-        var isAnswered = true;
-
-        quizSession?.State.UsersStats.ForEach(stat =>
+        if (quizSession == null)
         {
-            var isQuestionIdFound = false;
-            stat.Answers.ForEach(answer =>
-            {
-                if (answer.QuestionId == questionId)
-                {
-                    isQuestionIdFound = true;
-                }
-            });
+            return false;
+        }
 
-            isAnswered = isQuestionIdFound;
-        });
-
-        return isAnswered;
+        // check if all users have answered the current question
+        return quizSession.State.UsersStats.All(stat =>
+            stat.Answers.Any(answer => answer.QuestionId == questionId));
     }
     
     /// <summary>
@@ -418,5 +527,19 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             ).ToDictionary();
         
         return state;
+    }
+
+    /// <summary>
+    /// Removes a quiz session's countdown
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    public void DeleteQuizSessionCountdown(string quizSessionId)
+    {
+        if (QuizSessionsCountdowns.ContainsKey(quizSessionId))
+        {
+            QuizSessionsCountdowns[quizSessionId].stopwatch.Stop();
+            QuizSessionsCountdowns[quizSessionId].timer.Dispose();
+            QuizSessionsCountdowns.Remove(quizSessionId);
+        }
     }
 }

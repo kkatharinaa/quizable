@@ -28,13 +28,15 @@
     position: absolute;
     font-size: 24px;
     color: var(--white);
-    max-width: 90vw;
     text-align: center;
     width: 100%;
+    left: 0;
 }
 
 @media only screen and (max-width: 480px) {
     .contentJoin .inputFieldWithValidationText .inputFieldJoinValidation {
         font-size: 18px;
+        max-width: 90vw;
+        left: auto;
     }
 }

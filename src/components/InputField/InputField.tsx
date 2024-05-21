@@ -1,14 +1,17 @@
-import {ChangeEvent, FC} from "react";
+import React, {ChangeEvent, FC, useRef} from "react";
 import "./InputField.css"
 import {InputFieldType} from "./InputFieldExports.ts";
 
 interface InputFieldProps {
     value: string
     onChange: (newValue: string) => void
+    onEnter?: () => void
     type: InputFieldType
 }
 
-export const InputField: FC<InputFieldProps> = ({ value, onChange, type}) => {
+export const InputField: FC<InputFieldProps> = ({ value, onChange, onEnter, type}) => {
+
+    const inputRef = useRef<HTMLInputElement>(null);
 
     let maxCharacters = 100
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -37,6 +40,15 @@ export const InputField: FC<InputFieldProps> = ({ value, onChange, type}) => {
             break
     }
 
+    const handleOnEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            if (inputRef.current) {
+                inputRef.current.blur(); // remove focus from the input to close the keyboard on mobile
+            }
+            if (onEnter != undefined) onEnter();
+        }
+    };
+
     // TODO for inputs: when clicking on input jump to end of input
 
     return (
@@ -48,8 +60,10 @@ export const InputField: FC<InputFieldProps> = ({ value, onChange, type}) => {
                 type="text"
                 value={value}
                 onChange={handleInputChange}
+                onKeyDown={handleOnEnter}
                 placeholder={placeholder}
                 maxLength={maxCharacters != 0 ? maxCharacters : undefined}
+                ref={inputRef}
             />
         </div>
     )

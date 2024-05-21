@@ -3,11 +3,9 @@ import "./Timer.css"
 
 export interface TimerProps {
     remainingTime: number; // in seconds
-    isRunning: boolean;
-    onDone: () => void
 }
 
-export const Timer: FC<TimerProps> = ({ remainingTime, isRunning, onDone}) => {
+export const Timer: FC<TimerProps> = ({ remainingTime}) => {
 
     const formatTime = (seconds: number): string => {
         const minutes = Math.floor(seconds / 60);
@@ -16,33 +14,11 @@ export const Timer: FC<TimerProps> = ({ remainingTime, isRunning, onDone}) => {
         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     }
 
-    //const [time, setTime] = useState(remainingTime)
     const [formattedTime, setFormattedTime] = useState(formatTime(remainingTime))
 
-    const updateTime = () => {
-        remainingTime -= 1
-        setFormattedTime(formatTime(remainingTime))
-        if (remainingTime <= 0) {
-            console.log("timer over")
-            onDone()
-        }
-    }
-
     useEffect(() => {
-        let interval: NodeJS.Timeout;
-
-        if (isRunning) {
-            interval = setInterval(() => {
-                updateTime()
-            }, 1000);
-        }
-
-        return () => clearInterval(interval);
-    }, [isRunning]);
-    /*useEffect(() => {
-        const interval = setInterval(() => updateTime(), 1000);
-        return () => clearInterval(interval);
-    }, []);*/
+        setFormattedTime(formatTime(remainingTime));
+    }, [remainingTime]);
 
     return (
         <div className="timer">

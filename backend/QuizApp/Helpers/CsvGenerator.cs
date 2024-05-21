@@ -48,7 +48,7 @@ public class CsvGenerator
                 var question = EscapeCsvField(currentQuestion?.questionText ?? userStatsAnswer.QuestionId);
                 var answer = EscapeCsvField(selectedAnswer?.value ?? userStatsAnswer.AnswerId);
                 var pointsReceived = EscapeCsvField(userStatsAnswer.PointsReceived.ToString());
-                var timeTaken = EscapeCsvField(userStatsAnswer.TimeTaken.ToString());
+                var timeTaken = FormatTimeTaken(userStatsAnswer.TimeTaken);
 
                 csvBuilder.AppendLine($"{ranking},{nickname},{score},{questionIndex},{question},{answer},{pointsReceived},{timeTaken}");
             }
@@ -65,5 +65,15 @@ public class CsvGenerator
         field = field.Replace("\"", "\"\"");
         field = $"\"{field}\"";
         return field;
+    }
+    
+    private string FormatTimeTaken(int milliseconds)
+    {
+        var timeSpan = TimeSpan.FromMilliseconds(milliseconds);
+
+        return string.Format("{0:D2}:{1:D2}.{2:D3}", 
+            timeSpan.Minutes, 
+            timeSpan.Seconds, 
+            timeSpan.Milliseconds);
     }
 }
