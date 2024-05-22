@@ -10,13 +10,13 @@
     width: 800px;
     max-width: 800px;
     padding: 0;
+    gap: 0;
 }
 
 .quizSettingsContent {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 60px;
     flex: 1 0 0;
     align-self: stretch;
 }
@@ -54,7 +54,7 @@
 
 .quizSettingsContent .quizSettingsAll {
     display: flex;
-    padding: 0 40px;
+    padding: 40px;
     flex-direction: column;
     align-items: center;
     gap: 40px;
