@@ -8,6 +8,7 @@ import {Question} from "../models/Question.ts";
 import QuizSessionUserStats from "../models/QuizSessionUserStats.ts";
 import {isEqualNullable} from "../helper/EqualHelpers.ts";
 import {AuthenticatedUser, authUsersAreEqual} from "../models/AuthenticatedUser.ts";
+import QuizSessionService from "../services/QuizSessionService.ts";
 
 export interface QuizSessionManagerInterface {
     quizSession: QuizSession | null;
@@ -220,9 +221,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     }
     private async initSignalR(quizSessionId: string, hostUserId: string): Promise<SignalR.HubConnection> {
         // start websocket connection
-        const port: number = 5296
-        const url: string = `http://localhost:${port}`
-        // const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+        const url: string = QuizSessionService.url
 
         const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
             .withUrl(url + "/master", {
