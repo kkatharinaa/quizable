@@ -125,23 +125,17 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
         this._quizUser = null;
         this.notifySubscribers()
     }
-
-
     public selectAnswer(answer: Answer): void {
         this._connection?.send("NotifySlaveAnswered", this._quizUser, this._quizSession?.id, this._currentQuestion?.id, answer);
     }
-
     public async setUp(quizSessionId: string, quizUser: QuizUser): Promise<void> {
         this._connection = await this.initSignalR(quizSessionId, quizUser)
         this._quizUser = quizUser;
         this.notifySubscribers();
     }
-
     private async initSignalR(quizSessionId: string, quizUser: QuizUser): Promise<SignalR.HubConnection> {
         // start websocket connection
-        // const port: number = 5296
-        // const url: string = `http://localhost:${port}`
-        const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+        const url: string = QuizSessionService.url
 
         const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
             .withUrl(url + "/slave", {
