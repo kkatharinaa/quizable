@@ -221,7 +221,9 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     }
     private async initSignalR(quizSessionId: string, hostUserId: string): Promise<SignalR.HubConnection> {
         // start websocket connection
-        const url: string = QuizSessionService.url
+        //const port: number = 5296
+        //const url: string = `http://localhost:${port}`
+        const url: string = `https://quizapp-rueasghvla-nw.a.run.app`
 
         const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
             .withUrl(url + "/master", {

@@ -1,12 +1,13 @@
 import "firebase/firestore";
 import QuizSession from "../models/QuizSession";
 import { Question } from "../models/Question";
+import QuizUser from "../models/QuizUser";
 
 export default class QuizSessionService{
    
-    static port: number = 5296
-    static url: string = `http://localhost:${this.port}`
-    // static url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+    // static port: number = 5296
+    // static url: string = `http://localhost:${this.port}`
+    static url: string = `https://quizapp-rueasghvla-nw.a.run.app`
 
     public static async addSession(quizSession: QuizSession): Promise<string> {
         return (await fetch(`${this.url}/api/session`, 
@@ -42,8 +43,6 @@ export default class QuizSessionService{
             await fetch(`${this.url}/api/session/user/${quizSessionId}/${quizUserIdentifier}`)
         )
 
-        console.log("Status code: " + quizUserExistResponse.status)
-
         if(quizUserExistResponse.status == 404){
             return false;  
         }
@@ -57,4 +56,9 @@ export default class QuizSessionService{
         return await (await fetch(`${this.url}/api/session`)).json()
     }
 
+    public static async checkQuizUserReconnection(deviceId: string) : Promise<{quizUser: QuizUser, quizSession: QuizSession}|null> {
+        return fetch(`${this.url}/api/session/device/${deviceId}`)
+            .then((text) => text.json())
+            .catch(() => null)
+    }
 }
