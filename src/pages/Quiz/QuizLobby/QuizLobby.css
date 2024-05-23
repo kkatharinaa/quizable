@@ -24,18 +24,20 @@
 
 .entryIdContent {
     min-width: 40vw;
-    padding: 20px;
+    padding: 0 20px 0 20px;
     background-color: var(--white);
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    gap: 80px;
+    justify-content: space-between;
     border-radius: 20px;
 }
 
 .entryIdContentTitle, .entryIdContentGameCode {
     font-size: 32px;
     color: var(--black);
-    text-align: center;
+    text-align: start;
     font-family: "Inika", serif;
     font-style: normal;
     font-weight: bold;
