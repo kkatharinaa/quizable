@@ -1,8 +1,46 @@
-.createSendEmailClass {
+.login {
     display: flex;
     width: 100vw;
+    max-width: 100vw;
     height: 100vh;
+    max-height: 100vh;
+    flex-direction: column;
+}
 
-    justify-content: center;
+.login .content {
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    flex: 1 0 0;
+    align-self: stretch;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.login .content .inputFieldWithInfoText {
+    position: relative;
+}
+
+.login .content .inputFieldWithInfoText .infoText {
+    position: absolute;
+    font-size: 24px;
+    color: var(--white);
+    max-width: 90vw;
+    text-align: center;
+    width: 100%;
+}
+
+.login .content .inputFieldWithInfoText .infoText:first-of-type {
+    bottom: 100px;
+}
+.login .content .inputFieldWithInfoText .infoText:nth-of-type(2) {
+    top: 100px;
+}
+
+@media only screen and (max-width: 480px) {
+    .login .content .inputFieldWithInfoText .infoText {
+        font-size: 18px;
+    }
 }

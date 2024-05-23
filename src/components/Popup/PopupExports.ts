@@ -18,6 +18,22 @@ export const showPopupSomethingWentWrong = (showPopup: (popup: PopupProps) => vo
     showPopup(popup)
 }
 
+export const showPopupInfoOnly = (showPopup: (popup: PopupProps) => void, hidePopup: () => void, title: string, message?: string) => {
+    const popup: PopupProps = {
+        title: title,
+        message: message ?? null,
+        secondaryButtonText: "Ok",
+        secondaryButtonIcon: null,
+        primaryButtonText: "",
+        primaryButtonIcon: null,
+        type: BottomNavBarType.SecondaryOnly,
+        onSecondaryClick: () => {
+            hidePopup()
+        }
+    }
+    showPopup(popup)
+}
+
 export const showPopupLeaveSession = (showPopup: (popup: PopupProps) => void, hidePopup: () => void, navigate: NavigateFunction, leaveSession: () => void) => {
     const leavePopup: PopupProps = {
         title: "Are you sure you want to leave this quiz session?",

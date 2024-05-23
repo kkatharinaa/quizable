@@ -2,5 +2,6 @@ export enum InputFieldType {
     Question,
     Quizname,
     Quizcode,
-    Username
+    Username,
+    Email
 }

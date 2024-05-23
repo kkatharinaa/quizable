@@ -30,4 +30,5 @@
 
 .quizSlaveSessionQuestion .content .answersContainer .answerSelection {
     flex-basis: 30%;
+    max-width: 20vw;
 }

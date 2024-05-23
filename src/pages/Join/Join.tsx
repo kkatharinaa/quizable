@@ -1,10 +1,10 @@
-import {FC, useState} from "react";
+import {FC, useEffect, useState} from "react";
 import {BottomNavBar} from "../../components/BottomNavBar/BottomNavBar";
 import {BottomNavBarStyle, BottomNavBarType} from "../../components/BottomNavBar/BottomNavBarExports";
 import {BackgroundGems} from "../../components/BackgroundGems/BackgroundGems";
 import {BackgroundGemsType} from "../../components/BackgroundGems/BackgroundGemsExports";
 import "./Join.css"
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 import QuizSessionService from "../../services/QuizSessionService";
 import {RETURN_ICON_DARK} from "../../assets/Icons.ts";
 import {InputField} from "../../components/InputField/InputField.tsx";
@@ -21,9 +21,9 @@ interface ValidQuizCodeState {
     quizSessionId: string
 }
 
-
 export const Join: FC = () => {
     const navigate = useNavigate()
+    const [searchParam] = useSearchParams()
 
     const [ inputValue, setInputValue ] = useState("")
     const [ validation, setValidation ] = useState<ValidationState>({
@@ -127,11 +127,30 @@ export const Join: FC = () => {
         setInputValue(newValue)
     }
 
+    const checkEntryIdPresent = async () => {
+        const entryIdQuery: string | null = searchParam.get("entryid")
+
+        if(entryIdQuery != null) {
+            console.log("EntryId found: " + entryIdQuery)
+            const quizSessionCodeValid = await QuizSessionService.isQuizCodeValid(entryIdQuery)
+
+            setValidQuizCode({
+                code: entryIdQuery,
+                quizSessionId: quizSessionCodeValid.sessionId
+            })
+            setInputValue("")
+        }
+    }
+
+    useEffect(() => {
+        checkEntryIdPresent()
+    }, [])
+
     return (
         <div className="joinPage">
             <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary : BackgroundGemsType.PrimarySlave}></BackgroundGems>
             <div className="contentJoin">
-                <div>
+                <div className="inputFieldWithValidationText">
                     <InputField
                         value={inputValue}
                         onChange={validQuizCode.code.length == 0 ? validateInputLive : updateInput}

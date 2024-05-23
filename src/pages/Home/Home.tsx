@@ -54,7 +54,7 @@ const Home: FC = () => {
     }
 
     const navigateCreateQuiz = () => {
-        navigate("overview")
+        navigate("login")
     }
 
     return (

@@ -1,5 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-import About from "./pages/About/About";
 import Home from "./pages/Home/Home";
 import { CreateSendEmail } from "./pages/Create/CreateSendEmail/CreateSendEmail";
 import { Join } from "./pages/Join/Join";
@@ -8,8 +7,6 @@ import {CreateOverview} from "./pages/Create/CreateOverview/CreateOverview.tsx";
 import {ErrorPage} from "./pages/ErrorPage/ErrorPage.tsx";
 import {QuizMaster} from "./pages/Quiz/QuizMaster/QuizMaster.tsx";
 import {QuizSlave} from "./pages/Quiz/QuizSlave/QuizSlave.tsx";
-
-// TODO: only make master routes accessible if you are logged in
 
 export interface RouterType {
     title: string;
@@ -25,22 +22,17 @@ const pagesData: RouterType[] = [
       title: "Home | Quizable"
     },
     {
-      path: "about",
-      element: <About />,
-      title: "About | Quizable"
-    },
-    {
         path: "error",
         element: <ErrorPage />,
         title: "Error | Quizable"
     },
     {
-      path: "overview",
+      path: "overview", // needs authentication
       element: <CreateOverview/>,
       title: "Overview | Quizable"
     },
     {
-      path: "overview/editor",
+      path: "overview/editor", // needs authentication
       element: <CreateEditor/>,
       title: "Edit | Quizable"
     },
@@ -55,7 +47,7 @@ const pagesData: RouterType[] = [
       title: "Join Quiz | Quizable"
     },
     {
-        path: "quiz",
+        path: "quiz", // needs authentication
         element: <QuizMaster />,
         title: "Quiz | Quizable"
     },

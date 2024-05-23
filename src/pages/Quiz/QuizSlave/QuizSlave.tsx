@@ -13,6 +13,8 @@ import {QuizSlaveSessionQuestion} from "../QuizSlaveSessionQuestion/QuizSlaveSes
 import {QuizSlaveLeaderboard} from "../QuizSlaveLeaderboard/QuizSlaveLeaderboard.tsx";
 import {QuizSlaveEnd} from "../QuizSlaveEnd/QuizSlaveEnd.tsx";
 import {QuizSessionManagerSlave, QuizSessionManagerSlaveInterface} from "../../../managers/QuizSessionManagerSlave.tsx";
+import {LoadingPage} from "../../Loading/Loading.tsx";
+import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 
 export interface QuizSlaveChildrenProps {
     quizSessionManagerSlave: QuizSessionManagerSlaveInterface
@@ -110,6 +112,9 @@ export const QuizSlave: FC = () => {
                     leaveQuizSession={handleLeaveQuizSession}
                     showPopupSthWentWrong={showPopupSthWentWrong}
                 />
+            }
+            { (quizSessionManagerSlave.quizState == null || !quizSessionManagerSlave.sessionExists) &&
+                <LoadingPage hasBottomNavBar={false}/>
             }
 
             {(showingPopup && popupProps != null) &&

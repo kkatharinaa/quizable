@@ -34,6 +34,10 @@ export const InputField: FC<InputFieldProps> = ({ value, onChange, onEnter, type
             placeholder = "Enter user name"
             maxCharacters = 20
             break
+        case InputFieldType.Email:
+            placeholder = "Type your email here"
+            maxCharacters = 0
+            break
     }
 
     const handleOnEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -49,14 +53,16 @@ export const InputField: FC<InputFieldProps> = ({ value, onChange, onEnter, type
 
     return (
         <div className="inputField">
-            <p className="characterCount">{`${value.length}/${maxCharacters}`}</p>
+            { maxCharacters != 0 &&
+                <p className="characterCount">{`${value.length}/${maxCharacters}`}</p>
+            }
             <input
                 type="text"
                 value={value}
                 onChange={handleInputChange}
                 onKeyDown={handleOnEnter}
                 placeholder={placeholder}
-                maxLength={maxCharacters}
+                maxLength={maxCharacters != 0 ? maxCharacters : undefined}
                 ref={inputRef}
             />
         </div>

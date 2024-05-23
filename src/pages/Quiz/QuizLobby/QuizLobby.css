@@ -7,7 +7,7 @@
     align-items: center;
     flex-direction: column;
     justify-content: space-between;
-    overflow-y: hidden;
+    overflow: hidden;
 }
 
 .quizLobby .content {
@@ -16,6 +16,7 @@
     align-items: center;
     flex: 1 0 0;
     align-self: stretch;
+    overflow-x: hidden;
     overflow-y: scroll;
     padding: 40px 100px 0 100px;
     gap: 80px;
@@ -23,18 +24,20 @@
 
 .entryIdContent {
     min-width: 40vw;
-    padding: 20px;
+    padding: 0 20px 0 20px;
     background-color: var(--white);
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    gap: 80px;
+    justify-content: space-between;
     border-radius: 20px;
 }
 
 .entryIdContentTitle, .entryIdContentGameCode {
     font-size: 32px;
     color: var(--black);
-    text-align: center;
+    text-align: start;
     font-family: "Inika", serif;
     font-style: normal;
     font-weight: bold;

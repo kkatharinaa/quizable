@@ -18,6 +18,10 @@ import {LEAVE_ICON_DARK} from "../../../assets/Icons.ts";
 import {ErrorPageLinkedTo, showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
 import {quizOptionsAreEqual} from "../../../models/QuizOptions.ts";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
+import {auth, logInWithEmailLink, logOutUser} from "../../../firebase/auth.ts";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { Loading } from "../../Loading/Loading.tsx";
+import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -33,13 +37,13 @@ export const CreateOverview: FC = () => {
     const [showingQuizSettingsPopup, setShowingQuizSettingsPopup] = useState(false);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
-
-    // TODO: check if we are logged in!! else redirect to home
-
-    // get all of this user's quizzes from firebase TODO: only get it from the logged in user!
-    const setQuizzesFromFirestore = async () => {
-        const quizzesFromFirestore: Quiz[] = await QuizRepository.getAll()
-
+    const [user, loading, error] = useAuthState(auth);
+    const [isSetUp, setIsSetUp] = useState(false);
+    
+    // get all of a user's quizzes from firebase
+    const setQuizzesFromFirestore = async (userId: string) => {
+        const quizzesFromFirestore: Quiz[] = await QuizRepository.getAll(userId)
+        
         // sort quizzes by createdOn date, and display newest at the start
         const sortByCreatedOn = (a: Quiz, b: Quiz) => {
             if (a.createdOn < b.createdOn) { return 1 }
@@ -49,7 +53,7 @@ export const CreateOverview: FC = () => {
         const sortedQuizzes = quizzesFromFirestore.slice().sort(sortByCreatedOn)
         setQuizzes(sortedQuizzes)
     }
-
+    
     // if we just came back from somewhere and we still want to see the quiz settings, do so based on the query parameter
     const showPopupForQuery = () => {
         if (showingPopupForID == null) return
@@ -58,21 +62,54 @@ export const CreateOverview: FC = () => {
         setQuizSettingsPopupProps([showingPopupForQuiz, false])
         setShowingQuizSettingsPopup(true)
     }
-
+    
     useEffect(() => {
-        setQuizzesFromFirestore()
+        // redirect if the screen is too narrow
+        const handleResize = () => {
+            if (window.innerWidth <= 768) {
+                navigate('/')
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
+        const setUp = async () => {
+            await logInWithEmailLink(window.location.href, () => {
+                navigate("/login")
+            }, showPopup, hidePopup)
+            if (user) await setQuizzesFromFirestore(user.uid)
+            setIsSetUp(true)
+        }
+        setUp()
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
     }, []);
     useEffect(() => {
         showPopupForQuery()
     }, [quizzes]);
+    useEffect(() => {
+        if (!user && isSetUp && !showingPopup) navigate("/login");
+        if (user && isSetUp && !showingPopup) {
+            navigate("/overview");
+            setQuizzesFromFirestore(user.uid)
+        }
+        if (error) console.log(error)
+    }, [user, loading, navigate]);
 
     // quiz functions
     const findQuizByID = (id: string): Quiz | undefined => {
         return quizzes.find(quiz => quiz.id === id)
     }
-    const handleAddQuiz = () => {
+    const handleAddQuiz = async () => {
         // open new quiz settings popup which will create a quiz and update the quizzes state when closed, or when clicked on "edit questions" button
-        const newQuiz = makeQuiz()
+        if (user?.uid == null) {
+            showPopupSomethingWentWrong(showPopup, hidePopup)
+            return
+        }
+        const authUser = await QuizRepository.getUser(user.uid)
+        const newQuiz = makeQuiz(authUser)
         setQuizSettingsPopupProps([newQuiz, true])
         setShowingQuizSettingsPopup(true)
     };
@@ -123,7 +160,8 @@ export const CreateOverview: FC = () => {
         // if the quiz does not exist yet, we likely just created it and we have to add it
         if (previousQuiz == undefined) {
             setQuizzes([updatedQuiz, ...quizzes])
-            await QuizRepository.add(updatedQuiz)
+            if (user?.uid != null) await QuizRepository.add(user.uid, updatedQuiz)
+            else showPopupSomethingWentWrong(showPopup, hidePopup)
             return
         }
 
@@ -136,14 +174,18 @@ export const CreateOverview: FC = () => {
             }
             updatedQuizzes[index] = updatedQuiz
             setQuizzes(updatedQuizzes)
-            await QuizRepository.add(updatedQuiz)
+            if (user?.uid != null) await QuizRepository.add(user.uid, updatedQuiz)
+            else showPopupSomethingWentWrong(showPopup, hidePopup)
         }
     }
     const handleEditQuizClose = () => {
         setQuizSettingsPopupProps(null)
         setShowingQuizSettingsPopup(false)
         if (showingPopupForID != null) navigate('/overview') // hack to remove the search parameter so the popup does not keep reappearing if the user refreshes the page
-        setQuizzesFromFirestore() // reload quizzes
+        
+        if (user?.uid != null) setQuizzesFromFirestore(user.uid) // reload quizzes
+        else showPopupSomethingWentWrong(showPopup, hidePopup)
+
     };
     const handleEditQuizEditQuestions = (id: string) => {
         navigateToEditor(id)
@@ -162,8 +204,12 @@ export const CreateOverview: FC = () => {
                 hidePopup()
             },
             onPrimaryClick: () => {
+                if (user?.uid == null) {
+                    showPopupSomethingWentWrong(showPopup, () => setShowingPopup(false))
+                    return
+                }
                 // delete quiz from firebase and quizzes state
-                QuizRepository.delete(id).then(() => {
+                QuizRepository.delete(user!.uid, id).then(() => {
                     if (showingQuizSettingsPopup) handleEditQuizClose()
                     const updatedQuizzes = [...quizzes]
                     const index = updatedQuizzes.findIndex(quiz => quiz.id == id)
@@ -192,8 +238,8 @@ export const CreateOverview: FC = () => {
             onSecondaryClick: () => {
                 hidePopup()
             },
-            onPrimaryClick: () => {
-                // TODO: log out from firebase auth
+            onPrimaryClick: () => { 
+                logOutUser();
                 navigate(`/`)
             },
         }
@@ -210,16 +256,21 @@ export const CreateOverview: FC = () => {
     return (
         <div className="createOverview">
             <BackgroundGems type={BackgroundGemsType.Primary}/>
-            <div className="content">
-                <h1>Welcome, User</h1>
-                <QuizCardContainer
-                    quizzes={quizzes}
-                    onEdit={handleEditQuiz}
-                    onPlay={handlePlayQuiz}
-                    onAdd={handleAddQuiz}
-                    onDelete={handleDeleteQuiz}
-                />
-            </div>
+
+            {(loading || !isSetUp) ? (
+                <Loading/>
+            ) : (
+                <div className="content">
+                    <h1>Welcome, User</h1>
+                    <QuizCardContainer
+                        quizzes={quizzes}
+                        onEdit={handleEditQuiz}
+                        onPlay={handlePlayQuiz}
+                        onAdd={handleAddQuiz}
+                        onDelete={handleDeleteQuiz}
+                    />
+                </div>
+            )}
 
             <BottomNavBar
                 secondaryButtonText="Logout"
@@ -253,6 +304,7 @@ export const CreateOverview: FC = () => {
                     type={popupProps.type}
                     onSecondaryClick={popupProps.onSecondaryClick}
                     onPrimaryClick={popupProps.onPrimaryClick}
+                    isPrompt={popupProps.isPrompt}
                 />
             }
         </div>

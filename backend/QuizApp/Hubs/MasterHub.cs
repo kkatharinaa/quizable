@@ -282,7 +282,6 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
                         $"timerchange:{quizSessionUserStats.User.Identifier}",
                         remainingSeconds)
                 ));
-                
             }
 
             await Task.WhenAll(tasks.ToList());
