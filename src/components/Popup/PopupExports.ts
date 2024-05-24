@@ -18,6 +18,22 @@ export const showPopupSomethingWentWrong = (showPopup: (popup: PopupProps) => vo
     showPopup(popup)
 }
 
+export const showPopupNoConnection = (showPopup: (popup: PopupProps) => void, hidePopup: () => void) => {
+    const popup: PopupProps = {
+        title: "Oh no, you have lost your connection to the internet!",
+        message: "This page will refresh once you are reconnected.",
+        secondaryButtonText: "Ok",
+        secondaryButtonIcon: null,
+        primaryButtonText: "",
+        primaryButtonIcon: null,
+        type: BottomNavBarType.SecondaryOnly,
+        onSecondaryClick: () => {
+            hidePopup()
+        }
+    }
+    showPopup(popup)
+}
+
 export const showPopupInfoOnly = (showPopup: (popup: PopupProps) => void, hidePopup: () => void, title: string, message?: string) => {
     const popup: PopupProps = {
         title: title,

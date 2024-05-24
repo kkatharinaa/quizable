@@ -10,7 +10,7 @@ export const QuizSlaveEnd: FC<QuizSlaveChildrenProps> = ({leaveQuizSession}) => 
 
     return (
         <div className="quizSlaveEnd">
-            <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary2 : BackgroundGemsType.PrimarySlave2}/>
+            <BackgroundGems type={BackgroundGemsType.Primary2}/>
             <div className="content">
                 <h1>Thank you for playing!</h1>
             </div>

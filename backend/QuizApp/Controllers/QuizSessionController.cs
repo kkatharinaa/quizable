@@ -47,22 +47,25 @@ public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizS
 
     [HttpGet]
     [Route("user/{quizSessionId}/{quizUserIdentifier}")]
-    public IActionResult GetQuizSessionUser(string quizSessionId, string quizUserIdentifier)
+    public IActionResult IsQuizSessionUserAvailable(string quizSessionId, string quizUserIdentifier)
     {
         if (quizSessionId == string.Empty || quizUserIdentifier == string.Empty)
         {
-            Response.StatusCode = 400;
-            return Content("Bad request. Missing Data");
+            return BadRequest("Bad request. Missing Data");
         }
         
-        bool quizSessionUserExists = quizSessionService.TryGetQuizSessionUser(quizSessionId, quizUserIdentifier, out QuizUser quizUser);
+        bool quizSessionUserExists = quizSessionService.TryGetQuizSessionUser(quizSessionId, quizUserIdentifier, out QuizUser quizUserInSession);
+        bool quizSessionUserExistsAndIsDisconnected =
+            quizSessionService.TryGetDisconnectedQuizSessionUser(quizSessionId, quizUserIdentifier,
+                out QuizUser disconnectedUserInSession); 
+        
+        if (quizSessionUserExistsAndIsDisconnected)
+            return Ok(disconnectedUserInSession); // pass the quizUser back to the frontend
 
         if (quizSessionUserExists)
-            return Ok(quizUser);
+            return Conflict("Quiz user already exists");
         
-        logger.LogInformation("Quiz user not found!");
-        
-        return NotFound("Quiz user not found!");
+        return Ok();
     }
     
     [HttpGet]
@@ -70,6 +73,14 @@ public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizS
     public IActionResult GetSessionByEntryId(string entryId)
     {
         return Ok(quizSessionService.GetQuizSessionByEntryId(entryId));
+    }
+    
+    [HttpGet]
+    [Route("host/{hostId}/")]
+    public IActionResult GetSessionByHostId(string hostId)
+    {
+        bool hostIsRunningSession = quizSessionService.TryGetQuizSessionByHostId(hostId, out var quizSession);
+        return hostIsRunningSession ? Ok(quizSession) : NotFound(null);
     }
     
     [HttpGet]

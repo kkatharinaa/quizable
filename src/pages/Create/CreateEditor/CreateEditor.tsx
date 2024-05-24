@@ -85,7 +85,7 @@ export const CreateEditor: FC = () => {
         };
     }, []);
     useEffect(() => {
-        if (!user && isSetUp && !showingPopup) navigate("/login");
+        if (!loading && !user && isSetUp && !showingPopup) navigate("/login");
         if (error) console.log(error)
     }, [user, loading, navigate]);
 

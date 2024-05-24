@@ -14,8 +14,7 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     private static Dictionary<string, QuizSession> QuizSessions { get; set; } = new();
     private static Dictionary<string, List<Question>> QuizSessionsQuestions { get; set; } = new();
     
-    // key: quizUserDeviceId, value: connectionId
-    private static Dictionary<string, string> QuizSessionConnections { get; set; } = new();
+    private static Dictionary<string, List<(QuizUser, string)>> QuizSessionPlayers { get; set; } = new();
     private static Dictionary<string, CountDown> QuizSessionsCountdowns { get; set; } = new();
     
     /// <summary>
@@ -25,6 +24,14 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     /// <returns></returns>
     public string AddQuizSession(QuizSession quizSession)
     {
+        // first remove any other quiz sessions that the user might be running
+        bool hostIsRunningSession = TryGetQuizSessionByHostId(quizSession.HostId, out var oldSession);
+        if (hostIsRunningSession)
+        {
+            DeleteSessionExtrasBySessionId(oldSession.Id);
+            DeleteSessionById(oldSession.Id);
+        }
+        
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
 
@@ -88,6 +95,15 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     {
         QuizSessions.Remove(entryCode);
     }
+    /// <summary>
+    /// Delete the quiz session by its id
+    /// </summary>
+    /// <param name="quizSessionId">Id of the session to be deleted</param>
+    public void DeleteSessionById(string quizSessionId)
+    {
+        (QuizSession?, string) session = GetQuizSessionById(quizSessionId);
+        if (session.Item2 != "") QuizSessions.Remove(session.Item2);
+    }
 
     /// <summary>
     /// Delete the quiz session extras (all stuff around the session which is saved on the server to give more info on the session, like the related quiz questions and the timer...) by the session's id
@@ -97,6 +113,7 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     {
         QuizSessionsQuestions.Remove(quizSessionId);
         QuizSessionsCountdowns.Remove(quizSessionId);
+        QuizSessionPlayers.Remove(quizSessionId);
     }
     
     /// <summary>
@@ -111,12 +128,12 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             {
                 if (quizSession.Value.Id.Equals(quizSessionId))
                 {
-                    // check if user does not already exist inside the quiz
-                    bool quizUserExists = quizSession.Value.State.UsersStats
-                        .Any(u => u.User.Identifier == quizUser.Identifier);
+                    // check if user already exists inside the quiz
+                    var existingUserStat = quizSession.Value.State.UsersStats
+                        .FirstOrDefault(u => u.User.Identifier == quizUser.Identifier);
 
                     // if it does not exist, add it
-                    if (!quizUserExists)
+                    if (existingUserStat == null)
                     {
                         var newQuizSessionState = new QuizSessionUserStats
                         {
@@ -126,6 +143,10 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                         };
 
                         quizSession.Value.State.UsersStats.Add(newQuizSessionState);
+                    }
+                    else // if it exists, update it (because it might be a user reclaiming a disconnected user)
+                    {
+                        existingUserStat.User = quizUser;
                     }
                 }
                 return quizSession;
@@ -137,21 +158,29 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     /// </summary>
     /// <param name="quizSessionId"></param>
     /// <param name="quizUser"></param>
-    public void RemoveUserFromQuizSession(string quizSessionId, QuizUser quizUser)
+    /// <param name="deviceIdOnly"></param>
+    public void RemoveUserFromQuizSession(string quizSessionId, QuizUser quizUser, bool deviceIdOnly)
     {
         QuizSessions = QuizSessions.Select(quizSession =>
         {
             if (quizSession.Value.Id.Equals(quizSessionId))
             {
-                // check if user does not already exist inside the quiz
-                bool quizUserExists = quizSession.Value.State.UsersStats
-                    .Any(u => u.User.Identifier == quizUser.Identifier);
+                // check if user already exists inside the quiz
+                var userStat = quizSession.Value.State.UsersStats
+                    .FirstOrDefault(u => u.User.Identifier == quizUser.Identifier);
                 
-                // if it does not exist, add it
-                if (quizUserExists)
+                // if it exists, remove it
+                if (userStat != null)
                 {
-                    QuizSessionUserStats? userStats = GetQuizSessionUserStats(quizUser.Id);
-                    quizSession.Value.State.UsersStats.Remove(userStats!);
+                    if (deviceIdOnly)
+                    {
+                        // only remove the deviceid, so the user stays in the stats but the user can disconnect
+                        userStat.User.DeviceId = "";
+                    }
+                    else
+                    {
+                        quizSession.Value.State.UsersStats.Remove(userStat);
+                    }
                 }
             }
             return quizSession;
@@ -159,23 +188,44 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     }
 
     /// <summary>
-    /// Tries to get a quiz user for the give identifier and session id.
+    /// Tries to get a quiz session for the given host id
+    /// </summary>
+    /// <param name="hostId">Host ID</param>
+    /// <param name="quizSession">Out</param>
+    public bool TryGetQuizSessionByHostId(string hostId, out QuizSession quizSession)
+    {
+        QuizSession? session = QuizSessions
+            .Values.ToList()
+            .FirstOrDefault(session => session.HostId == hostId);
+        
+        if (session != null)
+        {
+            quizSession = session;
+            return true;
+        }
+
+        quizSession = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Tries to get a quiz user for the given identifier and session id.
     /// </summary>
     /// <param name="quizSessionId">Quiz Session ID</param>
     /// <param name="identifier">The name of the quiz user.</param>
     /// <param name="quizUser">Out</param>
     public bool TryGetQuizSessionUser(string quizSessionId, string identifier, out QuizUser quizUser)
     {
-        QuizSession? quizUserStats = QuizSessions
+        QuizSession? quizSession = QuizSessions
             .Values.ToList()
             .FirstOrDefault(session => session.Id == quizSessionId);
 
-        if (quizUserStats is not null)
+        if (quizSession is not null)
         {
-            QuizSessionUserStats? quizSessionUserStats = quizUserStats.State.UsersStats
+            QuizSessionUserStats? quizSessionUserStats = quizSession.State.UsersStats
                 .FirstOrDefault(s => s.User.Identifier.Equals(identifier));
             
-            logger.LogInformation(quizUserStats.State.UsersStats.Count.ToString());
+            logger.LogInformation(quizSession.State.UsersStats.Count.ToString());
 
             if (quizSessionUserStats is not null)
             {
@@ -206,7 +256,7 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             .FirstOrDefault(s => s.User.DeviceId.Equals(deviceId))
             ?.User;
         
-        logger.LogInformation("Quiz Sessssion is null: " + (quizSessionQuery is null));
+        logger.LogInformation("Quiz Session is null: " + (quizSessionQuery is null));
         logger.LogInformation("Quiz User is null: " + (quizUserQuery is null));
         
         if (quizUserQuery is not null && quizSessionQuery is not null)
@@ -219,6 +269,27 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         quizUser = null;
         quizSession = null;
         return false;
+    }
+    
+    /// <summary>
+    /// tries to get the quizuser for a disconnected player's identifier. will return true if a quizuser has been found for the given identifier and that quizuser is also currently disconnected, else it will return false.
+    /// </summary>
+    /// <param name="quizSessionId">Quiz session id of the session that the user is part of</param>
+    /// <param name="identifier">Identifier that is trying to be reclaimed</param>
+    /// <param name="quizUser">OUT: disconnected QuizUser in the session for the given identifier.</param>
+    public bool TryGetDisconnectedQuizSessionUser(string quizSessionId, string identifier, out QuizUser quizUser)
+    {
+        quizUser = null;
+        // check if user exists for quiz session
+        var userExists = TryGetQuizSessionUser(quizSessionId, identifier, out var user);
+        if (!userExists) return false; // user is not in session
+        
+        // check if user is disconnected
+        var connectionId = TryGetSlaveConnectionId(user);
+        if (connectionId != null) return false; // user is connected
+
+        quizUser = user;
+        return true;
     }
 
     /// <summary>
@@ -310,13 +381,11 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                 if (quizSession.Value.Id == quizSessionId)
                 {
                     Question currentQuestion = this.GetQuizSessionCurrentQuestion(quizSessionId);
-                    
                     quizSession.Value.State.UsersStats = quizSession.Value.State.UsersStats.Select(stat =>
                     {
                         if (stat.User.Id == quizUserId)
                         {
                             var countDownExists = TryGetQuizSessionCountdown(quizSessionId, out var countDown);
-                            
                             QuizSessionUserStatsAnswer statsAnswer = new QuizSessionUserStatsAnswer{
                                 QuestionId = questionId,
                                 AnswerId = answer.id,
@@ -344,7 +413,6 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
     /// If the questionPointsModifier is set to 0, will not change anything
     /// </summary>
     /// <param name="quizSessionId"></param>
-    /// <param name="questionId"></param>
     private void CalculatePoints(string quizSessionId)
     {
         QuizSessions = QuizSessions
@@ -377,7 +445,7 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                                 var userStatAnswer = userStat.Answers.FirstOrDefault(userStatAnswer => userStatAnswer.QuestionId == currentQuestion.id);
 
                                 // only change correct answers, the wrong answers can stay at 0
-                                if (userStatAnswer != null && userStatAnswer.PointsReceived != 0)
+                                if (userStatAnswer != null && userStatAnswer.PointsReceived != 0 && fastestTime != slowestTime)
                                 {
                                     var normalizedTime = (double)(userStatAnswer.TimeTaken - fastestTime) / (slowestTime - fastestTime);
                                     var points = (int)Math.Round(maxPoints - (normalizedTime * (maxPoints - minPoints)));
@@ -495,9 +563,11 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
             return false;
         }
 
-        // check if all users have answered the current question
-        return quizSession.State.UsersStats.All(stat =>
-            stat.Answers.Any(answer => answer.QuestionId == questionId));
+        // check if all currently connected users have answered the current question
+        List<string> connectedUserIds = this.GetConnectedPlayers(quizSessionId).Select(user => user.Id).ToList();
+        return quizSession.State.UsersStats
+            .Where(stat => connectedUserIds.Contains(stat.User.Id))
+            .All(stat => stat.Answers.Any(answer => answer.QuestionId == questionId));
     }
     
     /// <summary>
@@ -585,44 +655,113 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
         return state;
     }
     
-    public void AddQuizSessionSlaveConnection(QuizUser quizUser, string connectionId) => QuizSessionConnections.Add(quizUser.DeviceId, connectionId);
+    public void AddQuizSessionSlaveConnection(QuizUser quizUser, string connectionId, string quizSessionId)
+    {
+        if (!QuizSessionPlayers.ContainsKey(quizSessionId)) QuizSessionPlayers.Add(quizSessionId, new List<(QuizUser, string)>());
 
+        var connectionIndex = QuizSessionPlayers[quizSessionId]
+            .FindIndex(tuple => tuple.Item1.DeviceId == quizUser.DeviceId);
+        if (connectionIndex == -1)
+        {
+            QuizSessionPlayers[quizSessionId].Add((quizUser, connectionId));
+        }
+        else
+        {
+            QuizSessionPlayers[quizSessionId][connectionIndex] = (quizUser, connectionId);
+        }
+    }
+    
     /// <summary>
-    /// Get the quiz user based on the connection id
+    /// Get the quiz user for the connection id
     /// </summary>
     /// <param name="connectionId"></param>
     /// <returns></returns>
-    public QuizSessionUserStats? GetSlaveConnectionUser(string connectionId)
-    {   
-        var deviceId = QuizSessionConnections.FirstOrDefault(x => x.Value == connectionId).Key;
-        return QuizSessions
-            .SelectMany(kVp => kVp.Value.State.UsersStats)
-            .FirstOrDefault(userStats => userStats.User.DeviceId == deviceId);
+    public QuizUser? TryGetSlaveConnectionQuizUser(string connectionId)
+    {
+        foreach (var player in QuizSessionPlayers)
+        {
+            var foundTuple = player.Value.Find(tuple => tuple.Item2 == connectionId);
+            if (foundTuple != default)
+            {
+                return foundTuple.Item1; // quizUser
+            }
+        }
+        return null;
+    }
+    
+    /// <summary>
+    /// Get the connection id for the quiz user
+    /// </summary>
+    /// <param name="quizUser"></param>
+    /// <returns></returns>
+    public string? TryGetSlaveConnectionId(QuizUser quizUser)
+    {
+        foreach (var player in QuizSessionPlayers)
+        {
+            var foundTuple = player.Value.Find(tuple => tuple.Item1.Id == quizUser.Id && tuple.Item1.DeviceId == quizUser.DeviceId & tuple.Item1.Identifier == quizUser.Identifier);
+            if (foundTuple != default)
+            {
+                return foundTuple.Item2; // connection id
+            }
+        }
+        return null;
     }
 
     /// <summary>
-    /// Get the quiz session containing the quiz user connection id
+    /// Get the quiz session for the connected quizUser
     /// </summary>
-    /// <param name="connectionId"></param>
+    /// <param name="player"></param>
     /// <returns></returns>
-    public QuizSession GetSlaveConnectionQuizSession(string connectionId)
+    public QuizSession? GetSlaveConnectionQuizSession((QuizUser, string) player)
     {
-        var deviceId = QuizSessionConnections.FirstOrDefault(x => x.Value == connectionId).Key;
-        var quizSessionContainingQuizUser = 
-            QuizSessions.FirstOrDefault(kVp => 
-                kVp.Value.State.UsersStats.Any(val => val.User.DeviceId == deviceId)).Value;
+        var quizSessionId = QuizSessionPlayers.FirstOrDefault(x => x.Value.Contains(player)).Key;
+        return this.GetQuizSessionById(quizSessionId).Item1;
+    }
 
-        return quizSessionContainingQuizUser;
+    /// <summary>
+    /// Get a list of all the connected quizUsers
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <returns></returns>
+    public List<QuizUser> GetConnectedPlayers(string quizSessionId)
+    {
+        if (QuizSessionPlayers.TryGetValue(quizSessionId, out var playerList))
+        {
+            // first clean up players and remove those with an empty deviceid
+            QuizSessionPlayers[quizSessionId].RemoveAll(tuple => tuple.Item1.DeviceId == "");
+            // then return the list of connected players
+            return playerList.Select(tuple => tuple.Item1).ToList();
+        }
+        return new List<QuizUser>();
     }
 
     /// <summary>
     /// Remove a quiz session slave connection
     /// </summary>
-    /// <param name="connectionId"></param>
-    public void RemoveQuizSessionSlaveConnection(string connectionId)
+    /// <param name="quizSessionId"></param>
+    /// <param name="player"></param>
+    public void RemoveQuizSessionSlaveConnection(string quizSessionId, (QuizUser, string) player)
     {
-        var key = QuizSessionConnections.FirstOrDefault(kVp => kVp.Value == connectionId).Key;
-        QuizSessionConnections.Remove(key ?? "");
+        var playerTuple = QuizSessionPlayers[quizSessionId].Find(tuple => tuple.Item2 == player.Item2 &&
+                                                                          tuple.Item1.Id == player.Item1.Id &&
+                                                                          tuple.Item1.DeviceId == player.Item1.DeviceId &&
+                                                                          tuple.Item1.Identifier == player.Item1.Identifier);
+        QuizSessionPlayers[quizSessionId].Remove(playerTuple);
+    }
+
+    /// <summary>
+    /// Remove a quiz session slave connection without knowing the connection id
+    /// </summary>
+    /// <param name="quizSessionId"></param>
+    /// <param name="quizUser"></param>
+    public void RemoveQuizSessionSlaveConnectionWithoutConnectionId(string quizSessionId, QuizUser quizUser)
+    {
+        var connectionId = TryGetSlaveConnectionId(quizUser);
+
+        if (connectionId != null)
+        {
+            RemoveQuizSessionSlaveConnection(quizSessionId, (quizUser, connectionId));
+        }
     }
 
     /// <summary>
