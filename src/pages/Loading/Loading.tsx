@@ -24,7 +24,7 @@ export interface LoadingPageProps {
 export const LoadingPage: FC<LoadingPageProps> = ({hasBottomNavBar, secondaryButtonText, secondaryButtonIcon, primaryButtonText, primaryButtonIcon, type, onPrimaryClick, onSecondaryClick, alternativeSecondaryButtonStyle, alternativePrimaryButtonStyle}) => {
     return (
         <div className="loadingPage">
-            <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary : BackgroundGemsType.PrimarySlave}/>
+            <BackgroundGems type={BackgroundGemsType.Primary}/>
 
             <Loading/>
 

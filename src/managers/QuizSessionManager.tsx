@@ -2,13 +2,16 @@ import QuizSession, {quizSessionsAreEqual} from "../models/QuizSession.ts";
 import {Quiz, quizzesAreEqual} from "../models/Quiz.ts";
 import * as SignalR from "@microsoft/signalr";
 import QuizUser from "../models/QuizUser.ts";
-import {v4 as uuid} from "uuid";
 import {getDeviceId} from "../helper/DeviceHelper.ts";
 import {Question} from "../models/Question.ts";
 import QuizSessionUserStats from "../models/QuizSessionUserStats.ts";
 import {isEqualNullable} from "../helper/EqualHelpers.ts";
 import {AuthenticatedUser, authUsersAreEqual} from "../models/AuthenticatedUser.ts";
 import QuizSessionService from "../services/QuizSessionService.ts";
+import {BottomNavBarType} from "../components/BottomNavBar/BottomNavBarExports.ts";
+import {PLAY_ICON_LIGHT} from "../assets/Icons.ts";
+import {PopupProps} from "../components/Popup/Popup.tsx";
+import {NavigateFunction} from "react-router-dom";
 
 export interface QuizSessionManagerInterface {
     quizSession: QuizSession | null;
@@ -16,6 +19,7 @@ export interface QuizSessionManagerInterface {
     quizCode: string;
     connection: SignalR.HubConnection | null;
     host: AuthenticatedUser | null;
+    connectedPlayers: QuizUser[];
     quizState: string | null;
     currentQuestionId: string | null;
     currentQuestion: Question | null;
@@ -26,6 +30,7 @@ export interface QuizSessionManagerInterface {
     sessionExists: boolean;
     canSendReport: boolean;
     remainingTime: number;
+    errorGettingSession: boolean;
 }
 
 export class QuizSessionManager implements QuizSessionManagerInterface {
@@ -36,7 +41,9 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     private _connection: SignalR.HubConnection | null = null;
     private _canSendReport: boolean = true;
     private _host: AuthenticatedUser | null = null;
+    private _connectedPlayers: QuizUser[] = []
     private _remainingTime: number = 0;
+    private _errorGettingSession: boolean = false;
 
     private subscribers: ((quizSessionManager: QuizSessionManager) => void)[] = [];
 
@@ -57,6 +64,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             quizCode: instance.quizCode,
             connection: instance.connection,
             host: instance.host,
+            connectedPlayers: instance.connectedPlayers,
             quizState: instance.quizState,
             currentQuestionId: instance.currentQuestionId,
             currentQuestion: instance.currentQuestion,
@@ -67,6 +75,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             sessionExists: instance.sessionExists,
             canSendReport: instance.canSendReport,
             remainingTime: instance.remainingTime,
+            errorGettingSession: instance.errorGettingSession
         }
     }
 
@@ -98,8 +107,14 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     public get host(): AuthenticatedUser | null {
         return this._host;
     }
+    public get connectedPlayers(): QuizUser[] {
+        return this._connectedPlayers;
+    }
     public get remainingTime(): number {
         return this._remainingTime;
+    }
+    public get errorGettingSession(): boolean {
+        return this._errorGettingSession;
     }
     public get quizState(): string | null {
         if (this._quizSession == null) return null
@@ -184,20 +199,31 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         this._host = host;
         this.notifySubscribers()
     }
+    public set errorGettingSession(errorGettingSession: boolean) {
+        this._errorGettingSession = errorGettingSession
+        this.notifySubscribers()
+    }
 
     // functions
     public killSession(): void {
         // kill session on the server
-        this._connection?.send("NotifyKillQuiz", this._quizSession?.id)
-
+        this._connection?.send("NotifyKillQuiz", this._quizSession?.id);
+        this.resetManager()
+    }
+    public resetManager(): void {
         this._quizSession = null;
         this._quiz = null;
         this._quizCode = "";
         this._connection = null;
         this._host = null;
+        this._connectedPlayers = [];
         this._canSendReport = true;
         this._remainingTime = 0;
+        this._errorGettingSession = false;
         this.notifySubscribers()
+
+        localStorage.removeItem('quizSessionId');
+        localStorage.removeItem('quizId');
     }
     public changeState(newState: string): void {
         this._connection?.send("NotifyStateChange", this._quizSession?.id, newState)
@@ -216,12 +242,18 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     public async setUp(quizSessionId: string, host: AuthenticatedUser, quiz: Quiz): Promise<void> {
         this._quiz = quiz
         this._host = host
-        this._connection = await this.initSignalR(quizSessionId, "userId1")
+        this._connection = await this.initSignalR(quizSessionId, host)
         this.notifySubscribers();
+
+        // save the quizsession id and the quiz id in the localstorage to let host reconnect on same device
+        localStorage.setItem('quizSessionId', quizSessionId);
+        localStorage.setItem('quizId', quiz.id);
     }
-    private async initSignalR(quizSessionId: string, hostUserId: string): Promise<SignalR.HubConnection> {
+    private async initSignalR(quizSessionId: string, host: AuthenticatedUser): Promise<SignalR.HubConnection> {
         // start websocket connection
         const url: string = QuizSessionService.url
+
+        const hostUserId = "quizSessionHost0123456" // will be the same for each host of each quiz session, but each host will only listen to the messages from the backend for its own quiz. this id is one character longer than the character limit for player nicknames, so any possible confusions in the future are prevented. we could use the actual id of the host (host.id) instead of this default value, but that would mean more changes in the backend which are not really necessary
 
         const connection: SignalR.HubConnection = new SignalR.HubConnectionBuilder()
             .withUrl(url + "/master", {
@@ -230,43 +262,49 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             })
             .build();
 
-        connection.on(hostUserId, (quizEntryId: string, message: QuizSession) => {
+        connection.on(`sessionrequest:${quizSessionId}/${hostUserId}`, (quizEntryId: string, message: QuizSession, connectedPlayers: QuizUser[]) => {
             this._quizCode = quizEntryId
             this._quizSession = message
+            this._connectedPlayers = connectedPlayers
             this.notifySubscribers()
         })
+        connection.on(`nosession:${quizSessionId}/${hostUserId}`, () => {
+            this._errorGettingSession = true
+            this.resetManager()
+        })
 
-        connection.on(`statechange:${hostUserId}`, (state: string, currentQuestionId: string) => {
+        connection.on(`statechange:${quizSessionId}/${hostUserId}`, (state: string, currentQuestionId: string) => {
             if (this._quizSession == null) return
             this._quizSession = ({...this._quizSession, state: {...this._quizSession.state, currentQuizState: state, currentQuestionId: currentQuestionId}});
             this.notifySubscribers()
         })
 
-        connection.on(`questionend:${hostUserId}`, (quizUserStats: QuizSessionUserStats[], state: string) => {
+        connection.on(`questionend:${quizSessionId}/${hostUserId}`, (quizUserStats: QuizSessionUserStats[], state: string) => {
             if (this._quizSession == null) return
             this._quizSession = {...this._quizSession, state: {...this._quizSession.state, currentQuizState: state, usersStats: quizUserStats}}
             this._remainingTime = 0
             this.notifySubscribers()
         })
 
-        connection.on(`answer:${hostUserId}`, (quizUserStats: QuizSessionUserStats[]) => {
+        connection.on(`answer:${quizSessionId}/${hostUserId}`, (quizUserStats: QuizSessionUserStats[]) => {
             if (this._quizSession == null) return
             this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
             this.notifySubscribers()
         })
 
-        connection.on(`timerchange:${hostUserId}`, (remainingSeconds: number) => {
+        connection.on(`timerchange:${quizSessionId}/${hostUserId}`, (remainingSeconds: number) => {
             this._remainingTime = remainingSeconds
             this.notifySubscribers()
         })
 
-        connection.on(`userjoined:${hostUserId}`, (quizUserStats: QuizSessionUserStats[]) => {
+        connection.on(`userchange:${quizSessionId}/${hostUserId}`, (quizUserStats: QuizSessionUserStats[], connectedPlayers: QuizUser[]) => {
             if (this._quizSession == null) return
             this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
+            this._connectedPlayers = connectedPlayers
             this.notifySubscribers()
         })
 
-        connection.on(`canResendReport:${hostUserId}`, () => {
+        connection.on(`canResendReport:${quizSessionId}/${hostUserId}`, () => {
             this._canSendReport = true
             this.notifySubscribers()
         })
@@ -274,13 +312,19 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         connection.start()
             .then(async () => {
                 const quizUser: QuizUser = {
-                    id: uuid(),
+                    id: host.id,
                     identifier: hostUserId,
                     deviceId: await getDeviceId()
                 }
                 connection.send("requestQuizSession", quizUser, quizSessionId)
             })
             .catch((err) => console.error(err))
+
+        connection.onclose((error: Error | undefined) => {
+            console.error('SignalR connection closed. ', error);
+            this._errorGettingSession = true
+            this.notifySubscribers()
+        })
 
         return connection
     }
@@ -294,5 +338,32 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     }
     public unsubscribe(callback: (quizSessionManager: QuizSessionManager) => void) {
         this.subscribers = this.subscribers.filter(subscriber => subscriber !== callback);
+    }
+
+    // static methods
+    public static async checkReconnectionMaster(hostId: string, setPopupProps: (value: React.SetStateAction<PopupProps | null>) => void, setShowingPopup: (value: React.SetStateAction<boolean>) => void, navigate: NavigateFunction) {
+        const quizSession: QuizSession | null = await QuizSessionService.checkHostReconnection(hostId)
+
+        if (quizSession != null) {
+            console.log("Got reconnect")
+            setPopupProps({
+                title: "Do you want to reconnect?",
+                message: `Your quiz session is still running.`,
+                type: BottomNavBarType.Default,
+                onPrimaryClick: () => {
+                    QuizSessionManager.getInstance().resetManager();
+                    navigate('/quiz', {state: {quizSessionId: quizSession.id, quizId: quizSession.quizId}})
+                },
+                primaryButtonText: "Reconnect",
+                primaryButtonIcon: PLAY_ICON_LIGHT,
+                onSecondaryClick: () => {
+                    setShowingPopup(false);
+                    setPopupProps(null);
+                },
+                secondaryButtonText: "Cancel",
+                secondaryButtonIcon: null
+            })
+            setShowingPopup(true)
+        }
     }
 }

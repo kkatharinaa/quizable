@@ -10,12 +10,15 @@ import {Popup, PopupProps} from "../../../components/Popup/Popup.tsx";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
 import QuizSessionService from "../../../services/QuizSessionService.ts";
 import {v4 as uuid} from "uuid";
-import {getDeviceId} from "../../../helper/DeviceHelper.ts";
 import QuizSession from "../../../models/QuizSession.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
-import {LEAVE_ICON_DARK} from "../../../assets/Icons.ts";
-import {ErrorPageLinkedTo, showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
+import {LEAVE_ICON_DARK, PLAY_ICON_LIGHT} from "../../../assets/Icons.ts";
+import {
+    ErrorPageLinkedTo,
+    showErrorPageScreenNotSupported,
+    showErrorPageSomethingWentWrong
+} from "../../ErrorPage/ErrorPageExports.ts";
 import {quizOptionsAreEqual} from "../../../models/QuizOptions.ts";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 import {auth, logInWithEmailLink, logOutUser} from "../../../firebase/auth.ts";
@@ -67,7 +70,7 @@ export const CreateOverview: FC = () => {
         // redirect if the screen is too narrow
         const handleResize = () => {
             if (window.innerWidth <= 768) {
-                navigate('/')
+                showErrorPageScreenNotSupported(navigate)
             }
         };
         handleResize();
@@ -90,10 +93,13 @@ export const CreateOverview: FC = () => {
         showPopupForQuery()
     }, [quizzes]);
     useEffect(() => {
-        if (!user && isSetUp && !showingPopup) navigate("/login");
+        if (!loading && !user && isSetUp && !showingPopup) navigate("/login");
         if (user && isSetUp && !showingPopup) {
             navigate("/overview");
             setQuizzesFromFirestore(user.uid)
+                .then(() => {
+                    QuizSessionManager.checkReconnectionMaster(user.uid, setPopupProps, setShowingPopup, navigate)
+                })
         }
         if (error) console.log(error)
     }, [user, loading, navigate]);
@@ -123,34 +129,59 @@ export const CreateOverview: FC = () => {
         setShowingQuizSettingsPopup(true)
     };
     const handlePlayQuiz = async (id: string) => {
-        const quizToBePlayed: Quiz | undefined = findQuizByID(id)
-        if (quizToBePlayed == undefined) {
-            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
-            return
+        const playQuiz = async () => {
+            const quizToBePlayed: Quiz | undefined = findQuizByID(id)
+            if (quizToBePlayed == undefined || user == undefined) {
+                showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+                return
+            }
+
+            // create a new quiz session
+            const quizSessionPlay: QuizSession = {
+                id: uuid(),
+                quizId: quizToBePlayed!.id,
+                hostId: user?.uid,
+                state: {
+                    currentQuestionId: quizToBePlayed!.questions[0].id,
+                    usersStats: [ /**keep it empty at the beginning */],
+                    currentQuizState: "lobby"
+                },
+            };
+
+            QuizSessionManager.getInstance().resetManager()
+
+            // send the quiz session to the backend
+            await QuizSessionService.addSession(quizSessionPlay)
+
+            // send the quiz data to the backend too
+            await QuizSessionService.addQuestionsToSession(quizSessionPlay.id,quizToBePlayed.questions);
+
+            // navigate to the lobby page
+            navigate('/quiz', {state: {quizSessionId: quizSessionPlay.id, quizId: quizToBePlayed!.id}})
         }
 
-        // create a new quiz session
-        const quizSessionPlay: QuizSession = {
-            id: uuid(),
-            quizId: quizToBePlayed!.id, 
-            deviceId: await getDeviceId(),
-            state: {
-                currentQuestionId: quizToBePlayed!.questions[0].id,
-                usersStats: [ /**keep it empty at the beginning */],
-                currentQuizState: "lobby"
+        // warn user if another session is already running, or else just start a new session
+        if (user == undefined) return await playQuiz()
+        const quizSession: QuizSession | null = await QuizSessionService.checkHostReconnection(user.uid)
+        if (quizSession == null) return await playQuiz()
+
+        setPopupProps({
+            title: "You still have another quiz session running.",
+            message: "Do you want to proceed with starting a new quiz session? This will end the session which is still running.",
+            type: BottomNavBarType.Default,
+            onPrimaryClick: () => {
+                playQuiz()
             },
-        };
-
-        QuizSessionManager.getInstance().killSession()
-
-        // send the quiz session to the backend
-        await QuizSessionService.addSession(quizSessionPlay)
-
-        // send the quiz data to the backend too
-        await QuizSessionService.addQuestionsToSession(quizSessionPlay.id,quizToBePlayed.questions);
-
-        // navigate to the lobby page
-        navigate('/quiz', {state: {quizSessionId: quizSessionPlay.id, quizId: quizToBePlayed!.id}})
+            primaryButtonText: "Start New Session",
+            primaryButtonIcon: PLAY_ICON_LIGHT,
+            onSecondaryClick: () => {
+                setShowingPopup(false);
+                setPopupProps(null);
+            },
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null
+        })
+        setShowingPopup(true)
     };
 
     //quiz settings popup functions

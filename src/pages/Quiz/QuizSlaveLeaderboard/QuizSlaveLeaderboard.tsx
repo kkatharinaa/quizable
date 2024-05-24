@@ -29,7 +29,7 @@ export const QuizSlaveLeaderboard: FC<QuizSlaveChildrenProps> = ({leaveQuizSessi
 
     return (
         <div className="quizSlaveLeaderboard">
-            <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary2 : BackgroundGemsType.PrimarySlave2}/>
+            <BackgroundGems type={BackgroundGemsType.Primary2}/>
             { showComponent &&
             <div className="content">
                 <h1>Your Score</h1>

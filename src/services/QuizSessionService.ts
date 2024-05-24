@@ -5,9 +5,9 @@ import QuizUser from "../models/QuizUser";
 
 export default class QuizSessionService{
    
-    // static port: number = 5296
-    // static url: string = `http://localhost:${this.port}`
-    static url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+    static port: number = 5296
+    static url: string = `http://localhost:${this.port}`
+    //static url: string = `https://quizapp-rueasghvla-nw.a.run.app`
 
     public static async addSession(quizSession: QuizSession): Promise<string> {
         return (await fetch(`${this.url}/api/session`, 
@@ -38,26 +38,40 @@ export default class QuizSessionService{
         return {valid: textReturn != "Code is not valid.", sessionId: textReturn};
     }
 
-    public static async checkQuizUserAlreadyExists(quizSessionId: string, quizUserIdentifier: string): Promise<boolean> {
+    public static async checkQuizUserAlreadyExists(quizSessionId: string, quizUserIdentifier: string): Promise<{userExists: boolean, user?: QuizUser, status: number}> {
         const quizUserExistResponse: Response = await (
             await fetch(`${this.url}/api/session/user/${quizSessionId}/${quizUserIdentifier}`)
         )
 
-        if(quizUserExistResponse.status == 404){
-            return false;  
+        // Bad request
+        if (quizUserExistResponse.status === 400) { // bad request
+            return { userExists: false, status: 400 };
+        } else if (quizUserExistResponse.status === 409) { // conflict - quizuser exists already
+            return { userExists: true, status: 409 };
+        } else if (quizUserExistResponse.status === 200) { // ok - either comes with a quizuser when that user is disconnected and can be reclaimed, or doesn't when the user is completely free
+            try {
+                const quizUser: QuizUser = await quizUserExistResponse.json();
+                return { userExists: true, user: quizUser, status: 200 };
+            } catch (error) {
+                return { userExists: false, status: 200 };
+            }
+        } else {
+            throw new Error('Unexpected response status: ' + quizUserExistResponse.status);
         }
-        else if (quizUserExistResponse.status == 400)
-            return false;
-                
-        return true;
     }
 
-    public static async getSession(): Promise<QuizSession>{
+    public static async getSession(): Promise<QuizSession> {
         return await (await fetch(`${this.url}/api/session`)).json()
     }
 
-    public static async checkQuizUserReconnection(deviceId: string) : Promise<{quizUser: QuizUser, quizSession: QuizSession}|null> {
+    public static async checkQuizUserReconnection(deviceId: string): Promise<{quizUser: QuizUser, quizSession: QuizSession}|null> {
         return fetch(`${this.url}/api/session/device/${deviceId}`)
+            .then((text) => text.json())
+            .catch(() => null)
+    }
+
+    public static async checkHostReconnection(hostId: string): Promise<QuizSession|null> {
+        return fetch(`${this.url}/api/session/host/${hostId}`)
             .then((text) => text.json())
             .catch(() => null)
     }

@@ -60,7 +60,7 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionMan
                 <div className="answersGroup">
                     <div className="answersInfo">
                         <img src={USER_ICON_LIGHT.path} alt={USER_ICON_LIGHT.alt}/>
-                        <p>{`${playerCount()}/${quizSessionManager.userStats?.length ?? "?"} answered`}</p>
+                        <p>{`${playerCount()}/${quizSessionManager.connectedPlayers.length} answered`}</p>
                     </div>
                     <div className="answersContainer">
                         {currentQuestion?.answers.map((item, index) => (

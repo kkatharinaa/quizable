@@ -10,8 +10,8 @@ export const getErrorPageLinkedTo = (value: string): ErrorPageLinkedTo | undefin
     return Object.values(ErrorPageLinkedTo).find((key) => ErrorPageLinkedTo[key] === value) as ErrorPageLinkedTo;
 }
 
-export const showErrorQuizSessionNotRunning = (navigate: NavigateFunction, isHost: boolean) => {
-    const message = isHost ? "You are currently not in an active quiz session. Start playing a quiz from your quizzes overview screen." : "You are not logged in."
+export const showErrorQuizSession = (navigate: NavigateFunction, isHost: boolean) => {
+    const message = "There was an error connecting to the server and getting the quiz session."
     const linkTo = isHost ? ErrorPageLinkedTo.Overview : ErrorPageLinkedTo.Home;
     showErrorPage(navigate, message, linkTo)
 }
@@ -27,6 +27,10 @@ export const showErrorPageNothingToFind = (navigate: NavigateFunction, linkTo?: 
 }
 export const showErrorPageSomethingWentWrong = (navigate: NavigateFunction, linkTo?: ErrorPageLinkedTo) => {
     const message = "Looks like something went wrong. Please try again later or contact us if the issue persists."
+    showErrorPage(navigate, message, linkTo ?? ErrorPageLinkedTo.Home)
+}
+export const showErrorPageScreenNotSupported = (navigate: NavigateFunction, linkTo?: ErrorPageLinkedTo) => {
+    const message = "The screen you tried to view is not supported for your screen width."
     showErrorPage(navigate, message, linkTo ?? ErrorPageLinkedTo.Home)
 }
 

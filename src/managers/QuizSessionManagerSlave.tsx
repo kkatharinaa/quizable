@@ -6,6 +6,7 @@ import QuizSessionUserStats from "../models/QuizSessionUserStats.ts";
 import {isEqualNullable} from "../helper/EqualHelpers.ts";
 import {Answer} from "../models/Answer.ts";
 import QuizSessionService from "../services/QuizSessionService.ts";
+import {QuizState} from "../models/QuizSessionState.ts";
 
 export interface QuizSessionManagerSlaveInterface {
     quizSession: QuizSession | null;
@@ -17,6 +18,7 @@ export interface QuizSessionManagerSlaveInterface {
     sessionExists: boolean;
     quizUser: QuizUser | null;
     remainingTime: number;
+    errorGettingSession: boolean;
 }
 
 export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface {
@@ -26,6 +28,7 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
     private _connection: SignalR.HubConnection | null = null;
     private _quizUser: QuizUser | null = null;
     private _remainingTime: number = 0;
+    private _errorGettingSession: boolean = false
 
     private subscribers: ((quizSessionManagerSlave: QuizSessionManagerSlave) => void)[] = [];
 
@@ -49,7 +52,8 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
             userStats: instance.userStats,
             sessionExists: instance.sessionExists,
             quizUser: instance.quizUser,
-            remainingTime: instance.remainingTime
+            remainingTime: instance.remainingTime,
+            errorGettingSession: instance.errorGettingSession
         }
     }
 
@@ -96,6 +100,9 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
     public get remainingTime(): number {
         return this._remainingTime;
     }
+    public get errorGettingSession(): boolean {
+        return this._errorGettingSession;
+    }
 
     // setters
     public set quizSession(quizSession: QuizSession) {
@@ -114,15 +121,28 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
         this._quizUser = quizUser;
         this.notifySubscribers()
     }
+    public set errorGettingSession(errorGettingSession: boolean) {
+        this._errorGettingSession = errorGettingSession;
+        this.notifySubscribers()
+    }
 
     // functions
     public killSession(): void {
-        // TODO: kill connection to session on the server
+        // kill connection to session on the server
+        this._connection?.send("LeaveQuizSession", this._quizUser, this._quizSession?.id, true);
+        this.resetManager()
+    }
+    private resetManager(): void {
+        if (this.quizState == QuizState.lobby) {
+            localStorage.removeItem('quizSessionId');
+            localStorage.removeItem('quizUser');
+        }
 
         this._quizSession = null;
         this._currentQuestion = null;
         this._connection = null;
         this._quizUser = null;
+        this._errorGettingSession = false;
         this.notifySubscribers()
     }
     public selectAnswer(answer: Answer): void {
@@ -132,6 +152,10 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
         this._connection = await this.initSignalR(quizSessionId, quizUser)
         this._quizUser = quizUser;
         this.notifySubscribers();
+
+        // save the quizsession id and the username in the localstorage to let host reconnect on same device
+        localStorage.setItem('quizSessionId', quizSessionId);
+        localStorage.setItem('quizUser', JSON.stringify(quizUser));
     }
     private async initSignalR(quizSessionId: string, quizUser: QuizUser): Promise<SignalR.HubConnection> {
         // start websocket connection
@@ -144,31 +168,43 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
             })
             .build();
 
-        connection.on(quizUser.identifier, (message: QuizSession) => {
+        connection.on(`sessionrequest:${quizSessionId}/${quizUser.identifier}`, (message: QuizSession, currentQuestion: Question) => {
             this._quizSession = message
+            this._currentQuestion = currentQuestion
             this.notifySubscribers()
         })
+        connection.on(`nosession:${quizSessionId}/${quizUser.identifier}`, () => {
+            this._errorGettingSession = true
+            this.resetManager()
+        })
 
-        connection.on(`statechange:${quizUser.identifier}`, (state: string, currentQuestion: Question) => {
+        connection.on(`statechange:${quizSessionId}/${quizUser.identifier}`, (state: string, currentQuestion: Question) => {
+            console.log("state change")
             if (this._quizSession == null) return
             this._quizSession = {...this._quizSession, state: {...this._quizSession.state, currentQuizState: state, currentQuestionId: currentQuestion.id}};
             this._currentQuestion = currentQuestion
             this.notifySubscribers()
         })
 
-        connection.on(`questionend:${quizUser.identifier}`, (quizUserStats: QuizSessionUserStats[], state: string) => {
+        connection.on(`questionend:${quizSessionId}/${quizUser.identifier}`, (quizUserStats: QuizSessionUserStats[], state: string) => {
             if (this._quizSession == null) return
             this._quizSession = ({...this._quizSession, state: {...this._quizSession.state, currentQuizState: state, usersStats: quizUserStats}})
             this.notifySubscribers()
         })
 
-        connection.on(`userjoined:${quizUser.identifier}`, (quizUserStats: QuizSessionUserStats[]) => {
+        connection.on(`answer:${quizSessionId}/${quizUser.identifier}`, (quizUserStats: QuizSessionUserStats[]) => {
             if (this._quizSession == null) return
             this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
             this.notifySubscribers()
         })
 
-        connection.on(`timerchange:${quizUser.identifier}`, (remainingSeconds: number) => {
+        connection.on(`userchange:${quizSessionId}/${quizUser.identifier}`, (quizUserStats: QuizSessionUserStats[]) => {
+            if (this._quizSession == null) return
+            this._quizSession = {...this._quizSession, state: {...this._quizSession.state, usersStats: quizUserStats}}
+            this.notifySubscribers()
+        })
+
+        connection.on(`timerchange:${quizSessionId}/${quizUser.identifier}`, (remainingSeconds: number) => {
             this._remainingTime = remainingSeconds
             this.notifySubscribers()
         })
@@ -182,6 +218,12 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
                     })
             })
             .catch((err) => console.error(err))
+
+        connection.onclose((error: Error | undefined) => {
+            console.error('SignalR connection closed. ', error);
+            this._errorGettingSession = true
+            this.notifySubscribers()
+        })
 
         return connection
     }

@@ -6,10 +6,18 @@ import {BackgroundGemsType} from "../../components/BackgroundGems/BackgroundGems
 import "./Join.css"
 import {useNavigate, useSearchParams} from "react-router-dom";
 import QuizSessionService from "../../services/QuizSessionService";
-import {RETURN_ICON_DARK} from "../../assets/Icons.ts";
+import {PLAY_ICON_LIGHT, RETURN_ICON_DARK} from "../../assets/Icons.ts";
 import {InputField} from "../../components/InputField/InputField.tsx";
 import {InputFieldType} from "../../components/InputField/InputFieldExports.ts";
 import {QuizSessionManagerSlave} from "../../managers/QuizSessionManagerSlave.tsx";
+import QuizUser from "../../models/QuizUser.ts";
+import {getDeviceId} from "../../helper/DeviceHelper.ts";
+import {v4 as uuid} from "uuid";
+import {Popup, PopupProps} from "../../components/Popup/Popup.tsx";
+import QuizSession from "../../models/QuizSession.ts";
+import {useAuthState} from "react-firebase-hooks/auth";
+import {auth} from "../../firebase/auth.ts";
+import {QuizSessionManager} from "../../managers/QuizSessionManager.tsx";
 
 interface ValidationState {
     valid: boolean, 
@@ -34,6 +42,9 @@ export const Join: FC = () => {
         code: "",
         quizSessionId: ""
     });
+    const [user, loading, error] = useAuthState(auth); // only required for checking if user is host of quiz
+    const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
+    const [showingPopup, setShowingPopup] = useState(false);
 
     const navigateHome = () => {
         navigate("/");
@@ -45,15 +56,46 @@ export const Join: FC = () => {
             // make request to QuizService if code exists
             const quizSessionCodeValid = await QuizSessionService.isQuizCodeValid(inputValue)
             if(quizSessionCodeValid.valid){
-                setValidQuizCode({
-                    code: inputValue,
-                    quizSessionId: quizSessionCodeValid.sessionId
-                })
-                setInputValue("")
+                // check if we are already logged in and if yes forward the user to the quiz
+                const storedQuizUser: QuizUser | null = localStorage.getItem("quizUser") ? JSON.parse(localStorage.getItem("quizUser")!) : null;
+                const deviceId: string = storedQuizUser?.deviceId ?? await getDeviceId();
+                const reconnect: {quizUser: QuizUser, quizSession: QuizSession} | null = await QuizSessionService.checkQuizUserReconnection(deviceId)
+
+                if (reconnect) {
+                    setPopupProps({
+                        title: "You are already in this quiz session.",
+                        message: `This device is currently connected as "${reconnect.quizUser.identifier}".`,
+                        type: BottomNavBarType.Default,
+                        onPrimaryClick: () => {
+                            QuizSessionManagerSlave.getInstance().killSession()
+                            navigate("/quiz/player", {
+                                state: {
+                                    quizSessionId: reconnect.quizSession.id,
+                                    quizUser: reconnect.quizUser
+                                }
+                            })
+                        },
+                        primaryButtonText: "Reconnect",
+                        primaryButtonIcon: PLAY_ICON_LIGHT,
+                        onSecondaryClick: () => {
+                            setShowingPopup(false);
+                            setPopupProps(null);
+                        },
+                        secondaryButtonText: "Cancel",
+                        secondaryButtonIcon: null,
+                    })
+                    setShowingPopup(true)
+                } else {
+                    setValidQuizCode({
+                        code: inputValue,
+                        quizSessionId: quizSessionCodeValid.sessionId
+                    })
+                    setInputValue("")
+                }
             } else {
                 const newValidationState = {
                     valid: false,
-                    validationText: "Quiz code is invalid, no quiz session found!"
+                    validationText: "Quiz code is invalid, no quiz session found."
                 }
                 setValidation(newValidationState)
             }
@@ -69,16 +111,44 @@ export const Join: FC = () => {
     }
 
     const joinQuiz = async () => {
-        const userExists: boolean = await QuizSessionService.checkQuizUserAlreadyExists(validQuizCode.quizSessionId,inputValue);
+        const response = await QuizSessionService.checkQuizUserAlreadyExists(validQuizCode.quizSessionId,inputValue);
 
-        if(!userExists) {
-            QuizSessionManagerSlave.getInstance().killSession()
-            navigate("/quiz/player", {state: {quizSessionId: validQuizCode.quizSessionId, userName: inputValue}})
+        if(response.status == 200) {
+            const quizUser: QuizUser = {
+                id: response.user != undefined ? response.user.id : uuid(),
+                identifier: response.user != undefined ? response.user.identifier : inputValue,
+                deviceId: await getDeviceId()
+            }
+            const joinSession = () => {
+                QuizSessionManagerSlave.getInstance().killSession()
+                navigate("/quiz/player", {state: {quizSessionId: validQuizCode.quizSessionId, quizUser: quizUser}})
+            }
+            if (response.user != undefined) {
+                setPopupProps({
+                    title: `Are you trying to rejoin the session as "${response.user.identifier}"?`,
+                    message: `If you originally joined as this user and are trying to reconnect, please proceed. If this is your first time joining this session, please choose another username.`,
+                    type: BottomNavBarType.Default,
+                    onPrimaryClick: () => {
+                        joinSession()
+                    },
+                    primaryButtonText: "Reconnect",
+                    primaryButtonIcon: PLAY_ICON_LIGHT,
+                    onSecondaryClick: () => {
+                        setShowingPopup(false);
+                        setPopupProps(null);
+                    },
+                    secondaryButtonText: "Cancel",
+                    secondaryButtonIcon: null
+                })
+                setShowingPopup(true)
+            } else {
+                joinSession()
+            }
         }
         else {
             setValidation({
                 valid: false,
-                validationText: "Username is already given!"
+                validationText: "This username is already taken."
             })
         }
     }
@@ -116,7 +186,7 @@ export const Join: FC = () => {
         if(invalidChars.test(text)){
             newValidationState = {
                 valid: false, 
-                validationText: "Quiz code is invalid, no special characters allowed!"
+                validationText: "Quiz code is invalid, no special characters allowed."
             }
         }
 
@@ -142,13 +212,83 @@ export const Join: FC = () => {
         }
     }
 
+    const checkReconnectionMaster = async (hostId: string) => {
+        const quizSession: QuizSession | null = await QuizSessionService.checkHostReconnection(hostId)
+
+        if (quizSession != null) {
+            setPopupProps({
+                title: "You currently cannot join a new quiz session.",
+                message: `Your own quiz session is still running. End it first before trying again.`,
+                type: BottomNavBarType.Default,
+                onPrimaryClick: () => {
+                    QuizSessionManager.getInstance().resetManager();
+                    navigate('/quiz', {state: {quizSessionId: quizSession.id, quizId: quizSession.quizId}})
+                },
+                primaryButtonText: "To My Session",
+                primaryButtonIcon: PLAY_ICON_LIGHT,
+                onSecondaryClick: () => {
+                    setShowingPopup(false);
+                    setPopupProps(null);
+                    navigateHome()
+                },
+                secondaryButtonText: "To Home",
+                secondaryButtonIcon: null
+            })
+            setShowingPopup(true)
+        }
+    }
+
+    const checkReconnectionSlave = async () => {
+        const quizUser: QuizUser | null = localStorage.getItem("quizUser") ? JSON.parse(localStorage.getItem("quizUser")!) : null;
+        const deviceId: string = quizUser?.deviceId ?? await getDeviceId();
+        const reconnect: {
+            quizUser: QuizUser,
+            quizSession: QuizSession
+        } | null = await QuizSessionService.checkQuizUserReconnection(deviceId)
+
+        if (reconnect) {
+            setPopupProps({
+                title: "Do you want to reconnect?",
+                message: `This device was connected as "${reconnect.quizUser.identifier}" in a quiz. To join a new quiz, please reconnect and then leave the old one.`,
+                type: BottomNavBarType.Default,
+                onPrimaryClick: () => {
+                    QuizSessionManagerSlave.getInstance().killSession()
+                    navigate("/quiz/player", {
+                        state: {
+                            quizSessionId: reconnect.quizSession.id,
+                            quizUser: reconnect.quizUser
+                        }
+                    })
+                },
+                primaryButtonText: "Reconnect",
+                primaryButtonIcon: PLAY_ICON_LIGHT,
+                onSecondaryClick: () => {
+                    setShowingPopup(false);
+                    setPopupProps(null);
+                    navigateHome()
+                },
+                secondaryButtonText: "To Home",
+                secondaryButtonIcon: null
+            })
+            setShowingPopup(true)
+        }
+    }
+
     useEffect(() => {
-        checkEntryIdPresent()
+        const setUp = async () => {
+            await checkReconnectionSlave()
+            await checkEntryIdPresent()
+        }
+        setUp()
     }, [])
+    useEffect(() => {
+        if (!loading && user) checkReconnectionMaster(user.uid)
+        if (error) console.log(error)
+    }, [user, loading, navigate]);
 
     return (
         <div className="joinPage">
-            <BackgroundGems type={window.innerWidth > 480 ? BackgroundGemsType.Primary : BackgroundGemsType.PrimarySlave}></BackgroundGems>
+            <BackgroundGems type={BackgroundGemsType.Primary}></BackgroundGems>
             <div className="contentJoin">
                 <div className="inputFieldWithValidationText">
                     <InputField
@@ -173,6 +313,20 @@ export const Join: FC = () => {
                 onPrimaryClick={validQuizCode.code.length == 0 ? validateQuizCode : joinQuiz}
                 onSecondaryClick={navigateHome}
             />
+
+            {(showingPopup && popupProps != null) &&
+                <Popup
+                    title={popupProps.title}
+                    message={popupProps.message}
+                    secondaryButtonText={popupProps.secondaryButtonText}
+                    secondaryButtonIcon={popupProps.secondaryButtonIcon}
+                    primaryButtonText={popupProps.primaryButtonText}
+                    primaryButtonIcon={popupProps.primaryButtonIcon}
+                    type={popupProps.type}
+                    onSecondaryClick={popupProps.onSecondaryClick}
+                    onPrimaryClick={popupProps.onPrimaryClick}
+                />
+            }
         </div>
     )
 }

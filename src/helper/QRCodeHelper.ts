@@ -18,6 +18,6 @@ export default class QRCodeHelper {
 
         console.log(link)
 
-        QRCode.toCanvas(canvasEl, link, { width: options.width, margin: 0, color:{light:"#FFF3F7"} })
+        QRCode.toCanvas(canvasEl, link, { width: options.width, margin: 2, color:{dark: "#450027", light:"#FFF3F7"} })
     }
 }

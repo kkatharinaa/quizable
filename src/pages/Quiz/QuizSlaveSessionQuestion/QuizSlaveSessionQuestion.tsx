@@ -51,10 +51,15 @@ export const QuizSlaveSessionQuestion: FC<QuizSlaveChildrenProps> = ({leaveQuizS
         setRemainingTime(quizSessionManagerSlave.remainingTime);
     }, [quizSessionManagerSlave.remainingTime]);
 
+    useEffect(() => {
+        const selectedAnswer = quizSessionManagerSlave.userStats?.find(stats => stats.user.identifier == quizSessionManagerSlave.quizUser?.identifier)?.answers.find(answer => answer.questionId == quizSessionManagerSlave.currentQuestionId)?.answerId
+        if (selectedAnswer != null) setSelectedAnswerID(selectedAnswer)
+    }, [quizSessionManagerSlave.userStats]);
+
     return (
         <div className="quizSlaveSessionQuestion">
             <BackgroundGems
-                type={window.innerWidth > 480 ? BackgroundGemsType.Primary2 : BackgroundGemsType.PrimarySlave2}
+                type={BackgroundGemsType.Primary2}
             />
             <QuestionSlideInTag
                 questionText={quizSessionManagerSlave.currentQuestion?.questionText ?? "[Error: Could not display question.]"}

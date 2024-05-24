@@ -2,8 +2,8 @@ import {FC, useEffect, useState} from "react"
 import "./QuizMaster.css"
 import {useLocation, useNavigate} from "react-router-dom";
 import {
-    ErrorPageLinkedTo, showErrorPageNothingToFind,
-    showErrorPageSomethingWentWrong,
+    ErrorPageLinkedTo, showErrorPageNothingToFind, showErrorPageScreenNotSupported,
+    showErrorPageSomethingWentWrong, showErrorQuizSession
 } from "../../ErrorPage/ErrorPageExports.ts";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
 import {QuizState} from "../../../models/QuizSessionState.ts";
@@ -31,8 +31,8 @@ export const QuizMaster: FC = () => {
     const {state} = useLocation();
 
     // Read values passed on state
-    const quizSessionId: string | null = state ? state.quizSessionId : null;
-    const quizId: string | null = state ? state.quizId : null;
+    const quizSessionId: string | null = state ? state.quizSessionId : localStorage.getItem('quizSessionId');
+    const quizId: string | null = state ? state.quizId : localStorage.getItem('quizId');
 
     const [quizSessionManager, setQuizSessionManager] = useState(QuizSessionManager.getInstanceAsInterface());
 
@@ -81,8 +81,8 @@ export const QuizMaster: FC = () => {
                 QuizSessionManager.getInstance().changeState(QuizState.endscreen)
                 hidePopup()
             },
-        }
-        showPopup(endQuizPopup)
+        };
+        showPopup(endQuizPopup);
     }
 
     const showPopup = (popup: PopupProps) => {
@@ -93,16 +93,8 @@ export const QuizMaster: FC = () => {
         setShowingPopup(false)
     }
 
-    useEffect(() => {
-        // redirect if the screen is too narrow
-        const handleResize = () => {
-            if (window.innerWidth <= 768) {
-                navigate('/')
-            }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
-
+    // check login status, get quiz from firebase and setup connection to server
+    const setUp = async () => {
         // make sure we have all necessary info passed to the route
         if (quizSessionId == null || quizId == null) {
             console.log("no quiz id or quiz session")
@@ -110,29 +102,42 @@ export const QuizMaster: FC = () => {
             return
         }
 
+        await logInWithEmailLink(window.location.href, () => {
+            navigate("/login")
+        }, showPopup, hidePopup)
+        const quiz = await setQuizFromFirestore(quizId)
+        if (quiz == undefined) {
+            console.log("no quiz found in firebase")
+            showErrorPageSomethingWentWrong(navigate)
+            return
+        }
+        const host = quiz.quizUser
+        setIsSetUp(true)
+
+        await QuizSessionManager.getInstance().setUp(quizSessionId, host, quiz)
+    }
+
+    useEffect(() => {
+        // redirect if the screen is too narrow
+        const handleResize = () => {
+            if (window.innerWidth <= 768) {
+                showErrorPageScreenNotSupported(navigate)
+            }
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
         const handleQuizSessionManagerChange = () => {
+            if (QuizSessionManager.getInstanceAsInterface().errorGettingSession) {
+                QuizSessionManager.getInstance().errorGettingSession = false
+                showErrorQuizSession(navigate, true)
+                return
+            }
             setQuizSessionManager(QuizSessionManager.getInstanceAsInterface());
         };
         QuizSessionManager.getInstance().subscribe(handleQuizSessionManagerChange);
 
-        // get quiz from firebase and setup connection
-        const setUp = async () => {
-            await logInWithEmailLink(window.location.href, () => {
-                navigate("/login")
-            }, showPopup, hidePopup)
-            const quiz = await setQuizFromFirestore(quizId)
-            if (quiz == undefined) {
-                console.log("no quiz id or quiz session")
-                showErrorPageSomethingWentWrong(navigate)
-                return
-            }
-            const host = quiz.quizUser
-            setIsSetUp(true)
-
-            await QuizSessionManager.getInstance().setUp(quizSessionId, host, quiz)
-        }
-
-        setUp()
+        if (!loading) setUp()
 
         return () => {
             QuizSessionManager.getInstance().unsubscribe(handleQuizSessionManagerChange);
@@ -141,7 +146,8 @@ export const QuizMaster: FC = () => {
     }, [])
 
     useEffect(() => {
-        if (!user && isSetUp && !showingPopup) navigate("/login");
+        if (!loading && !isSetUp && user) setUp()
+        if (!loading && !user && isSetUp && !showingPopup) navigate("/login");
         if (error) console.log(error)
     }, [user, loading, navigate]);
 

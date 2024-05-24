@@ -14,6 +14,7 @@ import {ButtonStyle} from "../../../components/Button/ButtonExports.ts";
 import {auth, sendEmailLink} from "../../../firebase/auth.ts";
 import {useAuthState} from "react-firebase-hooks/auth";
 import {Loading} from "../../Loading/Loading.tsx";
+import {showErrorPageScreenNotSupported} from "../../ErrorPage/ErrorPageExports.ts";
 
 export const CreateSendEmail: FC = () => {
     const navigate = useNavigate()
@@ -58,7 +59,7 @@ export const CreateSendEmail: FC = () => {
         // redirect if the screen is too narrow
         const handleResize = () => {
             if (window.innerWidth <= 768) {
-                navigate('/')
+                showErrorPageScreenNotSupported(navigate)
             }
         };
         handleResize();

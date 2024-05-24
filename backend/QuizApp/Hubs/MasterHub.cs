@@ -23,12 +23,15 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
     public async Task RequestQuizSession(QuizUser quizUser, string quizSessionId)
     {
         (QuizSession? quizSession, string quizEntryId) = quizSessionService.GetQuizSessionById(quizSessionId);
-        
-        // TODO: change it so backend knows who the quiz user is of our quizsession, meaning we don't always have to manually send "userId1" -> required for auth stuff
 
         if (quizSession is not null)
         {
-            await Clients.All.SendAsync(quizUser.Identifier, quizEntryId, quizSession);
+            List<QuizUser> connectedPlayers = quizSessionService.GetConnectedPlayers(quizSession.Id);
+            await Clients.All.SendAsync($"sessionrequest:{quizSessionId}/quizSessionHost0123456", quizEntryId, quizSession, connectedPlayers);
+        }
+        else
+        {
+            await Clients.All.SendAsync($"nosession:{quizSessionId}/quizSessionHost0123456");
         }
     }
     
@@ -91,7 +94,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             tasks.Add(
             Task.Run(
                     () => ClientsCopy.All.SendAsync(
-                    $"questionend:userId1",
+                    $"questionend:{quizSessionId}/quizSessionHost0123456",
                     quizUsersStatsList,
                     "statistics")
                 )
@@ -101,7 +104,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             {
                 tasks.Add(Task.Run(() =>
                     slaveContext.Clients.All.SendAsync(
-                        $"questionend:{quizSessionUserStats.User.Identifier}",
+                        $"questionend:{quizSessionId}/{quizSessionUserStats.User.Identifier}",
                             quizUsersStatsList,
                             "statistics")
                     ));
@@ -129,7 +132,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             tasks.Add(
                 Task.Run(
                     () => Clients.All.SendAsync(
-                        $"statechange:userId1",
+                        $"statechange:{quizSessionId}/quizSessionHost0123456",
                         state,
                         currentQuestion.id)
                 )
@@ -139,7 +142,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             {
                 tasks.Add(Task.Run(() =>
                     slaveContext.Clients.All.SendAsync(
-                        $"statechange:{quizSessionUserStats.User.Identifier}",
+                        $"statechange:{quizSessionId}/{quizSessionUserStats.User.Identifier}",
                         state,
                         currentQuestion)
                 ));
@@ -154,7 +157,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
     public async Task NotifyKillQuiz(string quizSessionId)
     {
         (QuizSession? quizSession, string entry) = quizSessionService.GetQuizSessionById(quizSessionId);
-
+        
         if (quizSession is not null)
         {
             quizSessionService.DeleteSessionExtrasBySessionId(quizSessionId);
@@ -182,14 +185,12 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             // prepare attachment
             var csvBytes = Encoding.UTF8.GetBytes(csvContent);
             var attachment = new Attachment(new MemoryStream(csvBytes), $"Report_{validQuizTitle}.csv", "text/csv");
-            
-            Console.WriteLine(csvContent);
 
             await SendEmailAsync(emailAddress, "Quiz Report", "Attached please find the requested quiz report. Thank you for using Quizable!", attachment);
             
             // wait for a bit until the email can be sent again
             await Task.Delay(TimeSpan.FromMinutes(2));
-            await Clients.All.SendAsync("canResendReport:userId1");
+            await Clients.All.SendAsync($"canResendReport:{quizSessionId}/quizSessionHost0123456");
         }
     }
 
@@ -270,7 +271,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             tasks.Add(
                 Task.Run(
                     () => ClientsCopy.All.SendAsync(
-                        $"timerchange:userId1",
+                        $"timerchange:{quizSessionId}/quizSessionHost0123456",
                         remainingSeconds)
                 )
             );
@@ -279,7 +280,7 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             {
                 tasks.Add(Task.Run(() =>
                     slaveContext.Clients.All.SendAsync(
-                        $"timerchange:{quizSessionUserStats.User.Identifier}",
+                        $"timerchange:{quizSessionId}/{quizSessionUserStats.User.Identifier}",
                         remainingSeconds)
                 ));
             }

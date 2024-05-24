@@ -9,12 +9,12 @@ export default interface QuizSession{
     id: string,
     quizId: string,
     state: QuizSessionState,
-    deviceId: string
+    hostId: string
 }
 
 export const quizSessionsAreEqual = (a: QuizSession, b: QuizSession): boolean => {
     return a.id === b.id
         && a.quizId === b.quizId
         && quizSessionStatesAreEqual(a.state, b.state)
-        && a.deviceId === b.deviceId
+        && a.hostId === b.hostId
 }
