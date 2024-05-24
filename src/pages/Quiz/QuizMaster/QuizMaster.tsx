@@ -2,7 +2,7 @@ import {FC, useEffect, useState} from "react"
 import "./QuizMaster.css"
 import {useLocation, useNavigate} from "react-router-dom";
 import {
-    ErrorPageLinkedTo, showErrorPageNothingToFind,
+    ErrorPageLinkedTo, showErrorPageNothingToFind, showErrorPageScreenNotSupported,
     showErrorPageSomethingWentWrong, showErrorQuizSession
 } from "../../ErrorPage/ErrorPageExports.ts";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
@@ -121,7 +121,7 @@ export const QuizMaster: FC = () => {
         // redirect if the screen is too narrow
         const handleResize = () => {
             if (window.innerWidth <= 768) {
-                navigate('/')
+                showErrorPageScreenNotSupported(navigate)
             }
         };
         handleResize();

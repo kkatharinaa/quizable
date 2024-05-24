@@ -29,6 +29,10 @@ export const showErrorPageSomethingWentWrong = (navigate: NavigateFunction, link
     const message = "Looks like something went wrong. Please try again later or contact us if the issue persists."
     showErrorPage(navigate, message, linkTo ?? ErrorPageLinkedTo.Home)
 }
+export const showErrorPageScreenNotSupported = (navigate: NavigateFunction, linkTo?: ErrorPageLinkedTo) => {
+    const message = "The screen you tried to view is not supported for your screen width."
+    showErrorPage(navigate, message, linkTo ?? ErrorPageLinkedTo.Home)
+}
 
 export const showErrorPage = (navigate: NavigateFunction, message: string, linkTo: ErrorPageLinkedTo) => {
     navigate('/error', {state: {message: message, linkTo: linkTo}})

@@ -14,7 +14,11 @@ import QuizSession from "../../../models/QuizSession.ts";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {LEAVE_ICON_DARK, PLAY_ICON_LIGHT} from "../../../assets/Icons.ts";
-import {ErrorPageLinkedTo, showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
+import {
+    ErrorPageLinkedTo,
+    showErrorPageScreenNotSupported,
+    showErrorPageSomethingWentWrong
+} from "../../ErrorPage/ErrorPageExports.ts";
 import {quizOptionsAreEqual} from "../../../models/QuizOptions.ts";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 import {auth, logInWithEmailLink, logOutUser} from "../../../firebase/auth.ts";
@@ -66,7 +70,7 @@ export const CreateOverview: FC = () => {
         // redirect if the screen is too narrow
         const handleResize = () => {
             if (window.innerWidth <= 768) {
-                navigate('/')
+                showErrorPageScreenNotSupported(navigate)
             }
         };
         handleResize();

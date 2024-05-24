@@ -13,7 +13,7 @@ import QuizRepository from "../../../repositories/QuizRepository.ts";
 import {QuestionSettingsPopup} from "../../../components/QuestionSettingsPopup/QuestionSettingsPopup.tsx";
 import {
     ErrorPageLinkedTo,
-    showErrorPageNothingToFind,
+    showErrorPageNothingToFind, showErrorPageScreenNotSupported,
     showErrorPageSomethingWentWrong
 } from "../../ErrorPage/ErrorPageExports.ts";
 import {makeAnswer} from "../../../models/Answer.ts";
@@ -65,7 +65,7 @@ export const CreateEditor: FC = () => {
         // redirect if the screen is too narrow
         const handleResize = () => {
             if (window.innerWidth <= 768) {
-                navigate('/')
+                showErrorPageScreenNotSupported(navigate)
             }
         };
         handleResize();

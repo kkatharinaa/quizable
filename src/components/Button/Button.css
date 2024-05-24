@@ -124,6 +124,10 @@ button.correct.medium:hover, button.correct.short:hover {
     box-shadow: 0px calc(var(--shadow-width-medium) / 2) 0px 0px var(--correct-button-shadow);
 }*/
 
+button:hover {
+    cursor: pointer;
+}
+
 button:active {
     margin-top: var(--shadow-width-medium);
     margin-bottom: 0;
