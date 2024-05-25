@@ -32,8 +32,8 @@ export const QuizSlaveLobby: FC<QuizSlaveChildrenProps> = ({quizSessionManagerSl
                                 <QuizPlayerCard
                                     key={quizUser.id}
                                     type={QuizPlayerCardType.MobileNormal}
-                                    playerName={quizUser.identifier}
-                                    playerScore={undefined}>
+                                    quizUser={quizUser}
+                                    score={undefined}>
                                 </QuizPlayerCard>
                             ))}
                         </div>

@@ -5,7 +5,7 @@
     background-color: var(--black);
     border-radius: 20px;
     width: 544px;
-    max-width: 544px;
+    max-width: 80vw;
     height: 90px;
     max-height: 90px;
 
@@ -31,17 +31,11 @@
     overflow: hidden;
 }
 
-.quizPlayerCardIcon_desktop, .quizPlayerCardIcon_mobile {
-    border-radius: 16px;
-    background-color: var(--grey-icon);
-}
 .quizPlayerCardIcon_desktop {
-    min-width: 68px;
-    height: 68px;
+    width: 68px;
 }
 .quizPlayerCardIcon_mobile {
-    width: 52px;
-    height: 52px;
+    width: 58px;
 }
 
 .quizPlayerCardScoreText { 

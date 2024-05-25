@@ -50,8 +50,8 @@ export const QuizLobby: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQ
                                 <QuizPlayerCard
                                     key={quizUser.id}
                                     type={QuizPlayerCardType.DesktopNormal}
-                                    playerName={quizUser.identifier}
-                                    playerScore={undefined}>
+                                    quizUser={quizUser}
+                                    score={undefined}>
                                 </QuizPlayerCard>
                             ))}
                         </div>

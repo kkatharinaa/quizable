@@ -1,9 +1,3 @@
-export interface QuizPlayerCardProps {
-    type?: QuizPlayerCardType,
-    playerName: string
-    playerScore?: number, 
-}
-
 export enum QuizPlayerCardType{
     DesktopNormal = "desktopNormal",
     MobileNormal = "mobileNormal",

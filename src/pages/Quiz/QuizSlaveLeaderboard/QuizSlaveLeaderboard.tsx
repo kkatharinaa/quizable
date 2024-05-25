@@ -37,8 +37,8 @@ export const QuizSlaveLeaderboard: FC<QuizSlaveChildrenProps> = ({leaveQuizSessi
                     <QuizPlayerCard
                         key={userStat()!.user.id}
                         type={QuizPlayerCardType.MobileScore}
-                        playerName={userStat()!.user.identifier}
-                        playerScore={userStat()!.score}>
+                        quizUser={userStat()!.user}
+                        score={userStat()!.score}>
                     </QuizPlayerCard>
                 ) : (
                     <p>There was an error displaying your score. Please look for your score on the host's screen.</p>

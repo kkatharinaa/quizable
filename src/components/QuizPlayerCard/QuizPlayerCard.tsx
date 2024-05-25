@@ -1,23 +1,30 @@
 import {FC} from "react"
 import './QuizPlayerCard.css'
-import { QuizPlayerCardProps, QuizPlayerCardType } from "./QuizPlayerCardExports"
+import { QuizPlayerCardType } from "./QuizPlayerCardExports"
 import { CHEVRONDOWN_ICON_RED, CHEVRONUP_ICON_GREEN } from "../../assets/Icons"
+import {getRandomIcon} from "../../helper/PlayerIconHelper.ts";
+import QuizUser from "../../models/QuizUser.ts";
 
+export interface QuizPlayerCardProps {
+    type?: QuizPlayerCardType,
+    quizUser: QuizUser
+    score?: number,
+}
 
 export const QuizPlayerCard: FC<QuizPlayerCardProps> = (
     {
         type = QuizPlayerCardType.DesktopNormal,
-        playerName,
-        playerScore
+        quizUser,
+        score
     }
 ) => {
     return (
         <div className={`quizPlayerCard ${type}`}>
             <div className="quizPlayerCardIconAndName">
-                <div className={`quizPlayerCardIcon_${type.startsWith("desktop") ? 'desktop' : 'mobile'}`}></div>
-                <p>{playerName}</p>
+                <img className={`quizPlayerCardIcon_${type.startsWith("desktop") ? 'desktop' : 'mobile'}`} src={getRandomIcon(quizUser)} alt={"player icon"}/>
+                <p>{quizUser.identifier}</p>
             </div>
-            {playerScore != null &&
+            {score != null &&
                 <div className="quizPlayerCardScore">
                     <p
                         className={`quizPlayerCardScoreText`}
@@ -25,7 +32,7 @@ export const QuizPlayerCard: FC<QuizPlayerCardProps> = (
                             opacity: type.includes("Score")? 1:0,
                             color: type.includes("Up")? 'var(--correct-button)':type.includes("Down")?'var(--delete-button)':'var(--white)',
                         }}>
-                        {playerScore}
+                        {score}
                     </p>
                     <div className={`quizPlayerCardScoreArrow`}>
                         {(type.includes("Up") || type.includes("Down")) && 

@@ -83,8 +83,8 @@ export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, qu
                         <QuizPlayerCard
                             key={userStat.user.id}
                             type={getQuizPlayerCardType(userStat)}
-                            playerName={userStat.user.identifier}
-                            playerScore={userStat.score}>
+                            quizUser={userStat.user}
+                            score={userStat.score}>
                         </QuizPlayerCard>
                     ))}
                 </div>
