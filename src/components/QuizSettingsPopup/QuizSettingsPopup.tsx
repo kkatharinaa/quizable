@@ -297,18 +297,18 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
                             currentValue={quizOptions.questionPointsModifier}
                             onChange={handleSettingQuestionPointsModifierToggle}
                             placeholder={null}/>
-                        <SettingsField
+                        {/*<SettingsField
                             text="Show live answer statistics"
                             type={SettingsFieldType.Toggle}
                             currentValue={quizOptions.showLiveStats}
                             onChange={handleSettingLiveStatsToggle}
-                            placeholder={null}/>
-                        <SettingsField
+                            placeholder={null}/>*/}
+                        {/*<SettingsField
                             text="Use enterprise/research theme"
                             type={SettingsFieldType.Toggle}
                             currentValue={quizOptions.colourScheme}
                             onChange={handleColourSchemeToggle}
-                            placeholder={null}/>
+                            placeholder={null}/>*/}
                         <div className="exportImport">
                             <ButtonComponent
                                 text={"Import Quiz"}

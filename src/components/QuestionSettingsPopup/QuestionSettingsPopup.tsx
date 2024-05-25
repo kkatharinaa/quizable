@@ -83,12 +83,12 @@ export const QuestionSettingsPopup: FC<QuestionSettingsPopupProps> = ({ selected
                             currentValue={question.questionPointsModifier}
                             onChange={handleSettingQuestionPointsModifierToggle}
                             placeholder={null}/>
-                        <SettingsField
+                        {/*<SettingsField
                             text="Show live answer statistics for this question"
                             type={SettingsFieldType.Toggle}
                             currentValue={question.showLiveStats}
                             onChange={handleSettingLiveStatsToggle}
-                            placeholder={null}/>
+                            placeholder={null}/>*/}
                     </div>
                     <p className="questionSettingsTitle">{`Overrides the general quiz settings for this specific question.`}</p>
                 </div>
