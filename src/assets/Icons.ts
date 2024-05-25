@@ -125,3 +125,8 @@ export const CHEVRONUP_ICON_LIGHT: Icon = {
     path: '/assets/icon-chevronup-light.svg',
     alt: 'Collapse',
 };
+
+export const COIN_ICON_GREEN: Icon = {
+    path: '/assets/icon-coin-green.svg',
+    alt: 'Coin',
+};

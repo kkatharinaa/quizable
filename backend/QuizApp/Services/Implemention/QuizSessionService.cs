@@ -429,16 +429,21 @@ public class QuizSessionService(ILogger<QuizSessionService> logger): IQuizSessio
                         const double minPointsRatio = 0.5; // If you get it right but are slow, you should at least get half of the points
                         var minPoints = (int)Math.Round(maxPoints * minPointsRatio);
                         
-                        var allAnswersForQuestion = quizSession.Value.State.UsersStats
+                        var correctAnswerIds = currentQuestion.answers // will only ever contain one element so far but in future versions there could be multiple correct answers per question
+                            .Where(answer => answer.correct)
+                            .Select(answer => answer.id)
+                            .ToList();
+                        
+                        var allCorrectAnswersForQuestion = quizSession.Value.State.UsersStats
                             .SelectMany(stats => stats.Answers, (stats, answer) => new { stats, answer })
-                            .Where(x => x.answer.QuestionId == currentQuestion.id)
+                            .Where(x => x.answer.QuestionId == currentQuestion.id && correctAnswerIds.Contains(x.answer.AnswerId))
                             .ToList();
 
-                        if (allAnswersForQuestion.Count > 0)
+                        if (allCorrectAnswersForQuestion.Count > 0)
                         {
                             // get the fastest and slowest time in ms
-                            var fastestTime = allAnswersForQuestion.Min(x => x.answer.TimeTaken);
-                            var slowestTime = allAnswersForQuestion.Max(x => x.answer.TimeTaken);
+                            var fastestTime = allCorrectAnswersForQuestion.Min(x => x.answer.TimeTaken);
+                            var slowestTime = allCorrectAnswersForQuestion.Max(x => x.answer.TimeTaken);
 
                             foreach (var userStat in quizSession.Value.State.UsersStats)
                             {

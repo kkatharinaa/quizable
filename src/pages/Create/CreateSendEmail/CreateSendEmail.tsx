@@ -85,7 +85,7 @@ export const CreateSendEmail: FC = () => {
             ) : (
                 <div className="content">
                     <div className="inputFieldWithInfoText">
-                        <p className="infoText">{"Logging in is as simple as possible - just put in your email!"}</p>
+                        <p className="infoText">{"Login or register with your email."}</p>
                         <InputField
                             value={inputValue}
                             onChange={updateInput}
