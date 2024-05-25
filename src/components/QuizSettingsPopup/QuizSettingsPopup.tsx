@@ -7,7 +7,7 @@ import {BottomNavBarStyle, BottomNavBarType} from "../BottomNavBar/BottomNavBarE
 import {InputField} from "../InputField/InputField.tsx";
 import {InputFieldType} from "../InputField/InputFieldExports.ts";
 import {
-    ColourScheme,
+    // ColourScheme,
     QuizOptions,
     quizOptionsAreEqual,
     quizOptionsAreEqualForQuestions
@@ -18,7 +18,10 @@ import {SettingsField} from "../SettingsField/SettingsField.tsx";
 import {SettingsFieldType} from "../SettingsField/SettingsFieldExports.ts";
 import {Question} from "../../models/Question.ts";
 import {PopupProps} from "../Popup/Popup.tsx";
-import {showPopupInfoOnly, showPopupSomethingWentWrong} from "../Popup/PopupExports.ts";
+import {
+    showPopupInfoOnly, 
+    // showPopupSomethingWentWrong
+} from "../Popup/PopupExports.ts";
 import {ButtonComponent} from "../Button/Button.tsx";
 
 export interface QuizSettingsPopupProps {
@@ -167,20 +170,20 @@ export const QuizSettingsPopup: FC<QuizSettingsPopupProps> = ({ selectedQuiz, on
         const newValue = quizOptions.questionPointsModifier == 0 ? 1 : 0
         handleSettingQuestionPointsModifierInputChange(newValue)
     }
-    const handleSettingLiveStatsToggle = () => {
-        setQuizOptions({...quizOptions, showLiveStats: !quizOptions.showLiveStats})
-    }
-    const handleColourSchemeInputChange = (value: number) => {
-        if (!Object.values(ColourScheme).includes(value)) {
-            showPopupSomethingWentWrong(showPopup, hidePopup)
-        }
-        setQuizOptions({...quizOptions, colourScheme: value})
-    }
-    const handleColourSchemeToggle = () => {
-        // currently only a toggle, because we only have 2 colour schemes, but could be customised even more
-        const newValue = quizOptions.colourScheme == 0 ? 1 : 0
-        handleColourSchemeInputChange(newValue)
-    }
+    // const handleSettingLiveStatsToggle = () => {
+    //     setQuizOptions({...quizOptions, showLiveStats: !quizOptions.showLiveStats})
+    // }
+    // const handleColourSchemeInputChange = (value: number) => {
+    //     if (!Object.values(ColourScheme).includes(value)) {
+    //         showPopupSomethingWentWrong(showPopup, hidePopup)
+    //     }
+    //     setQuizOptions({...quizOptions, colourScheme: value})
+    // }
+    // const handleColourSchemeToggle = () => {
+    //     // currently only a toggle, because we only have 2 colour schemes, but could be customised even more
+    //     const newValue = quizOptions.colourScheme == 0 ? 1 : 0
+    //     handleColourSchemeInputChange(newValue)
+    // }
 
     // import and export quiz
     const handleImportQuiz = () => {

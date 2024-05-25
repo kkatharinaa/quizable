@@ -25,7 +25,7 @@ export default class QuizSessionRepository{
         const newQuizSession: QuizSession = {
             id: uuid(),
             quizId: quiz.id,
-            deviceId: await getDeviceId(),
+            hostId: await getDeviceId(),
             state: {
                 currentQuestionId: quiz.questions[0].id,    // start with the first question at the begining
                 usersStats: [],

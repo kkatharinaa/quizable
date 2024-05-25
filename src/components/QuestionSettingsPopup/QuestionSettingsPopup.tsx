@@ -50,9 +50,9 @@ export const QuestionSettingsPopup: FC<QuestionSettingsPopupProps> = ({ selected
         const newValue = question.questionPointsModifier == 0 ? 1 : 0
         handleSettingQuestionPointsModifierInputChange(newValue)
     }
-    const handleSettingLiveStatsToggle = () => {
-        setQuestion({...question, showLiveStats: !question.showLiveStats})
-    }
+    // const handleSettingLiveStatsToggle = () => {
+    //     setQuestion({...question, showLiveStats: !question.showLiveStats})
+    // }
 
     return (
         <div className="popup questionSettingsPopup">
