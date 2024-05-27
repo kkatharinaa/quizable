@@ -5,13 +5,15 @@ import {AuthenticatedUser} from "../models/AuthenticatedUser.ts";
 import {PopupProps} from "../components/Popup/Popup.tsx";
 import {BottomNavBarType} from "../components/BottomNavBar/BottomNavBarExports.ts";
 
+const env_var = import.meta.env
+
 // Initialize Auth
 const auth = getAuth(app);
 // 3 parts - actioncodesettings, send link, login on sent link
 // Action code settings
 // TODO: replace with live domain
 const actionCodeSettings = {
-    url: 'http://localhost:5173/overview',
+    url: env_var.VITE_AUTH_REDIRECT_URL,
     handleCodeInApp: true
 };
 

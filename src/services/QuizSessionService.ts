@@ -7,7 +7,7 @@ export default class QuizSessionService{
    
     //static port: number = 5296
     //static url: string = `http://localhost:${this.port}`
-    static url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+    public static url: string = 'https://quizable-rjjp3736fa-lm.a.run.app'
 
     public static async addSession(quizSession: QuizSession): Promise<string> {
         return (await fetch(`${this.url}/api/session`, 
