@@ -24,6 +24,16 @@ if (!string.IsNullOrEmpty(port)) {
     builder.WebHost.UseUrls($"http://*:{port}");
 }
 
+ILogger logger = LoggerFactory.Create((lb) => {}).CreateLogger<Program>();
+
+var email_smtp = Environment.GetEnvironmentVariable("EMAIL_SMTP");
+var email_port = Environment.GetEnvironmentVariable("EMAIL_PORT");
+
+if(!string.IsNullOrEmpty(email_smtp) || !string.IsNullOrEmpty(email_smtp))
+    Console.WriteLine($"Email SMTP and Port are set. SMTP: {email_smtp}, Port: {email_port}");   
+else
+    Console.WriteLine("Email SMTP and Port are not set. Please set them in the environment variables.");
+
 var app = builder.Build();
 
 app.UseDefaultFiles();
