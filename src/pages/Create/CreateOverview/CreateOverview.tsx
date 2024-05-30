@@ -25,6 +25,9 @@ import {auth, logInWithEmailLink, logOutUser} from "../../../firebase/auth.ts";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Loading } from "../../Loading/Loading.tsx";
 import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
+import QuizUser from "../../../models/QuizUser.ts";
+import {getDeviceId} from "../../../helper/DeviceHelper.ts";
+import {QuizSessionManagerSlave} from "../../../managers/QuizSessionManagerSlave.tsx";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -158,6 +161,41 @@ export const CreateOverview: FC = () => {
 
             // navigate to the lobby page
             navigate('/quiz', {state: {quizSessionId: quizSessionPlay.id, quizId: quizToBePlayed!.id}})
+        }
+
+        // check that user is not a player in quiz already
+        const quizUser: QuizUser | null = localStorage.getItem("quizUser") ? JSON.parse(localStorage.getItem("quizUser")!) : null;
+        const deviceId: string = quizUser?.deviceId ?? await getDeviceId();
+        const reconnect: {
+            quizUser: QuizUser,
+            quizSession: QuizSession
+        } | null = await QuizSessionService.checkQuizUserReconnection(deviceId)
+
+        if (reconnect) {
+            setPopupProps({
+                title: "You are already connected to a quiz as a player.",
+                message: `This device is currently connected as "${reconnect.quizUser.identifier}" in a quiz. To start your own quiz session, please leave the other quiz first.`,
+                type: BottomNavBarType.Default,
+                onPrimaryClick: () => {
+                    QuizSessionManagerSlave.getInstance().killSession()
+                    navigate("/quiz/player", {
+                        state: {
+                            quizSessionId: reconnect.quizSession.id,
+                            quizUser: reconnect.quizUser
+                        }
+                    })
+                },
+                primaryButtonText: "Reconnect As Player",
+                primaryButtonIcon: PLAY_ICON_LIGHT,
+                onSecondaryClick: () => {
+                    setShowingPopup(false);
+                    setPopupProps(null);
+                },
+                secondaryButtonText: "Cancel",
+                secondaryButtonIcon: null
+            })
+            setShowingPopup(true)
+            return
         }
 
         // warn user if another session is already running, or else just start a new session
