@@ -41,6 +41,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.quizSessionQuestion .content .marginBottom {
+    margin-bottom: 50px;
+}
 
 .quizSessionQuestion .content .timer {
 }

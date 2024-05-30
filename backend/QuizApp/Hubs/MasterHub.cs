@@ -64,8 +64,8 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
 
                     await NotifyStateChange(quizSessionId);
                     
-                    // start timer
-                    await StartNewCountdown(quizSessionId, nextQuestion.maxQuestionTime);
+                    // start timer if the maxQuestion time is not 0
+                    if (nextQuestion.maxQuestionTime > 0) await StartNewCountdown(quizSessionId, nextQuestion.maxQuestionTime);
                 }
                 else
                 {
