@@ -122,14 +122,19 @@ export const CreateOverview: FC = () => {
         setQuizSettingsPopupProps([newQuiz, true])
         setShowingQuizSettingsPopup(true)
     };
-    const handleEditQuiz = (id: string) => {
-        const quizToBeEdited = findQuizByID(id)
-        if (quizToBeEdited == undefined) {
-            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
-            return
+    const handleEditQuiz = async (id: string) => {
+        const editQuiz = () => {
+            const quizToBeEdited = findQuizByID(id)
+            if (quizToBeEdited == undefined) {
+                showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+                return
+            }
+            setQuizSettingsPopupProps([quizToBeEdited, false])
+            setShowingQuizSettingsPopup(true)
         }
-        setQuizSettingsPopupProps([quizToBeEdited, false])
-        setShowingQuizSettingsPopup(true)
+
+        // prevent user from editing quiz which is currently running
+        await editOrDeleteIfNotRunning(id, "edit", editQuiz)
     };
     const handlePlayQuiz = async (id: string) => {
         const playQuiz = async () => {
@@ -259,37 +264,67 @@ export const CreateOverview: FC = () => {
     const handleEditQuizEditQuestions = (id: string) => {
         navigateToEditor(id)
     };
-    const handleDeleteQuiz = (id: string) => {
-        // popup for confirmation
-        const deletePopup: PopupProps = {
-            title: "Are you sure you want to delete this quiz?",
-            message: "This action cannot be undone.",
-            secondaryButtonText: "Cancel",
-            secondaryButtonIcon: null,
-            primaryButtonText: "Yes, I Am Sure",
-            primaryButtonIcon: null,
-            type: BottomNavBarType.Default,
-            onSecondaryClick: () => {
-                hidePopup()
-            },
-            onPrimaryClick: () => {
-                if (user?.uid == null) {
-                    showPopupSomethingWentWrong(showPopup, () => setShowingPopup(false))
-                    return
-                }
-                // delete quiz from firebase and quizzes state
-                QuizRepository.delete(user!.uid, id).then(() => {
-                    if (showingQuizSettingsPopup) handleEditQuizClose()
-                    const updatedQuizzes = [...quizzes]
-                    const index = updatedQuizzes.findIndex(quiz => quiz.id == id)
-                    updatedQuizzes.splice(index, 1);
-                    setQuizzes(updatedQuizzes)
+    const handleDeleteQuiz = async (id: string) => {
+        const deleteQuiz = () => {
+            // popup for confirmation
+            const deletePopup: PopupProps = {
+                title: "Are you sure you want to delete this quiz?",
+                message: "This action cannot be undone.",
+                secondaryButtonText: "Cancel",
+                secondaryButtonIcon: null,
+                primaryButtonText: "Yes, I Am Sure",
+                primaryButtonIcon: null,
+                type: BottomNavBarType.Default,
+                onSecondaryClick: () => {
                     hidePopup()
-                })
-            },
+                },
+                onPrimaryClick: () => {
+                    if (user?.uid == null) {
+                        showPopupSomethingWentWrong(showPopup, () => setShowingPopup(false))
+                        return
+                    }
+                    // delete quiz from firebase and quizzes state
+                    QuizRepository.delete(user!.uid, id).then(() => {
+                        if (showingQuizSettingsPopup) handleEditQuizClose()
+                        const updatedQuizzes = [...quizzes]
+                        const index = updatedQuizzes.findIndex(quiz => quiz.id == id)
+                        updatedQuizzes.splice(index, 1);
+                        setQuizzes(updatedQuizzes)
+                        hidePopup()
+                    })
+                },
+            }
+            showPopup(deletePopup)
         }
-        showPopup(deletePopup)
+
+        // prevent user from deleting quiz which is currently running
+        await editOrDeleteIfNotRunning(id, "delete", deleteQuiz)
     };
+    const editOrDeleteIfNotRunning = async (id: string, action: string, editOrDelete: () => void) => {
+        // prevent user from editing or deleting quiz which is currently running
+        if (user == undefined) return editOrDelete()
+        const quizSession: QuizSession | null = await QuizSessionService.checkHostReconnection(user.uid)
+        if (quizSession == null || quizSession.quizId != id) return editOrDelete()
+
+        setPopupProps({
+            title: `You cannot ${action} this quiz right now.`,
+            message: `This quiz is currently being played. Please end the quiz session first in order to ${action} the quiz.`,
+            type: BottomNavBarType.Default,
+            onPrimaryClick: () => {
+                QuizSessionManager.getInstance().resetManager();
+                navigate('/quiz', {state: {quizSessionId: quizSession.id, quizId: quizSession.quizId}})
+            },
+            primaryButtonText: "To Quiz Session",
+            primaryButtonIcon: PLAY_ICON_LIGHT,
+            onSecondaryClick: () => {
+                setShowingPopup(false);
+                setPopupProps(null);
+            },
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null
+        })
+        setShowingPopup(true)
+    }
 
     // nav functions
     const navigateToEditor = (id: string) => {
