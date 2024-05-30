@@ -40,7 +40,7 @@ export const QuizSlaveSessionQuestion: FC<QuizSlaveChildrenProps> = ({leaveQuizS
     }
 
     const handleSelectAnswer = (answer: Answer) => {
-        if(selectedAnswerID != "")
+        if(selectedAnswerID != "" || quizSessionManagerSlave.quizState != QuizState.playing)
             return
 
         setSelectedAnswerID(answer.id)
