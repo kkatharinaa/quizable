@@ -70,9 +70,9 @@ public class SlaveHub(ILogger<SlaveHub> logger, IQuizSessionService quizSessionS
                     await Clients.All.SendAsync($"userchange:{quizSessionId}/{quizSessionUserStats.User.Identifier}", quizSessionUserStatList);
                 }
             }
-            
-            await RequestQuizSession(quizUser, quizSessionId);
         }
+        
+        await RequestQuizSession(quizUser, quizSessionId);
     }
     
     // Notifies that the slave has answered a question
