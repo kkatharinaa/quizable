@@ -67,6 +67,7 @@
     line-height: normal;
     box-sizing: border-box;
     overflow: hidden;
+    z-index: 2;
 }
 
 .answerInputField .threeDots {
