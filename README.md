@@ -132,9 +132,11 @@ VITE_MESSAGIN_SENDER_ID=<YOUR_MESSAGIN_SENDER_ID_FROM_FIREBASE>
 VITE_APP_ID=<YOUR_APP_ID_FROM_FIREBASE>
 EMAIL_SMTP="smtp.google.com"
 EMAIL_PORT="587"
-EMAIL_ADDRESS=<YOUR_OWN_EMAIL_ADRESS>
-EMAIL_PASSWORD=<YOUR_OWN_EMAIL_PASSWORD>
+EMAIL_ADDRESS=<YOUR_OWN_GMAIL_ADDRESS>
+EMAIL_PASSWORD=<YOUR_OWN_GMAIL_PASSWORD>
 ```
+
+Alternatively, another email service can be used, but then the SMTP and port have to be adjusted. If you decide to go with a GMAIL address, you might have to generate an [app password](https://myaccount.google.com/apppasswords).
 
 6. Change value of "default" to your project id:
 In `.firebaserc` file, change the value of the `default` field to match the name of your Firebase project. This value should be the same as the `VITE_PROJECT_ID` you entered earlier. This configuration ensures that the code knows which Firebase project to use from your Firebase account.
