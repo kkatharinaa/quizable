@@ -83,7 +83,7 @@ export const CreateSendEmail: FC = () => {
             { (loading || !isSetUp) ? (
                 <Loading/>
             ) : (
-                <div className="content">
+                <div className="content" tabIndex={0}>
                     <div className="inputFieldWithInfoText">
                         <p className="infoText">{"Login or register with your email."}</p>
                         <InputField

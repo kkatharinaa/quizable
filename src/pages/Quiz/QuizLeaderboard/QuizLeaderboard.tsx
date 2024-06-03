@@ -76,7 +76,7 @@ export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, qu
                 code={quizSessionManager.quizCode}
             />
             { showLeaderboard() &&
-            <div className="content">
+            <div className="content" tabIndex={0}>
                 <h1>Leaderboard</h1>
                 <div className="usersList">
                     {quizSessionManager.userStats?.map((userStat) => (

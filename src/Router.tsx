@@ -49,12 +49,12 @@ const pagesData: RouterType[] = [
     {
         path: "quiz", // needs authentication
         element: <QuizMaster />,
-        title: "Quiz | Quizable"
+        title: "Hosting Quiz | Quizable"
     },
     {
         path: "quiz/player",
         element: <QuizSlave />,
-        title: "Quiz | Quizable"
+        title: "Playing Quiz | Quizable"
     },
 ];
 

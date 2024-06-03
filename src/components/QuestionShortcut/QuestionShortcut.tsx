@@ -32,7 +32,7 @@ export const QuestionShortcut: FC<QuestionShortcutProps> = ({ index, question, i
             <ThreeDots style={isSelected ? ThreeDotsStyle.PrimaryColour : ThreeDotsStyle.PrimaryShadow}/>
             
             <div className="questionCard">
-                <p className="questionText">{question.questionText === "" ? "Question" : question.questionText}</p>
+                <p className="questionText" tabIndex={0}>{question.questionText === "" ? "Question" : question.questionText}</p>
                 <p className="questionIndex">{index + 1}</p>
             </div>
         </div>

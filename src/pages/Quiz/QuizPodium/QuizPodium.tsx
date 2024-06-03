@@ -97,7 +97,7 @@ export const QuizPodium: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSes
             <QuizCodeTag
                 code={quizSessionManager.quizCode}
             />
-            <div className="content">
+            <div className="content" tabIndex={0}>
                 <h1>Podium</h1>
                 <div className="podiumGroup">
                     {topThree().map((player) => (
