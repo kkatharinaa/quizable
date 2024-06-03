@@ -43,7 +43,7 @@ export const AnswerInputField: FC<AnswerInputFieldProps> = ({ value, type, index
 
     return (
         <div className="answerInputField">
-            <object type="image/svg+xml" data={gemsPath}></object>
+            <object type="image/svg+xml" data={gemsPath} aria-hidden="true"></object>
             { onChange != null &&
                 <p className="characterCount">{`${value.length}/${maxCharacters}`}</p>
             }
@@ -58,7 +58,7 @@ export const AnswerInputField: FC<AnswerInputFieldProps> = ({ value, type, index
             {onChange == null &&
                 <p className="fixedValue">{value}</p>
             }
-            <object type="image/svg+xml" data={gemsPath}></object>
+            <object type="image/svg+xml" data={gemsPath} aria-hidden="true"></object>
         </div>
     )
 }

@@ -47,7 +47,7 @@ export const StatisticsBar: FC<StatisticsBarProps> = ({ value, type, answerCount
             <div className={`bar ${className}`} style={{ height: `${height}px` }}>
             </div>
             <div className="answerValue">
-                <object type="image/svg+xml" data={gemsPath}></object>
+                <object type="image/svg+xml" data={gemsPath} aria-hidden="true"></object>
                 <p>{value}</p>
             </div>
         </div>
