@@ -41,9 +41,9 @@ export const AnswerSelection: FC<AnswerSelectionProps> = ({ id, value, type, sty
             className={`answerSelection ${style}`}
             onClick={() => {onClick(id)}}
         >
-            <object type="image/svg+xml" data={gemsPath}></object>
+            <object type="image/svg+xml" data={gemsPath} aria-hidden="true"></object>
             <p>{value}</p>
-            <object type="image/svg+xml" data={gemsPath}></object>
+            <object type="image/svg+xml" data={gemsPath} aria-hidden="true"></object>
         </div>
     )
 }

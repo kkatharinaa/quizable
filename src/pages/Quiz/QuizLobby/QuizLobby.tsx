@@ -33,7 +33,7 @@ export const QuizLobby: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQ
                 <div>
                     <div className="entryIdContent">
                         <div >   
-                            <p className="entryIdContentTitle">Game code</p>
+                            <p className="entryIdContentTitle">Game Code</p>
                             <p className="entryIdContentGameCode">{quizSessionManager.quizCode}</p>
                         </div>
                         <canvas id="canvasQrCode"></canvas>
