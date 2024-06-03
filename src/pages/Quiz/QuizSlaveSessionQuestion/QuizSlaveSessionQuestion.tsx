@@ -65,7 +65,7 @@ export const QuizSlaveSessionQuestion: FC<QuizSlaveChildrenProps> = ({leaveQuizS
                 questionText={quizSessionManagerSlave.currentQuestion?.questionText ?? "[Error: Could not display question.]"}
                 remainingTime={remainingTime}
             />
-            <div className="content">
+            <div className="content" tabIndex={0}>
                 <div className="answersContainer">
                     {quizSessionManagerSlave.currentQuestion?.answers.map((item, index) => (
                         <AnswerSelection

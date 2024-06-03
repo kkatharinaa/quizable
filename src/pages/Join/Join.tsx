@@ -284,7 +284,7 @@ export const Join: FC = () => {
     return (
         <div className="joinPage">
             <BackgroundGems type={BackgroundGemsType.Primary}></BackgroundGems>
-            <div className="contentJoin">
+            <div className="contentJoin" tabIndex={0}>
                 <div className="inputFieldWithValidationText">
                     <InputField
                         value={inputValue}

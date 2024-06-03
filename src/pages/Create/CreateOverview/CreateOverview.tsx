@@ -364,7 +364,7 @@ export const CreateOverview: FC = () => {
             {(loading || !isSetUp) ? (
                 <Loading/>
             ) : (
-                <div className="content">
+                <div className="content" tabIndex={0}>
                     <h1>Welcome, User</h1>
                     <QuizCardContainer
                         quizzes={quizzes}

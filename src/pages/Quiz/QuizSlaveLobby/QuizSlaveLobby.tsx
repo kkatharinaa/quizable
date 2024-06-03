@@ -19,7 +19,7 @@ export const QuizSlaveLobby: FC<QuizSlaveChildrenProps> = ({quizSessionManagerSl
     return (
         <div className="quizSlaveLobby">
             <BackgroundGems type={BackgroundGemsType.Primary2}/>
-            <div className="content">
+            <div className="content" tabIndex={0}>
                 <h1>Waiting...</h1>
                 {joinedUsers().length >= 1 &&
                     <div className="joinedUserSection">

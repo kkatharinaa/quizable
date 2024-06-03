@@ -28,7 +28,7 @@ export const QuizEnd: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQui
             <QuizCodeTag
                 code={quizSessionManager.quizCode}
             />
-            <div className="content">
+            <div className="content" tabIndex={0}>
                 <p>Would you like to get a report of the results via email?</p>
                 <div className={"buttonAndMessage"}>
                     <ButtonComponent

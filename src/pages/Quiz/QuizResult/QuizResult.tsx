@@ -53,7 +53,7 @@ export const QuizResult: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSes
             <QuizCodeTag
                 code={quizSessionManager.quizCode}
             />
-            <div className="content">
+            <div className="content" tabIndex={0}>
                 <div className="statistics">
                     {currentQuestion?.answers.map((item, index) => (
                         <StatisticsBar
