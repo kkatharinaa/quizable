@@ -4,6 +4,7 @@ import QuizRepository from "../repositories/QuizRepository.ts";
 import {AuthenticatedUser} from "../models/AuthenticatedUser.ts";
 import {PopupProps} from "../components/Popup/Popup.tsx";
 import {BottomNavBarType} from "../components/BottomNavBar/BottomNavBarExports.ts";
+import QuizSessionService from "../services/QuizSessionService.ts";
 
 const env_var = import.meta.env
 
@@ -11,7 +12,6 @@ const env_var = import.meta.env
 const auth = getAuth(app);
 // 3 parts - actioncodesettings, send link, login on sent link
 // Action code settings
-// TODO: replace with live domain
 const actionCodeSettings = {
     url: env_var.VITE_AUTH_REDIRECT_URL,
     handleCodeInApp: true
@@ -30,6 +30,7 @@ const sendEmailLink = async (email: string, successCallback?: () => void, failur
                 autoSendLog: false,
             }
             QuizRepository.addUser(user)
+            QuizSessionService.sendEmailOnRegister(email)
         })
         .catch((error) => {
             if(error.code == 'auth/email-already-in-use') {

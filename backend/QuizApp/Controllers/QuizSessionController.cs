@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using QuizApp.Helpers;
 using QuizApp.Models;
 using QuizApp.Services;
 using QuizApp.Services.Interface;
@@ -96,5 +97,17 @@ public class QuizSessionController(ILogger<QuizSessionController> logger, IQuizS
         }) : NotFound(null);
     }
     
-    
+    [HttpPost]
+    [Route("registerEmail/{email}")]
+    public IActionResult SendEmailOnRegister(string email)
+    {
+        // send email
+        var domain = Environment.GetEnvironmentVariable("VITE_AUTH_DOMAIN");
+        var url = domain != null ? $"<a href='https://{domain}'>{domain}</a>" : "Quizable";
+        var emailSender = new EmailSender(logger);
+        emailSender.SendEmailAsync(email, "Sign in to Quizable",
+            $"Hello,<br><br>Your email address {email} was just used to register at {url}.<br><br>If this wasn't you, please contact us by replying to this email. If this was you, you can safely ignore this email.<br><br>Thank you for using Quizable!<br><br>PS: Just so you know, for the next login attempts we will contact you from a different email.",
+            null, true);
+        return Ok();
+    }
 }

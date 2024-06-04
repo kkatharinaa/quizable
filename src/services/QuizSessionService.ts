@@ -77,4 +77,11 @@ export default class QuizSessionService{
             .then((text) => text.json())
             .catch(() => null)
     }
+
+    public static async sendEmailOnRegister(email: string) {
+        return (await fetch(`${this.url}/api/session/registerEmail/${email}`,
+            {
+                method: "POST",
+            }))
+    }
 }
