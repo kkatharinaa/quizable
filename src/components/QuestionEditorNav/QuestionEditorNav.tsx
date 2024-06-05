@@ -1,4 +1,4 @@
-import React, {FC} from "react";
+import React, {FC, useRef} from "react";
 import "./QuestionEditorNav.css"
 import {Question} from "../../models/Question.ts";
 import {ButtonComponent} from "../Button/Button.tsx";
@@ -14,9 +14,10 @@ interface QuestionEditorNavProps {
     onDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void
     onDragOver: (e: React.DragEvent<HTMLDivElement>) => void
     onDragDrop: (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => void
+    questionShortcutsRef: React.MutableRefObject<HTMLDivElement | null>
 }
 
-export const QuestionEditorNav: FC<QuestionEditorNavProps> = ({ questions, currentQuestionIndex, onSelect, onAdd, onDragStart, onDragOver, onDragDrop }) => {
+export const QuestionEditorNav: FC<QuestionEditorNavProps> = ({ questions, currentQuestionIndex, onSelect, onAdd, onDragStart, onDragOver, onDragDrop, questionShortcutsRef }) => {
 
     return (
         <div className="questionEditorNav">
@@ -27,7 +28,7 @@ export const QuestionEditorNav: FC<QuestionEditorNavProps> = ({ questions, curre
                 style={ButtonStyle.Accent}
                 onClick={onAdd}
             />
-            <div className="questionShortcuts">
+            <div className="questionShortcuts" ref={questionShortcutsRef}>
                 {questions.map((item, index) => (
                     <QuestionShortcut
                         key={item.id}
