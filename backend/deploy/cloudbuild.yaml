@@ -31,5 +31,16 @@ steps:
     entrypoint: bash
     args: 
       - -c 
-      - gcloud run deploy $(cat _PROJECT_NAME | tr -d '\r') --region=$(cat _REGION | tr -d '\r') --image $(cat _TAG | tr -d '\r') --allow-unauthenticated
+      - |
+        gcloud run deploy $(cat _PROJECT_NAME | tr -d '\r') --region=$(cat _REGION | tr -d '\r') --image $(cat _TAG | tr -d '\r') \
+              --cpu ${_CPU_LIMIT} \
+              --memory ${_MEMORY_LIMIT} \
+              --min-instances ${_MIN_INSTANCES} \
+              --max-instances ${_MAX_INSTANCES} \
+              --allow-unauthenticated \
+substitutions:
+  _CPU_LIMIT: '2'
+  _MEMORY_LIMIT: '1Gi'
+  _MIN_INSTANCES: '0'
+  _MAX_INSTANCES: '1'
 
