@@ -103,8 +103,9 @@ export const Join: FC = () => {
     }
 
     const validateInputLive = (newValue: string) => {
-        // update input value
-        setInputValue(newValue);
+        // update input value (make all letters big first)
+        const transformedValue = newValue.replace(/[a-z]/g, (char) => char.toUpperCase())
+        setInputValue(transformedValue);
 
         // validate the text
         validateText(newValue);
