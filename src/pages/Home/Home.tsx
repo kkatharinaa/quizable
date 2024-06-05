@@ -36,7 +36,7 @@ const Home: FC = () => {
             console.log("Got reconnect")
             setPopupProps({
                 title: "Do you want to reconnect?",
-                message: `This device was connected as "${reconnect.quizUser.identifier}" in a quiz`,
+                message: `This device was connected as "${reconnect.quizUser.identifier}" in a quiz. Not you? Try opening this page from a different browser or private window.`,
                 type: BottomNavBarType.Default,
                 onPrimaryClick: () => {
                     QuizSessionManagerSlave.getInstance().killSession()
