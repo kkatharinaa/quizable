@@ -64,7 +64,7 @@ export const Join: FC = () => {
                 if (reconnect) {
                     setPopupProps({
                         title: "You are already in this quiz session.",
-                        message: `This device is currently connected as "${reconnect.quizUser.identifier}".`,
+                        message: `This device is currently connected as "${reconnect.quizUser.identifier}". Not you? Try opening this page from a different browser or private window.`,
                         type: BottomNavBarType.Default,
                         onPrimaryClick: () => {
                             QuizSessionManagerSlave.getInstance().killSession()
@@ -244,7 +244,7 @@ export const Join: FC = () => {
         if (reconnect) {
             setPopupProps({
                 title: "Do you want to reconnect?",
-                message: `This device was connected as "${reconnect.quizUser.identifier}" in a quiz. To join a new quiz, please reconnect and then leave the old one.`,
+                message: `This device was connected as "${reconnect.quizUser.identifier}" in a quiz. To join a new quiz, please reconnect and then leave the old one. Not you? Try opening this page from a different browser or private window.`,
                 type: BottomNavBarType.Default,
                 onPrimaryClick: () => {
                     QuizSessionManagerSlave.getInstance().killSession()

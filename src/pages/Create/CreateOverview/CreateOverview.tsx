@@ -179,7 +179,7 @@ export const CreateOverview: FC = () => {
         if (reconnect) {
             setPopupProps({
                 title: "You are already connected to a quiz as a player.",
-                message: `This device is currently connected as "${reconnect.quizUser.identifier}" in a quiz. To start your own quiz session, please leave the other quiz first.`,
+                message: `This device is currently connected as "${reconnect.quizUser.identifier}" in a quiz. To start your own quiz session, please leave the other quiz first. Think we have made a mistake? Try opening this page from a different browser or private window.`,
                 type: BottomNavBarType.Default,
                 onPrimaryClick: () => {
                     QuizSessionManagerSlave.getInstance().killSession()
