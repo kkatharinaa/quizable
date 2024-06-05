@@ -87,4 +87,6 @@
 }
 .quizSessionQuestion .content .answersContainer .answerInputField {
     flex-basis: 30%;
+    height: calc((var(--answer-input-text-size))*3 + 36px*2 + 9px);
+    min-width: 350px;
 }
