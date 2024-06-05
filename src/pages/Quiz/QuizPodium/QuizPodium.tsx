@@ -41,7 +41,7 @@ export const QuizPodium: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSes
                 rank: rank
             })
             previousScore = sortedUsers[i].score
-            if (rank > 3) break
+            if (rank > 2) break
         }
 
         // if there are less than 3 players, add pseudo players
