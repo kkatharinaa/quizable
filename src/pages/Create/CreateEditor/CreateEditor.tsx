@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useState} from "react";
+import React, {FC, useEffect, useRef, useState} from "react";
 import "./CreateEditor.css"
 import {Quiz} from "../../../models/Quiz.ts";
 import {makeQuestion, Question, questionArraysAreEqual} from "../../../models/Question.ts";
@@ -39,6 +39,8 @@ export const CreateEditor: FC = () => {
     const [originalQuiz, setOriginalQuiz] = useState<Quiz | null>(null) // only needed for saving
     const [questions, setQuestions] = useState<Question[]>([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number | null>(null);
+    const previousQuestionsLength = useRef(questions.length)
+    const questionShortcutsRef = useRef<HTMLDivElement | null>(null)
     const [showingQuestionSettingsPopup, setShowingQuestionSettingsPopup] = useState(false);
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
@@ -88,6 +90,18 @@ export const CreateEditor: FC = () => {
         if (!loading && !user && isSetUp && !showingPopup) navigate("/login");
         if (error) console.log(error)
     }, [user, loading, navigate]);
+    useEffect(() => {
+        // if we added a question, set the currentquestionindex to its index
+        if (questions.length === previousQuestionsLength.current + 1) {
+            setCurrentQuestionIndex(questions.length - 1)
+            // scroll to bottom of questionShortcuts
+            if (questionShortcutsRef.current) {
+                questionShortcutsRef.current.scrollTop = questionShortcutsRef.current.scrollHeight
+            }
+        }
+        // keep the ref up to date
+        previousQuestionsLength.current = questions.length
+    }, [questions])
 
     // question functions
     const handleQuestionTitleInputChange = (value: string) => {
@@ -338,6 +352,7 @@ export const CreateEditor: FC = () => {
                     onDragStart={handleQuestionDragStart}
                     onDragOver={handleQuestionDragOver}
                     onDragDrop={handleQuestionDragDrop}
+                    questionShortcutsRef={questionShortcutsRef}
                 />}
             </div>
 
