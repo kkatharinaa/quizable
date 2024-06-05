@@ -3,11 +3,13 @@ import QuizSession from "../models/QuizSession";
 import { Question } from "../models/Question";
 import QuizUser from "../models/QuizUser";
 
+const env_var = import.meta.env
+
 export default class QuizSessionService{
    
     //static port: number = 5296
     //static url: string = `http://localhost:${this.port}`
-    static url: string = `https://quizapp-rueasghvla-nw.a.run.app`
+    public static url: string = env_var.VITE_API_URL
 
     public static async addSession(quizSession: QuizSession): Promise<string> {
         return (await fetch(`${this.url}/api/session`, 
@@ -74,5 +76,12 @@ export default class QuizSessionService{
         return fetch(`${this.url}/api/session/host/${hostId}`)
             .then((text) => text.json())
             .catch(() => null)
+    }
+
+    public static async sendEmailOnRegister(email: string) {
+        return (await fetch(`${this.url}/api/session/registerEmail/${email}`,
+            {
+                method: "POST",
+            }))
     }
 }

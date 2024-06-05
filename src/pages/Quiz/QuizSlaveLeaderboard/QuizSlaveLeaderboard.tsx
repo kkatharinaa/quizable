@@ -31,7 +31,7 @@ export const QuizSlaveLeaderboard: FC<QuizSlaveChildrenProps> = ({leaveQuizSessi
         <div className="quizSlaveLeaderboard">
             <BackgroundGems type={BackgroundGemsType.Primary2}/>
             { showComponent &&
-            <div className="content">
+            <div className="content" tabIndex={0}>
                 <h1>Your Score</h1>
                 {userStat() != null ? (
                     <QuizPlayerCard

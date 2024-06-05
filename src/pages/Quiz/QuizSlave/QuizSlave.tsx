@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from "react"
 import "./QuizSlave.css"
 import {useLocation, useNavigate} from "react-router-dom";
 import { getDeviceId } from "../../../helper/DeviceHelper";
-import QuizUser from "../../../models/QuizUser";
+import QuizUser, {quizUsersAreEqual} from "../../../models/QuizUser";
 import {
     showErrorPageNothingToFind,
     showErrorQuizSession
@@ -67,7 +67,7 @@ export const QuizSlave: FC = () => {
             const reconnect: {quizUser: QuizUser, quizSession: QuizSession} | null = await QuizSessionService.checkQuizUserReconnection(deviceId)
 
             if (reconnect) {
-                navigate("/quiz/player", {state: {quizSessionId: reconnect.quizSession.id, userName: reconnect.quizUser}})
+                navigate("/quiz/player", {state: {quizSessionId: reconnect.quizSession.id, quizUser: reconnect.quizUser}})
                 return
             }
         }
@@ -98,6 +98,15 @@ export const QuizSlave: FC = () => {
                 showErrorPageNothingToFind(navigate)
                 return
             }
+
+            // check that the info we have passed to the route is actually correct and fix if necessary
+            const deviceId: string = await getDeviceId();
+            const reconnectInfo: {quizUser: QuizUser, quizSession: QuizSession} | null = await QuizSessionService.checkQuizUserReconnection(deviceId)
+            if (reconnectInfo && (!quizUsersAreEqual(quizUser, reconnectInfo.quizUser) || quizSessionId != reconnectInfo.quizSession.id)) {
+                navigate("/quiz/player", {state: {quizSessionId: reconnectInfo.quizSession.id, quizUser: reconnectInfo.quizUser}})
+                return
+            }
+            // if reconnectInfo is null we are just proceeding, because it will always be null the first time the user views this screen right after joining a quiz. if reconnectInfo is null and the user joins with the wrong credentials, the server should send back a nosession message
 
             QuizSessionManagerSlave.getInstance().subscribe(handleQuizSessionManagerSlaveChange);
 

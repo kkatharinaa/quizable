@@ -25,6 +25,9 @@ import {auth, logInWithEmailLink, logOutUser} from "../../../firebase/auth.ts";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Loading } from "../../Loading/Loading.tsx";
 import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
+import QuizUser from "../../../models/QuizUser.ts";
+import {getDeviceId} from "../../../helper/DeviceHelper.ts";
+import {QuizSessionManagerSlave} from "../../../managers/QuizSessionManagerSlave.tsx";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -119,14 +122,19 @@ export const CreateOverview: FC = () => {
         setQuizSettingsPopupProps([newQuiz, true])
         setShowingQuizSettingsPopup(true)
     };
-    const handleEditQuiz = (id: string) => {
-        const quizToBeEdited = findQuizByID(id)
-        if (quizToBeEdited == undefined) {
-            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
-            return
+    const handleEditQuiz = async (id: string) => {
+        const editQuiz = () => {
+            const quizToBeEdited = findQuizByID(id)
+            if (quizToBeEdited == undefined) {
+                showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
+                return
+            }
+            setQuizSettingsPopupProps([quizToBeEdited, false])
+            setShowingQuizSettingsPopup(true)
         }
-        setQuizSettingsPopupProps([quizToBeEdited, false])
-        setShowingQuizSettingsPopup(true)
+
+        // prevent user from editing quiz which is currently running
+        await editOrDeleteIfNotRunning(id, "edit", editQuiz)
     };
     const handlePlayQuiz = async (id: string) => {
         const playQuiz = async () => {
@@ -158,6 +166,41 @@ export const CreateOverview: FC = () => {
 
             // navigate to the lobby page
             navigate('/quiz', {state: {quizSessionId: quizSessionPlay.id, quizId: quizToBePlayed!.id}})
+        }
+
+        // check that user is not a player in quiz already
+        const quizUser: QuizUser | null = localStorage.getItem("quizUser") ? JSON.parse(localStorage.getItem("quizUser")!) : null;
+        const deviceId: string = quizUser?.deviceId ?? await getDeviceId();
+        const reconnect: {
+            quizUser: QuizUser,
+            quizSession: QuizSession
+        } | null = await QuizSessionService.checkQuizUserReconnection(deviceId)
+
+        if (reconnect) {
+            setPopupProps({
+                title: "You are already connected to a quiz as a player.",
+                message: `This device is currently connected as "${reconnect.quizUser.identifier}" in a quiz. To start your own quiz session, please leave the other quiz first.`,
+                type: BottomNavBarType.Default,
+                onPrimaryClick: () => {
+                    QuizSessionManagerSlave.getInstance().killSession()
+                    navigate("/quiz/player", {
+                        state: {
+                            quizSessionId: reconnect.quizSession.id,
+                            quizUser: reconnect.quizUser
+                        }
+                    })
+                },
+                primaryButtonText: "Reconnect As Player",
+                primaryButtonIcon: PLAY_ICON_LIGHT,
+                onSecondaryClick: () => {
+                    setShowingPopup(false);
+                    setPopupProps(null);
+                },
+                secondaryButtonText: "Cancel",
+                secondaryButtonIcon: null
+            })
+            setShowingPopup(true)
+            return
         }
 
         // warn user if another session is already running, or else just start a new session
@@ -221,37 +264,67 @@ export const CreateOverview: FC = () => {
     const handleEditQuizEditQuestions = (id: string) => {
         navigateToEditor(id)
     };
-    const handleDeleteQuiz = (id: string) => {
-        // popup for confirmation
-        const deletePopup: PopupProps = {
-            title: "Are you sure you want to delete this quiz?",
-            message: "This action cannot be undone.",
-            secondaryButtonText: "Cancel",
-            secondaryButtonIcon: null,
-            primaryButtonText: "Yes, I Am Sure",
-            primaryButtonIcon: null,
-            type: BottomNavBarType.Default,
-            onSecondaryClick: () => {
-                hidePopup()
-            },
-            onPrimaryClick: () => {
-                if (user?.uid == null) {
-                    showPopupSomethingWentWrong(showPopup, () => setShowingPopup(false))
-                    return
-                }
-                // delete quiz from firebase and quizzes state
-                QuizRepository.delete(user!.uid, id).then(() => {
-                    if (showingQuizSettingsPopup) handleEditQuizClose()
-                    const updatedQuizzes = [...quizzes]
-                    const index = updatedQuizzes.findIndex(quiz => quiz.id == id)
-                    updatedQuizzes.splice(index, 1);
-                    setQuizzes(updatedQuizzes)
+    const handleDeleteQuiz = async (id: string) => {
+        const deleteQuiz = () => {
+            // popup for confirmation
+            const deletePopup: PopupProps = {
+                title: "Are you sure you want to delete this quiz?",
+                message: "This action cannot be undone.",
+                secondaryButtonText: "Cancel",
+                secondaryButtonIcon: null,
+                primaryButtonText: "Yes, I Am Sure",
+                primaryButtonIcon: null,
+                type: BottomNavBarType.Default,
+                onSecondaryClick: () => {
                     hidePopup()
-                })
-            },
+                },
+                onPrimaryClick: () => {
+                    if (user?.uid == null) {
+                        showPopupSomethingWentWrong(showPopup, () => setShowingPopup(false))
+                        return
+                    }
+                    // delete quiz from firebase and quizzes state
+                    QuizRepository.delete(user!.uid, id).then(() => {
+                        if (showingQuizSettingsPopup) handleEditQuizClose()
+                        const updatedQuizzes = [...quizzes]
+                        const index = updatedQuizzes.findIndex(quiz => quiz.id == id)
+                        updatedQuizzes.splice(index, 1);
+                        setQuizzes(updatedQuizzes)
+                        hidePopup()
+                    })
+                },
+            }
+            showPopup(deletePopup)
         }
-        showPopup(deletePopup)
+
+        // prevent user from deleting quiz which is currently running
+        await editOrDeleteIfNotRunning(id, "delete", deleteQuiz)
     };
+    const editOrDeleteIfNotRunning = async (id: string, action: string, editOrDelete: () => void) => {
+        // prevent user from editing or deleting quiz which is currently running
+        if (user == undefined) return editOrDelete()
+        const quizSession: QuizSession | null = await QuizSessionService.checkHostReconnection(user.uid)
+        if (quizSession == null || quizSession.quizId != id) return editOrDelete()
+
+        setPopupProps({
+            title: `You cannot ${action} this quiz right now.`,
+            message: `This quiz is currently being played. Please end the quiz session first in order to ${action} the quiz.`,
+            type: BottomNavBarType.Default,
+            onPrimaryClick: () => {
+                QuizSessionManager.getInstance().resetManager();
+                navigate('/quiz', {state: {quizSessionId: quizSession.id, quizId: quizSession.quizId}})
+            },
+            primaryButtonText: "To Quiz Session",
+            primaryButtonIcon: PLAY_ICON_LIGHT,
+            onSecondaryClick: () => {
+                setShowingPopup(false);
+                setPopupProps(null);
+            },
+            secondaryButtonText: "Cancel",
+            secondaryButtonIcon: null
+        })
+        setShowingPopup(true)
+    }
 
     // nav functions
     const navigateToEditor = (id: string) => {
@@ -291,7 +364,7 @@ export const CreateOverview: FC = () => {
             {(loading || !isSetUp) ? (
                 <Loading/>
             ) : (
-                <div className="content">
+                <div className="content" tabIndex={0}>
                     <h1>Welcome, User</h1>
                     <QuizCardContainer
                         quizzes={quizzes}

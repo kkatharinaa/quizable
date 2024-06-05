@@ -50,8 +50,8 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionMan
             <QuizCodeTag
                 code={quizSessionManager.quizCode}
             />
-            <div className="content">
-                <h1>{currentQuestion?.questionText ?? ""}</h1>
+            <div className="content" tabIndex={0}>
+                <h1 className={currentQuestion?.maxQuestionTime == 0 ? "marginBottom" : ""}>{currentQuestion?.questionText ?? ""}</h1>
                 { (currentQuestion != null && currentQuestion?.maxQuestionTime != 0 && quizSessionManager.remainingTime != 0) &&
                     <Timer
                         remainingTime={remainingTime}

@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /App
 
 # Copy everything
-COPY . ./
+COPY . ./   
 
 # Restore as distinct layers
 RUN dotnet restore
@@ -15,6 +15,16 @@ WORKDIR /App
 COPY --from=build-env /App/out .
 
 ENV ASPNETCORE_hostBuilder__reloadConfigOnChange=false
+
+ARG EMAIL_SMTP
+ARG EMAIL_PORT
+ARG EMAIL_ADDRESS
+ARG EMAIL_PASSWORD
+
+ENV EMAIL_SMTP=$EMAIL_SMTP
+ENV EMAIL_PORT=$EMAIL_PORT
+ENV EMAIL_ADDRESS=$EMAIL_ADDRESS
+ENV EMAIL_PASSWORD=$EMAIL_PASSWORD
 
 EXPOSE 5296
 

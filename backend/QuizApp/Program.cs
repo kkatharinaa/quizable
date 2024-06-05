@@ -19,10 +19,26 @@ builder.Services.AddSingleton<IQuizSessionService, QuizSessionService>();
 builder.Services.AddSignalR();
 
 DotNetEnv.Env.Load();
+
+// 
+
 var port = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrEmpty(port)) {
     builder.WebHost.UseUrls($"http://*:{port}");
 }
+
+var email_smtp = Environment.GetEnvironmentVariable("EMAIL_SMTP");
+var email_port = Environment.GetEnvironmentVariable("EMAIL_PORT");
+
+if(string.IsNullOrEmpty(email_smtp) || string.IsNullOrEmpty(email_smtp))
+{
+    DotNetEnv.Env.Load("../../");
+
+    if(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("EMAIL_SMTP"))){
+        throw new Exception("Cannot load environment variables. Please check if .env file in root exists.");
+    }
+}
+    
 
 var app = builder.Build();
 

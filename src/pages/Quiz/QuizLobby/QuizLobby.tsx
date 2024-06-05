@@ -29,11 +29,11 @@ export const QuizLobby: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQ
     return (
         <div className="quizLobby">
             <BackgroundGems type={BackgroundGemsType.Primary}/>
-            <div className="content">
+            <div className="content" tabIndex={0}>
                 <div>
                     <div className="entryIdContent">
                         <div >   
-                            <p className="entryIdContentTitle">Game code</p>
+                            <p className="entryIdContentTitle">Game Code</p>
                             <p className="entryIdContentGameCode">{quizSessionManager.quizCode}</p>
                         </div>
                         <canvas id="canvasQrCode"></canvas>

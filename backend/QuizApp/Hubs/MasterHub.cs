@@ -64,8 +64,8 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
 
                     await NotifyStateChange(quizSessionId);
                     
-                    // start timer
-                    await StartNewCountdown(quizSessionId, nextQuestion.maxQuestionTime);
+                    // start timer if the maxQuestion time is not 0
+                    if (nextQuestion.maxQuestionTime > 0) await StartNewCountdown(quizSessionId, nextQuestion.maxQuestionTime);
                 }
                 else
                 {
@@ -186,42 +186,13 @@ public class MasterHub(ILogger<MasterHub> logger, IQuizSessionService quizSessio
             var csvBytes = Encoding.UTF8.GetBytes(csvContent);
             var attachment = new Attachment(new MemoryStream(csvBytes), $"Report_{validQuizTitle}.csv", "text/csv");
 
-            await SendEmailAsync(emailAddress, "Quiz Report", "Attached please find the requested quiz report. Thank you for using Quizable!", attachment);
+            // send email
+            var emailSender = new EmailSender(logger);
+            await emailSender.SendEmailAsync(emailAddress, "Quiz Report", "Attached please find the requested quiz report. Thank you for using Quizable!", attachment);
             
             // wait for a bit until the email can be sent again
             await Task.Delay(TimeSpan.FromMinutes(2));
             await Clients.All.SendAsync($"canResendReport:{quizSessionId}/quizSessionHost0123456");
-        }
-    }
-
-    private async Task SendEmailAsync(string email, string subject, string body, Attachment attachment)
-    {
-        // read secrets
-        var smtp = Environment.GetEnvironmentVariable("EMAIL_SMTP");
-        var port = Environment.GetEnvironmentVariable("EMAIL_PORT");
-        var address = Environment.GetEnvironmentVariable("EMAIL_ADDRESS");
-        var password = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
-
-        if (smtp == null || port == null || address == null || password == null)
-        {
-            logger.LogError("Could not send email. One of the following was not specified at backend/QuizApp/.env: EMAIL_SMTP, EMAIL_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD");
-            return;
-        }
-        
-        var message = new MailMessage();
-        message.From = new MailAddress(address);
-        message.To.Add(new MailAddress(email));
-        message.Subject = subject;
-        message.Body = body;
-        message.Attachments.Add(attachment);
-        
-        using (var smtpClient = new SmtpClient(smtp))
-        {
-            smtpClient.Port = int.Parse(port);
-            smtpClient.Credentials = new NetworkCredential(address, password);
-            smtpClient.EnableSsl = true; // Enable SSL for secure transmission
-
-            await smtpClient.SendMailAsync(message);
         }
     }
 

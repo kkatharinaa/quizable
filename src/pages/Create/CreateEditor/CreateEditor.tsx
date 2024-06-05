@@ -308,7 +308,7 @@ export const CreateEditor: FC = () => {
     return (
         <div className="createEditor">
             <BackgroundGems type={BackgroundGemsType.Grey}/>
-            <div className="contentAndMenu">
+            <div className="contentAndMenu" tabIndex={0}>
                 { originalQuiz != null &&
                 <p className="quizName">{`Quiz / ${originalQuiz.name}`}</p>
                 }

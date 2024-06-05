@@ -52,6 +52,7 @@
 .popupTitleAndMessage .popupMessage {
     margin: 0;
     font-size: 18px;
+    text-shadow: 0 0 2px #9a1039; /* to fix contrast issue of white text on primary colour background */
 }
 
 .popupField .bottomNavBar {

@@ -50,11 +50,11 @@ export const Join: FC = () => {
         navigate("/");
     }
 
-    const validateQuizCode = async () => {
+    const validateQuizCode = async (quizCode: string) => {
         if(validation.valid){
 
             // make request to QuizService if code exists
-            const quizSessionCodeValid = await QuizSessionService.isQuizCodeValid(inputValue)
+            const quizSessionCodeValid = await QuizSessionService.isQuizCodeValid(quizCode)
             if(quizSessionCodeValid.valid){
                 // check if we are already logged in and if yes forward the user to the quiz
                 const storedQuizUser: QuizUser | null = localStorage.getItem("quizUser") ? JSON.parse(localStorage.getItem("quizUser")!) : null;
@@ -87,7 +87,7 @@ export const Join: FC = () => {
                     setShowingPopup(true)
                 } else {
                     setValidQuizCode({
-                        code: inputValue,
+                        code: quizCode,
                         quizSessionId: quizSessionCodeValid.sessionId
                     })
                     setInputValue("")
@@ -202,13 +202,8 @@ export const Join: FC = () => {
 
         if(entryIdQuery != null) {
             console.log("EntryId found: " + entryIdQuery)
-            const quizSessionCodeValid = await QuizSessionService.isQuizCodeValid(entryIdQuery)
-
-            setValidQuizCode({
-                code: entryIdQuery,
-                quizSessionId: quizSessionCodeValid.sessionId
-            })
-            setInputValue("")
+            setInputValue(entryIdQuery)
+            await validateQuizCode(entryIdQuery)
         }
     }
 
@@ -289,12 +284,12 @@ export const Join: FC = () => {
     return (
         <div className="joinPage">
             <BackgroundGems type={BackgroundGemsType.Primary}></BackgroundGems>
-            <div className="contentJoin">
+            <div className="contentJoin" tabIndex={0}>
                 <div className="inputFieldWithValidationText">
                     <InputField
                         value={inputValue}
                         onChange={validQuizCode.code.length == 0 ? validateInputLive : updateInput}
-                        onEnter={validQuizCode.code.length == 0 ? validateQuizCode : joinQuiz}
+                        onEnter={validQuizCode.code.length == 0 ? () => validateQuizCode(inputValue) : joinQuiz}
                         type={validQuizCode.code.length == 0 ? InputFieldType.Quizcode : InputFieldType.Username}
                     />
                     {!validation.valid &&
@@ -310,7 +305,7 @@ export const Join: FC = () => {
                 primaryButtonIcon={null}
                 type={BottomNavBarType.Default}
                 style={BottomNavBarStyle.Long}
-                onPrimaryClick={validQuizCode.code.length == 0 ? validateQuizCode : joinQuiz}
+                onPrimaryClick={validQuizCode.code.length == 0 ? () => validateQuizCode(inputValue) : joinQuiz}
                 onSecondaryClick={navigateHome}
             />
 

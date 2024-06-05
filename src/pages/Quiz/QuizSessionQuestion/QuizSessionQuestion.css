@@ -38,8 +38,10 @@
     line-height: normal;
     margin: 0;
     max-width: 100%;
-    overflow: hidden;
     text-overflow: ellipsis;
+}
+.quizSessionQuestion .content .marginBottom {
+    margin-bottom: 50px;
 }
 
 .quizSessionQuestion .content .timer {

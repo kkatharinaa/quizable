@@ -20,6 +20,8 @@ import {QuizSessionManager, QuizSessionManagerInterface} from "../../../managers
 import { useAuthState } from "react-firebase-hooks/auth";
 import {auth, logInWithEmailLink} from "../../../firebase/auth.ts";
 import {LoadingPage} from "../../Loading/Loading.tsx";
+import QuizSession from "../../../models/QuizSession.ts";
+import QuizSessionService from "../../../services/QuizSessionService.ts";
 
 export interface QuizMasterChildrenProps {
     quizSessionManager: QuizSessionManagerInterface
@@ -102,6 +104,21 @@ export const QuizMaster: FC = () => {
             return
         }
 
+        // check that the info we have passed to the route is actually related to a running quiz session that we are hosting and fix if necessary
+        if (user) {
+            const quizSession: QuizSession | null = await QuizSessionService.checkHostReconnection(user.uid)
+            if (quizSession == null) {
+                console.log("no quiz session")
+                showErrorPageNothingToFind(navigate)
+                return
+            }
+            if (quizSessionId != quizSession.id || quizId != quizSession.quizId) {
+                QuizSessionManager.getInstance().resetManager();
+                navigate('/quiz', {state: {quizSessionId: quizSession.id, quizId: quizSession.quizId}})
+                return
+            }
+        }
+
         await logInWithEmailLink(window.location.href, () => {
             navigate("/login")
         }, showPopup, hidePopup)
@@ -137,7 +154,7 @@ export const QuizMaster: FC = () => {
         };
         QuizSessionManager.getInstance().subscribe(handleQuizSessionManagerChange);
 
-        if (!loading) setUp()
+        if (!loading && user) setUp()
 
         return () => {
             QuizSessionManager.getInstance().unsubscribe(handleQuizSessionManagerChange);

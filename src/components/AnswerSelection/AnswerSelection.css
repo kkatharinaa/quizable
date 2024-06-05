@@ -9,6 +9,7 @@
     background: var(--black);
     position: relative;
     height: 150px;
+    overflow: hidden;
 }
 .answerSelection.disabled, .answerSelection.unselected {
     background: var(--disabled-button);
@@ -32,6 +33,7 @@
     width: 100%;
     text-overflow: ellipsis;
     word-wrap: break-word;
+    overflow: hidden;
 }
 .answerSelection.disabled p, .answerSelection.unselected p {
     color: var(--disabled-button-text);

@@ -1,3 +1,4 @@
+
 steps:
   - name: 'ubuntu'
     entrypoint: bash
@@ -10,16 +11,17 @@ steps:
       echo $$GCLOUD_PROJECT_REPO_NAME > _REPO_NAME
       echo $$GCLOUD_PROJECT_REGION > _REGION
       echo $$GCLOUD_PROJECT_REGION-docker.pkg.dev/$$GCLOUD_PROJECT_ID/$$GCLOUD_PROJECT_REPO_NAME/$$GCLOUD_PROJECT_NAME-image:$$GCLOUD_PROJECT_NAME > _TAG
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: sh
-    args: [ '-c', 'gcloud artifacts repositories create quizapp-repo --repository-format=docker --location=europe-central2 --description="Docker repository"']
-    allowFailure: true
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: bash
     args: 
       - -c
       - |
-        docker build -t  $(cat _TAG | tr -d '\r') ./backend
+        source .env
+        docker build --build-arg EMAIL_SMTP=$$EMAIL_SMTP \
+             --build-arg EMAIL_PORT=$$EMAIL_PORT \
+             --build-arg EMAIL_ADDRESS=$$EMAIL_ADDRESS \
+             --build-arg EMAIL_PASSWORD="$$EMAIL_PASSWORD" \
+             -t $(cat _TAG | tr -d '\r') ./backend
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: bash
     args: 

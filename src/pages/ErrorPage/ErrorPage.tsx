@@ -42,7 +42,7 @@ export const ErrorPage: FC = () => {
             <BackgroundGems
                 type={BackgroundGemsType.Primary}
             />
-            <div className="content">
+            <div className="content" tabIndex={0}>
                 <h1>{message}</h1>
             </div>
 
