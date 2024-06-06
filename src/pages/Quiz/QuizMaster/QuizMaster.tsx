@@ -2,7 +2,7 @@ import {FC, useEffect, useState} from "react"
 import "./QuizMaster.css"
 import {useLocation, useNavigate} from "react-router-dom";
 import {
-    ErrorPageLinkedTo, showErrorPageNothingToFind, showErrorPageScreenNotSupported,
+    ErrorPageLinkedTo, showErrorPageNothingToFind,
     showErrorPageSomethingWentWrong, showErrorQuizSession
 } from "../../ErrorPage/ErrorPageExports.ts";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
@@ -22,6 +22,8 @@ import {auth, logInWithEmailLink} from "../../../firebase/auth.ts";
 import {LoadingPage} from "../../Loading/Loading.tsx";
 import QuizSession from "../../../models/QuizSession.ts";
 import QuizSessionService from "../../../services/QuizSessionService.ts";
+import {handleResize} from "../../../helper/ResizeHelper.ts";
+import {ErrorPage} from "../../ErrorPage/ErrorPage.tsx";
 
 export interface QuizMasterChildrenProps {
     quizSessionManager: QuizSessionManagerInterface
@@ -42,6 +44,7 @@ export const QuizMaster: FC = () => {
     const [showingPopup, setShowingPopup] = useState(false);
     const [user, loading, error] = useAuthState(auth);
     const [isSetUp, setIsSetUp] = useState(false);
+    const [ screenIsUnsupported, setScreenIsUnsupported ] = useState(false)
     
     const setQuizFromFirestore = async (quizID: string) => {
         if (quizID == null) {
@@ -135,14 +138,11 @@ export const QuizMaster: FC = () => {
     }
 
     useEffect(() => {
-        // redirect if the screen is too narrow
-        const handleResize = () => {
-            if (window.innerWidth <= 768) {
-                showErrorPageScreenNotSupported(navigate)
-            }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
+        const resize = () => {
+            handleResize(setScreenIsUnsupported)
+        }
+        resize()
+        window.addEventListener('resize', resize);
 
         const handleQuizSessionManagerChange = () => {
             if (QuizSessionManager.getInstanceAsInterface().errorGettingSession) {
@@ -158,7 +158,7 @@ export const QuizMaster: FC = () => {
 
         return () => {
             QuizSessionManager.getInstance().unsubscribe(handleQuizSessionManagerChange);
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', resize);
         };
     }, [])
 
@@ -169,6 +169,11 @@ export const QuizMaster: FC = () => {
     }, [user, loading, navigate]);
 
     return (
+        (screenIsUnsupported) ? (
+            <ErrorPage
+                message={"The screen you tried to view is not supported for your screen width."}
+            />
+        ) : (
         <div className="quizMaster">
             { (quizSessionManager.quizState === QuizState.lobby && quizSessionManager.sessionExists) &&
                 <QuizLobby
@@ -224,6 +229,7 @@ export const QuizMaster: FC = () => {
                 />
             }
         </div>
+        )
     )
 }
 

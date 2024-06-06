@@ -7,14 +7,19 @@ import {BackgroundGemsType} from "../../components/BackgroundGems/BackgroundGems
 import {BottomNavBar} from "../../components/BottomNavBar/BottomNavBar.tsx";
 import {BottomNavBarStyle, BottomNavBarType} from "../../components/BottomNavBar/BottomNavBarExports.ts";
 
-export const ErrorPage: FC = () => {
+export interface ErrorPageProps {
+    message?: string
+    linkTo?: ErrorPageLinkedTo
+}
+
+export const ErrorPage: FC<ErrorPageProps> = (props) => {
 
     const navigate = useNavigate();
     const {state} = useLocation();
 
     // Read values passed on state
-    const message: string | null = state ? state.message : null;
-    const linkTo: ErrorPageLinkedTo = state ? state.linkTo : ErrorPageLinkedTo.Home
+    const message: string | null = state.message ?? props.message ?? null
+    const linkTo: ErrorPageLinkedTo = state.linkTo ?? props.linkTo ?? ErrorPageLinkedTo.Home
 
     useEffect(() => {
         // prevent someone from manually going to the error path

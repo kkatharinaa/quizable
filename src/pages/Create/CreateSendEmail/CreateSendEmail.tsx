@@ -14,7 +14,8 @@ import {ButtonStyle} from "../../../components/Button/ButtonExports.ts";
 import {auth, sendEmailLink} from "../../../firebase/auth.ts";
 import {useAuthState} from "react-firebase-hooks/auth";
 import {Loading} from "../../Loading/Loading.tsx";
-import {showErrorPageScreenNotSupported} from "../../ErrorPage/ErrorPageExports.ts";
+import {ErrorPage} from "../../ErrorPage/ErrorPage.tsx";
+import {handleResize} from "../../../helper/ResizeHelper.ts";
 
 export const CreateSendEmail: FC = () => {
     const navigate = useNavigate()
@@ -25,6 +26,7 @@ export const CreateSendEmail: FC = () => {
     const [ sentEmail, setSentEmail ] = useState(false)
     const [ isSetUp, setIsSetUp ] = useState(false)
     const [user, loading, error] = useAuthState(auth);
+    const [ screenIsUnsupported, setScreenIsUnsupported ] = useState(false)
     
     const updateInput = (newValue: string) => {
         setInputValue(newValue)
@@ -56,17 +58,14 @@ export const CreateSendEmail: FC = () => {
     }
 
     useEffect(() => {
-        // redirect if the screen is too narrow
-        const handleResize = () => {
-            if (window.innerWidth <= 768) {
-                showErrorPageScreenNotSupported(navigate)
-            }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
+        const resize = () => {
+            handleResize(setScreenIsUnsupported)
+        }
+        resize()
+        window.addEventListener('resize', resize);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', resize);
         };
     }, []);
     useEffect(() => {
@@ -77,10 +76,15 @@ export const CreateSendEmail: FC = () => {
     }, [user, loading, navigate]);
 
     return (
+        (screenIsUnsupported) ? (
+            <ErrorPage
+                message={"The screen you tried to view is not supported for your screen width."}
+            />
+        ) : (
         <div className="login">
             <BackgroundGems type={BackgroundGemsType.Primary}></BackgroundGems>
 
-            { (loading || !isSetUp) ? (
+            {(loading || !isSetUp) ? (
                 <Loading/>
             ) : (
                 <div className="content" tabIndex={0}>
@@ -98,7 +102,7 @@ export const CreateSendEmail: FC = () => {
                     </div>
                 </div>
             )}
-            { (!loading && isSetUp) &&
+            {(!loading && isSetUp) &&
                 <BottomNavBar
                     secondaryButtonText="Home"
                     secondaryButtonIcon={RETURN_ICON_DARK}
@@ -112,5 +116,6 @@ export const CreateSendEmail: FC = () => {
                 />
             }
         </div>
+        )
     )
 }

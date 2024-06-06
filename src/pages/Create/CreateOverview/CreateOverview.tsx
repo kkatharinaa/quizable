@@ -16,7 +16,6 @@ import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundG
 import {LEAVE_ICON_DARK, PLAY_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {
     ErrorPageLinkedTo,
-    showErrorPageScreenNotSupported,
     showErrorPageSomethingWentWrong
 } from "../../ErrorPage/ErrorPageExports.ts";
 import {quizOptionsAreEqual} from "../../../models/QuizOptions.ts";
@@ -28,6 +27,8 @@ import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExport
 import QuizUser from "../../../models/QuizUser.ts";
 import {getDeviceId} from "../../../helper/DeviceHelper.ts";
 import {QuizSessionManagerSlave} from "../../../managers/QuizSessionManagerSlave.tsx";
+import {handleResize} from "../../../helper/ResizeHelper.ts";
+import {ErrorPage} from "../../ErrorPage/ErrorPage.tsx";
 
 export const CreateOverview: FC = () => {
     // set up router stuff and getting query parameters
@@ -45,6 +46,7 @@ export const CreateOverview: FC = () => {
     const [showingPopup, setShowingPopup] = useState(false);
     const [user, loading, error] = useAuthState(auth);
     const [isSetUp, setIsSetUp] = useState(false);
+    const [ screenIsUnsupported, setScreenIsUnsupported ] = useState(false)
     
     // get all of a user's quizzes from firebase
     const setQuizzesFromFirestore = async (userId: string) => {
@@ -70,14 +72,11 @@ export const CreateOverview: FC = () => {
     }
     
     useEffect(() => {
-        // redirect if the screen is too narrow
-        const handleResize = () => {
-            if (window.innerWidth <= 768) {
-                showErrorPageScreenNotSupported(navigate)
-            }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
+        const resize = () => {
+            handleResize(setScreenIsUnsupported)
+        }
+        resize()
+        window.addEventListener('resize', resize);
 
         const setUp = async () => {
             await logInWithEmailLink(window.location.href, () => {
@@ -89,7 +88,7 @@ export const CreateOverview: FC = () => {
         setUp()
 
         return () => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', resize);
         };
     }, []);
     useEffect(() => {
@@ -358,6 +357,11 @@ export const CreateOverview: FC = () => {
     }
 
     return (
+        (screenIsUnsupported) ? (
+            <ErrorPage
+                message={"The screen you tried to view is not supported for your screen width."}
+            />
+        ) : (
         <div className="createOverview">
             <BackgroundGems type={BackgroundGemsType.Primary}/>
 
@@ -412,5 +416,6 @@ export const CreateOverview: FC = () => {
                 />
             }
         </div>
+        )
     )
 }

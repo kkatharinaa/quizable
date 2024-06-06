@@ -13,7 +13,7 @@ import QuizRepository from "../../../repositories/QuizRepository.ts";
 import {QuestionSettingsPopup} from "../../../components/QuestionSettingsPopup/QuestionSettingsPopup.tsx";
 import {
     ErrorPageLinkedTo,
-    showErrorPageNothingToFind, showErrorPageScreenNotSupported,
+    showErrorPageNothingToFind,
     showErrorPageSomethingWentWrong
 } from "../../ErrorPage/ErrorPageExports.ts";
 import {makeAnswer} from "../../../models/Answer.ts";
@@ -22,6 +22,8 @@ import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundG
 import {useAuthState} from "react-firebase-hooks/auth";
 import {auth, logInWithEmailLink} from "../../../firebase/auth.ts";
 import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
+import {ErrorPage} from "../../ErrorPage/ErrorPage.tsx";
+import {handleResize} from "../../../helper/ResizeHelper.ts";
 
 export const CreateEditor: FC = () => {
 
@@ -46,6 +48,7 @@ export const CreateEditor: FC = () => {
     const [showingPopup, setShowingPopup] = useState(false);
     const [user, loading, error] = useAuthState(auth);
     const [isSetUp, setIsSetUp] = useState(false);
+    const [ screenIsUnsupported, setScreenIsUnsupported ] = useState(false)
 
     // get quiz from Firebase using the quizID
     const setQuizFromFirestore = async () => {
@@ -64,14 +67,11 @@ export const CreateEditor: FC = () => {
     }
 
     useEffect(() => {
-        // redirect if the screen is too narrow
-        const handleResize = () => {
-            if (window.innerWidth <= 768) {
-                showErrorPageScreenNotSupported(navigate)
-            }
-        };
-        handleResize();
-        window.addEventListener('resize', handleResize);
+        const resize = () => {
+            handleResize(setScreenIsUnsupported)
+        }
+        resize()
+        window.addEventListener('resize', resize);
 
         const setUp = async () => {
             await logInWithEmailLink(window.location.href, () => {
@@ -83,7 +83,7 @@ export const CreateEditor: FC = () => {
         setUp()
 
         return () => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener('resize', resize);
         };
     }, []);
     useEffect(() => {
@@ -320,6 +320,11 @@ export const CreateEditor: FC = () => {
     }
 
     return (
+        (screenIsUnsupported) ? (
+            <ErrorPage
+                message={"The screen you tried to view is not supported for your screen width."}
+            />
+        ) : (
         <div className="createEditor">
             <BackgroundGems type={BackgroundGemsType.Grey}/>
             <div className="contentAndMenu" tabIndex={0}>
@@ -388,5 +393,6 @@ export const CreateEditor: FC = () => {
                 onPrimaryClick={popupProps.onPrimaryClick}
             />}
         </div>
+        )
     )
 }
