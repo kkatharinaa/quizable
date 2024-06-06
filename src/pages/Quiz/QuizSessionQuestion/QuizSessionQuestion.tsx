@@ -1,7 +1,7 @@
 import {FC, useEffect, useState} from "react";
 import "./QuizSessionQuestion.css"
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
-import {POWER_ICON_DARK, SKIP_ICON_LIGHT, USER_ICON_LIGHT} from "../../../assets/Icons.ts";
+import {POWER_ICON_DARK, SKIP_ICON_DISABLED, SKIP_ICON_LIGHT, USER_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {Timer} from "../../../components/Timer/Timer.tsx";
 import {AnswerInputField} from "../../../components/AnswerInputField/AnswerInputField.tsx";
@@ -14,8 +14,9 @@ import {useNavigate} from "react-router-dom";
 import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
 import {showErrorPageSomethingWentWrong} from "../../ErrorPage/ErrorPageExports.ts";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
+import {ButtonStyle} from "../../../components/Button/ButtonExports.ts";
 
-export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQuizSession}) => {
+export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQuizSession, buttonClickDisabled, disableButtonShortly}) => {
     const navigate = useNavigate();
 
     const [currentQuestion] = useState<Question | null>(quizSessionManager.currentQuestion);
@@ -30,6 +31,7 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionMan
     const handleSkipQuestion = () => {
         // move on to answer statistics screen
         QuizSessionManager.getInstance().skipQuestion()
+        disableButtonShortly()
     }
 
     useEffect(() => {
@@ -81,11 +83,12 @@ export const QuizSessionQuestion: FC<QuizMasterChildrenProps> = ({quizSessionMan
                 secondaryButtonText="End Quiz"
                 secondaryButtonIcon={POWER_ICON_DARK}
                 primaryButtonText={(currentQuestion?.maxQuestionTime != 0) ? "Skip" : "Next"}
-                primaryButtonIcon={SKIP_ICON_LIGHT}
+                primaryButtonIcon={buttonClickDisabled ? SKIP_ICON_DISABLED : SKIP_ICON_LIGHT}
                 type={BottomNavBarType.Default}
                 style={BottomNavBarStyle.Long}
                 onSecondaryClick={endQuizSession}
-                onPrimaryClick={handleSkipQuestion}
+                onPrimaryClick={buttonClickDisabled ? undefined : handleSkipQuestion}
+                alternativePrimaryButtonStyle={buttonClickDisabled ? ButtonStyle.Disabled : undefined}
             />
         </div>
     );

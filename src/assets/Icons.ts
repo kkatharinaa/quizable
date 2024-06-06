@@ -105,6 +105,10 @@ export const SKIP_ICON_LIGHT: Icon = {
     path: '/assets/icon-skip-light.svg',
     alt: 'Skip',
 };
+export const SKIP_ICON_DISABLED: Icon = {
+    path: '/assets/icon-skip-disabled.svg',
+    alt: 'Skip',
+};
 
 export const POWER_ICON_DARK: Icon = {
     path: '/assets/icon-power-dark.svg',

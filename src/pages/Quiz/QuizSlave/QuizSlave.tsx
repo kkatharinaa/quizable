@@ -4,6 +4,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 import { getDeviceId } from "../../../helper/DeviceHelper";
 import QuizUser, {quizUsersAreEqual} from "../../../models/QuizUser";
 import {
+    ErrorPageLinkedTo,
     showErrorPageNothingToFind,
     showErrorQuizSession
 } from "../../ErrorPage/ErrorPageExports.ts";
@@ -21,6 +22,7 @@ import {QuizSessionManagerSlave, QuizSessionManagerSlaveInterface} from "../../.
 import QuizSession from "../../../models/QuizSession.ts";
 import QuizSessionService from "../../../services/QuizSessionService.ts";
 import {LoadingPage} from "../../Loading/Loading.tsx";
+import {ErrorPage} from "../../ErrorPage/ErrorPage.tsx";
 
 export interface QuizSlaveChildrenProps {
     quizSessionManagerSlave: QuizSessionManagerSlaveInterface
@@ -40,6 +42,7 @@ export const QuizSlave: FC = () => {
 
     const [popupProps, setPopupProps] = useState<PopupProps | null>(null);
     const [showingPopup, setShowingPopup] = useState(false);
+    const [errorGettingSession, setErrorGettingSession] = useState(false)
 
     const handleLeaveQuizSession = () => {
         if (QuizSessionManagerSlave.getInstance().quizState == QuizState.endscreen) {
@@ -75,7 +78,7 @@ export const QuizSlave: FC = () => {
         const handleQuizSessionManagerSlaveChange = () => {
             if (QuizSessionManagerSlave.getInstanceAsInterface().errorGettingSession) {
                 QuizSessionManagerSlave.getInstance().errorGettingSession = false
-                showErrorQuizSession(navigate, false)
+                setErrorGettingSession(true)
                 return
             }
             setQuizSessionManagerSlave(QuizSessionManagerSlave.getInstanceAsInterface());
@@ -122,6 +125,16 @@ export const QuizSlave: FC = () => {
     }, [])
 
     return (
+        (errorGettingSession) ? (
+            <ErrorPage
+                message={"There was an error connecting to the server and getting the quiz session."}
+                linkTo={ErrorPageLinkedTo.Home}
+                buttonText={"Try Again"}
+                onButtonClick={() => {
+                    window.location.reload()
+                }}
+            />
+        ) : (
         <div className="quizSlave">
             { (quizSessionManagerSlave.quizState == QuizState.lobby && quizSessionManagerSlave.sessionExists) &&
                 <QuizSlaveLobby
@@ -169,6 +182,7 @@ export const QuizSlave: FC = () => {
                 />
             }
         </div>
+        )
     )
 }
 

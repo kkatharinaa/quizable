@@ -12,7 +12,7 @@ import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 import QRCodeHelper from "../../../helper/QRCodeHelper.ts";
 
-export const QuizLobby: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQuizSession}) => {
+export const QuizLobby: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQuizSession, disableButtonShortly}) => {
 
     const joinedUsers = (): QuizUser[] => {
         return quizSessionManager.userStats?.map(item => item.user) ?? []
@@ -20,6 +20,7 @@ export const QuizLobby: FC<QuizMasterChildrenProps> = ({quizSessionManager, endQ
 
     const playQuiz = () => {
         QuizSessionManager.getInstance().toNextQuestionOrEnd(true)
+        disableButtonShortly()
     }
 
     useEffect(() => {

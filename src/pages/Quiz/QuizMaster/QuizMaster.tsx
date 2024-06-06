@@ -3,7 +3,7 @@ import "./QuizMaster.css"
 import {useLocation, useNavigate} from "react-router-dom";
 import {
     ErrorPageLinkedTo, showErrorPageNothingToFind,
-    showErrorPageSomethingWentWrong, showErrorQuizSession
+    showErrorPageSomethingWentWrong
 } from "../../ErrorPage/ErrorPageExports.ts";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
 import {QuizState} from "../../../models/QuizSessionState.ts";
@@ -28,6 +28,8 @@ import {ErrorPage} from "../../ErrorPage/ErrorPage.tsx";
 export interface QuizMasterChildrenProps {
     quizSessionManager: QuizSessionManagerInterface
     endQuizSession: () => void
+    buttonClickDisabled: boolean
+    disableButtonShortly: () => void
 }
 
 export const QuizMaster: FC = () => {
@@ -44,7 +46,9 @@ export const QuizMaster: FC = () => {
     const [showingPopup, setShowingPopup] = useState(false);
     const [user, loading, error] = useAuthState(auth);
     const [isSetUp, setIsSetUp] = useState(false);
-    const [ screenIsUnsupported, setScreenIsUnsupported ] = useState(false)
+    const [screenIsUnsupported, setScreenIsUnsupported] = useState(false)
+    const [errorGettingSession, setErrorGettingSession] = useState(false)
+    const [buttonClickDisabled, setButtonClickDisabled] = useState(false);
     
     const setQuizFromFirestore = async (quizID: string) => {
         if (quizID == null) {
@@ -88,6 +92,12 @@ export const QuizMaster: FC = () => {
             },
         };
         showPopup(endQuizPopup);
+    }
+    const disableButtonShortly = () => {
+        setButtonClickDisabled(true)
+        setTimeout(() => {
+            setButtonClickDisabled(false);
+        }, 1000)
     }
 
     const showPopup = (popup: PopupProps) => {
@@ -147,7 +157,7 @@ export const QuizMaster: FC = () => {
         const handleQuizSessionManagerChange = () => {
             if (QuizSessionManager.getInstanceAsInterface().errorGettingSession) {
                 QuizSessionManager.getInstance().errorGettingSession = false
-                showErrorQuizSession(navigate, true)
+                setErrorGettingSession(true)
                 return
             }
             setQuizSessionManager(QuizSessionManager.getInstanceAsInterface());
@@ -173,42 +183,63 @@ export const QuizMaster: FC = () => {
             <ErrorPage
                 message={"The screen you tried to view is not supported for your screen width."}
             />
+        ) : (errorGettingSession) ? (
+            <ErrorPage
+                message={"There was an error connecting to the server and getting the quiz session."}
+                linkTo={ErrorPageLinkedTo.Overview}
+                buttonText={"Try Again"}
+                onButtonClick={() => {
+                    window.location.reload()
+                }}
+            />
         ) : (
         <div className="quizMaster">
             { (quizSessionManager.quizState === QuizState.lobby && quizSessionManager.sessionExists) &&
                 <QuizLobby
                     quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
+                    buttonClickDisabled={buttonClickDisabled}
+                    disableButtonShortly={disableButtonShortly}
                 />
             }
             { (quizSessionManager.quizState === QuizState.playing && quizSessionManager.sessionExists) &&
                 <QuizSessionQuestion
                     quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
+                    buttonClickDisabled={buttonClickDisabled}
+                    disableButtonShortly={disableButtonShortly}
                 />
             }
             { (quizSessionManager.quizState === QuizState.statistics && quizSessionManager.sessionExists) &&
                 <QuizResult
                     quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
+                    buttonClickDisabled={buttonClickDisabled}
+                    disableButtonShortly={disableButtonShortly}
                 />
             }
             { (quizSessionManager.quizState === QuizState.leaderboard && quizSessionManager.sessionExists) &&
                 <QuizLeaderboard
                     quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
+                    buttonClickDisabled={buttonClickDisabled}
+                    disableButtonShortly={disableButtonShortly}
                 />
             }
             { (quizSessionManager.quizState === QuizState.podium && quizSessionManager.sessionExists) &&
                 <QuizPodium
                     quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
+                    buttonClickDisabled={buttonClickDisabled}
+                    disableButtonShortly={disableButtonShortly}
                 />
             }
             { (quizSessionManager.quizState === QuizState.endscreen && quizSessionManager.sessionExists) &&
                 <QuizEnd
                     quizSessionManager={quizSessionManager}
                     endQuizSession={handleEndQuizSession}
+                    buttonClickDisabled={buttonClickDisabled}
+                    disableButtonShortly={disableButtonShortly}
                 />
             }
             { (loading || quizSessionManager.quizState == null || !quizSessionManager.sessionExists) &&

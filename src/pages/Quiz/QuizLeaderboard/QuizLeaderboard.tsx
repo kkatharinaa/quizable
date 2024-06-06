@@ -1,7 +1,7 @@
 import {FC, useEffect} from "react";
 import "./QuizLeaderboard.css"
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
-import {POWER_ICON_DARK, SKIP_ICON_LIGHT} from "../../../assets/Icons.ts";
+import {POWER_ICON_DARK, SKIP_ICON_DISABLED, SKIP_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {QuizCodeTag} from "../../../components/QuizCodeTag/QuizCodeTag.tsx";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
@@ -11,6 +11,7 @@ import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 import {QuizPlayerCard} from "../../../components/QuizPlayerCard/QuizPlayerCard.tsx";
 import {QuizPlayerCardType} from "../../../components/QuizPlayerCard/QuizPlayerCardExports.ts";
 import QuizSessionUserStats from "../../../models/QuizSessionUserStats.ts";
+import {ButtonStyle} from "../../../components/Button/ButtonExports.ts";
 
 enum LeaderboardChange {
     MovedUp,
@@ -18,12 +19,13 @@ enum LeaderboardChange {
     MovedDown
 }
 
-export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSessionManager}) => {
+export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSessionManager, buttonClickDisabled, disableButtonShortly}) => {
 
     const handleContinue = () => {
         // move on to next question, for this the currentQuestionId of the quizsession has to be set to the id of the next question in the questionsarray of the quiz, and the quizstate has to be set to playing
         // however if this is the last question in the questionsarray of the quiz, instead move on to the podium screen by setting the quizstate to podium
         QuizSessionManager.getInstance().toNextQuestionOrEnd(false)
+        disableButtonShortly()
     }
 
     const getLeaderboardChange = (userStat: QuizSessionUserStats): LeaderboardChange => {
@@ -96,11 +98,12 @@ export const QuizLeaderboard: FC<QuizMasterChildrenProps> = ({endQuizSession, qu
                 secondaryButtonText="End Quiz"
                 secondaryButtonIcon={POWER_ICON_DARK}
                 primaryButtonText={"Next"}
-                primaryButtonIcon={SKIP_ICON_LIGHT}
+                primaryButtonIcon={buttonClickDisabled ? SKIP_ICON_DISABLED : SKIP_ICON_LIGHT}
                 type={BottomNavBarType.Default}
                 style={BottomNavBarStyle.Long}
                 onSecondaryClick={endQuizSession}
-                onPrimaryClick={handleContinue}
+                onPrimaryClick={buttonClickDisabled ? undefined : handleContinue}
+                alternativePrimaryButtonStyle={buttonClickDisabled ? ButtonStyle.Disabled : undefined}
             />
             }
         </div>

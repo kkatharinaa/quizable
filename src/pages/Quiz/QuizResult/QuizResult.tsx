@@ -1,7 +1,7 @@
 import {FC, useState} from "react";
 import "./QuizResult.css"
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
-import {POWER_ICON_DARK, SKIP_ICON_LIGHT} from "../../../assets/Icons.ts";
+import {POWER_ICON_DARK, SKIP_ICON_DISABLED, SKIP_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {getAnswerInputFieldTypeForIndex} from "../../../components/AnswerInputField/AnswerInputFieldExports.ts";
 import {QuizCodeTag} from "../../../components/QuizCodeTag/QuizCodeTag.tsx";
@@ -12,8 +12,9 @@ import {StatisticsBar} from "../../../components/StatisticsBar/StatisticsBar.tsx
 import {QuizMasterChildrenProps} from "../QuizMaster/QuizMaster.tsx";
 import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 import {QuizState} from "../../../models/QuizSessionState.ts";
+import {ButtonStyle} from "../../../components/Button/ButtonExports.ts";
 
-export const QuizResult: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSessionManager}) => {
+export const QuizResult: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSessionManager, buttonClickDisabled, disableButtonShortly}) => {
 
     const [currentQuestion] = useState<Question | null>(quizSessionManager.currentQuestion)
 
@@ -43,6 +44,7 @@ export const QuizResult: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSes
     const handleContinue = () => {
         // move on to leaderboard, for this the quizstate needs to be set to leaderboard
         QuizSessionManager.getInstance().changeState(QuizState.leaderboard)
+        disableButtonShortly()
     }
 
     return (
@@ -72,11 +74,12 @@ export const QuizResult: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSes
                 secondaryButtonText="End Quiz"
                 secondaryButtonIcon={POWER_ICON_DARK}
                 primaryButtonText={"Next"}
-                primaryButtonIcon={SKIP_ICON_LIGHT}
+                primaryButtonIcon={buttonClickDisabled ? SKIP_ICON_DISABLED : SKIP_ICON_LIGHT}
                 type={BottomNavBarType.Default}
                 style={BottomNavBarStyle.Long}
                 onSecondaryClick={endQuizSession}
-                onPrimaryClick={handleContinue}
+                onPrimaryClick={buttonClickDisabled ? undefined : handleContinue}
+                alternativePrimaryButtonStyle={buttonClickDisabled ? ButtonStyle.Disabled : undefined}
             />
         </div>
     );

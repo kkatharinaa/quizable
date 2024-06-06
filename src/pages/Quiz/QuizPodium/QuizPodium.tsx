@@ -1,7 +1,7 @@
 import {FC} from "react";
 import "./QuizPodium.css"
 import {BottomNavBar} from "../../../components/BottomNavBar/BottomNavBar.tsx";
-import {POWER_ICON_DARK, SKIP_ICON_LIGHT} from "../../../assets/Icons.ts";
+import {POWER_ICON_DARK, SKIP_ICON_DISABLED, SKIP_ICON_LIGHT} from "../../../assets/Icons.ts";
 import {BottomNavBarStyle, BottomNavBarType} from "../../../components/BottomNavBar/BottomNavBarExports.ts";
 import {QuizCodeTag} from "../../../components/QuizCodeTag/QuizCodeTag.tsx";
 import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.tsx";
@@ -11,8 +11,9 @@ import {QuizSessionManager} from "../../../managers/QuizSessionManager.tsx";
 import {QuizState} from "../../../models/QuizSessionState.ts";
 import QuizSessionUserStats from "../../../models/QuizSessionUserStats.ts";
 import {PodiumPlatform} from "../../../components/PodiumPlatform/PodiumPlatform.tsx";
+import {ButtonStyle} from "../../../components/Button/ButtonExports.ts";
 
-export const QuizPodium: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSessionManager}) => {
+export const QuizPodium: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSessionManager, buttonClickDisabled}) => {
 
     const handleContinue = () => {
         // move on to endscreen on which the user can download the report, for this the quizstate needs to be set to endscreen
@@ -115,11 +116,12 @@ export const QuizPodium: FC<QuizMasterChildrenProps> = ({endQuizSession, quizSes
                 secondaryButtonText="End Quiz"
                 secondaryButtonIcon={POWER_ICON_DARK}
                 primaryButtonText={"Next"}
-                primaryButtonIcon={SKIP_ICON_LIGHT}
+                primaryButtonIcon={buttonClickDisabled ? SKIP_ICON_DISABLED : SKIP_ICON_LIGHT}
                 type={BottomNavBarType.Default}
                 style={BottomNavBarStyle.Long}
                 onSecondaryClick={endQuizSession}
-                onPrimaryClick={handleContinue}
+                onPrimaryClick={buttonClickDisabled ? undefined : handleContinue}
+                alternativePrimaryButtonStyle={buttonClickDisabled ? ButtonStyle.Disabled : undefined}
             />
         </div>
     );
