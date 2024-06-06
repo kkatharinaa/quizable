@@ -87,7 +87,7 @@
         max-width: none;
     }
 
-    .quizPlayerCardIconAndName {
+    .quizPlayerCard .quizPlayerCardIconAndName {
         display: flex;
         justify-content: flex-start;
         align-items: center;
@@ -95,12 +95,15 @@
         width: 100%;
     }
 
-    .quizPlayerCardIconAndName p {
+    .quizPlayerCard .quizPlayerCardIconAndName p {
         font-size: 24px;
         text-overflow: ellipsis;
     }
+    .quizPlayerCard .quizPlayerCardIconAndName img {
+        width: 40px;
+    }
 
-    .quizPlayerCardScoreText {
+    .quizPlayerCard .quizPlayerCardScoreText {
         font-size: 24px;
         margin: 0;
     }

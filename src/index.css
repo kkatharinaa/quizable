@@ -35,7 +35,8 @@ body {
   display: flex;
   place-items: center;
   min-width: 320px;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100svh;
 }
 
 /* TODO: Update or remove */
@@ -62,6 +63,7 @@ h1 {
   display: flex;
   width: 100vw;
   height: 100vh;
+  max-height: 100svh;
 
   justify-content: center;
   align-items: center;

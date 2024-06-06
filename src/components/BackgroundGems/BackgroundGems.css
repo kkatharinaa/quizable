@@ -3,7 +3,7 @@
     height: 100vh;
     overflow: hidden;
     max-width: 100vw;
-    max-height: 100vh;
+    max-height: 100svh;
     position: absolute;
     filter: blur(8px);
     display: flex;
@@ -23,7 +23,7 @@
     height: 100vh;
     overflow: hidden;
     max-width: 100vw;
-    max-height: 100vh;
+    max-height: 100svh;
     position: absolute;
     z-index: -2;
 }

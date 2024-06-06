@@ -2,9 +2,25 @@
     pointer-events: none;
     position: absolute;
     height: 100vh;
+    max-height: 100svh;
     width: 100vw;
     overflow: hidden;
     z-index: 2;
+}
+
+.questionSlideInTagBackground {
+    position: absolute;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100svh;
+    background: var(--black);
+    opacity: 0.6;
+    display: none;
+}
+.questionSlideInTagBackground.open {
+    display: block;
+    pointer-events: auto;
 }
 
 .questionSlideInTag {
@@ -14,7 +30,7 @@
     width: 100vw;
     position: absolute;
     pointer-events: auto;
-    bottom: calc(100vh - 36px);
+    bottom: calc(100svh - 36px);
     transition: top 2s ease 0s; /* TODO: not working? */
 }
 .questionSlideInTag.open {

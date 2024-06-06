@@ -3,7 +3,7 @@
     width: 100vw;
     max-width: 100vw;
     height: 100vh;
-    max-height: 100vh;
+    max-height: 100svh;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
@@ -24,8 +24,12 @@
     color: var(--white);
     text-align: center;
     font-family: "Inika", serif;
-    font-size: 52px;
+    font-size: 48px;
     font-style: normal;
     font-weight: 700;
     line-height: normal;
+}
+
+.quizSlaveLeaderboard .content .quizPlayerCard .quizPlayerCardScore .quizPlayerCardScoreArrow {
+    display: none;
 }

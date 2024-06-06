@@ -270,6 +270,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         })
         connection.on(`nosession:${quizSessionId}/${hostUserId}`, () => {
             this._errorGettingSession = true
+            this.notifySubscribers()
             this.resetManager()
         })
 

@@ -176,6 +176,7 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
         connection.on(`nosession:${quizSessionId}/${quizUser.identifier}`, () => {
             console.log("no session")
             this._errorGettingSession = true
+            this.notifySubscribers()
             this.resetManager()
         })
 

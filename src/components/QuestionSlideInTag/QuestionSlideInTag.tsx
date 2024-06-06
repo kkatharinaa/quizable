@@ -29,10 +29,12 @@ export const QuestionSlideInTag: FC<QuestionSlideInTagProps> = ({ questionText, 
 
     return (
         <div className="questionSlideInTagContainer">
+            <div className={`questionSlideInTagBackground ${open ? "open" : ""}`}>
+            </div>
             <div className={`questionSlideInTag ${open ? "open" : ""}`}>
                 <div className="content" tabIndex={0}>
                     <h1>{questionText}</h1>
-                    { (remainingTime != 0) &&
+                    {(remainingTime != 0) &&
                         <Timer
                             remainingTime={time}
                         />
