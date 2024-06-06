@@ -1,12 +1,11 @@
-import { FC, useEffect, useState } from "react"
+import {FC, useEffect, useState} from "react"
 import "./QuizSlave.css"
 import {useLocation, useNavigate} from "react-router-dom";
-import { getDeviceId } from "../../../helper/DeviceHelper";
+import {getDeviceId} from "../../../helper/DeviceHelper";
 import QuizUser, {quizUsersAreEqual} from "../../../models/QuizUser";
 import {
     ErrorPageLinkedTo,
     showErrorPageNothingToFind,
-    showErrorQuizSession
 } from "../../ErrorPage/ErrorPageExports.ts";
 import {
     showPopupLeaveSession,
@@ -23,6 +22,7 @@ import QuizSession from "../../../models/QuizSession.ts";
 import QuizSessionService from "../../../services/QuizSessionService.ts";
 import {LoadingPage} from "../../Loading/Loading.tsx";
 import {ErrorPage} from "../../ErrorPage/ErrorPage.tsx";
+import {QuizSessionStatus} from "../../../managers/QuizSessionManager.tsx";
 
 export interface QuizSlaveChildrenProps {
     quizSessionManagerSlave: QuizSessionManagerSlaveInterface
@@ -76,9 +76,13 @@ export const QuizSlave: FC = () => {
         }
 
         const handleQuizSessionManagerSlaveChange = () => {
-            if (QuizSessionManagerSlave.getInstanceAsInterface().errorGettingSession) {
-                QuizSessionManagerSlave.getInstance().errorGettingSession = false
-                setErrorGettingSession(true)
+            if (QuizSessionManagerSlave.getInstanceAsInterface().errorGettingSession != QuizSessionStatus.Ok) {
+                if (QuizSessionManagerSlave.getInstanceAsInterface().errorGettingSession == QuizSessionStatus.NoSession) {
+                    showErrorPageNothingToFind(navigate)
+                } else if (QuizSessionManagerSlave.getInstanceAsInterface().errorGettingSession != QuizSessionStatus.ConnectionClosed) {
+                    setErrorGettingSession(true)
+                }
+                QuizSessionManagerSlave.getInstance().errorGettingSession = QuizSessionStatus.Ok
                 return
             }
             setQuizSessionManagerSlave(QuizSessionManagerSlave.getInstanceAsInterface());

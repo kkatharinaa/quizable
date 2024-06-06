@@ -13,6 +13,12 @@ import {PLAY_ICON_LIGHT} from "../assets/Icons.ts";
 import {PopupProps} from "../components/Popup/Popup.tsx";
 import {NavigateFunction} from "react-router-dom";
 
+export enum QuizSessionStatus {
+    Ok,
+    NoSession,
+    ConnectionClosed
+}
+
 export interface QuizSessionManagerInterface {
     quizSession: QuizSession | null;
     quiz: Quiz | null;
@@ -30,7 +36,7 @@ export interface QuizSessionManagerInterface {
     sessionExists: boolean;
     canSendReport: boolean;
     remainingTime: number;
-    errorGettingSession: boolean;
+    errorGettingSession: QuizSessionStatus;
 }
 
 export class QuizSessionManager implements QuizSessionManagerInterface {
@@ -43,7 +49,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     private _host: AuthenticatedUser | null = null;
     private _connectedPlayers: QuizUser[] = []
     private _remainingTime: number = 0;
-    private _errorGettingSession: boolean = false;
+    private _errorGettingSession: QuizSessionStatus = QuizSessionStatus.Ok;
 
     private subscribers: ((quizSessionManager: QuizSessionManager) => void)[] = [];
 
@@ -113,7 +119,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
     public get remainingTime(): number {
         return this._remainingTime;
     }
-    public get errorGettingSession(): boolean {
+    public get errorGettingSession(): QuizSessionStatus {
         return this._errorGettingSession;
     }
     public get quizState(): string | null {
@@ -199,7 +205,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         this._host = host;
         this.notifySubscribers()
     }
-    public set errorGettingSession(errorGettingSession: boolean) {
+    public set errorGettingSession(errorGettingSession: QuizSessionStatus) {
         this._errorGettingSession = errorGettingSession
         this.notifySubscribers()
     }
@@ -219,7 +225,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
         this._connectedPlayers = [];
         this._canSendReport = true;
         this._remainingTime = 0;
-        this._errorGettingSession = false;
+        this._errorGettingSession = QuizSessionStatus.Ok;
         this.notifySubscribers()
 
         localStorage.removeItem('quizSessionId');
@@ -269,7 +275,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
             this.notifySubscribers()
         })
         connection.on(`nosession:${quizSessionId}/${hostUserId}`, () => {
-            this._errorGettingSession = true
+            this._errorGettingSession = QuizSessionStatus.NoSession
             this.notifySubscribers()
             this.resetManager()
         })
@@ -323,7 +329,7 @@ export class QuizSessionManager implements QuizSessionManagerInterface {
 
         connection.onclose((error: Error | undefined) => {
             console.error('SignalR connection closed. ', error);
-            this._errorGettingSession = true
+            this._errorGettingSession = QuizSessionStatus.ConnectionClosed
             this.notifySubscribers()
         })
 

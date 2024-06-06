@@ -2,7 +2,8 @@ import {FC, useEffect, useState} from "react"
 import "./QuizMaster.css"
 import {useLocation, useNavigate} from "react-router-dom";
 import {
-    ErrorPageLinkedTo, showErrorPageNothingToFind,
+    ErrorPageLinkedTo,
+    showErrorPageNothingToFind,
     showErrorPageSomethingWentWrong
 } from "../../ErrorPage/ErrorPageExports.ts";
 import QuizRepository from "../../../repositories/QuizRepository.ts";
@@ -16,8 +17,12 @@ import {QuizLeaderboard} from "../QuizLeaderboard/QuizLeaderboard.tsx";
 import {QuizPodium} from "../QuizPodium/QuizPodium.tsx";
 import {QuizEnd} from "../QuizEnd/QuizEnd.tsx";
 import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
-import {QuizSessionManager, QuizSessionManagerInterface} from "../../../managers/QuizSessionManager.tsx";
-import { useAuthState } from "react-firebase-hooks/auth";
+import {
+    QuizSessionManager,
+    QuizSessionManagerInterface,
+    QuizSessionStatus
+} from "../../../managers/QuizSessionManager.tsx";
+import {useAuthState} from "react-firebase-hooks/auth";
 import {auth, logInWithEmailLink} from "../../../firebase/auth.ts";
 import {LoadingPage} from "../../Loading/Loading.tsx";
 import QuizSession from "../../../models/QuizSession.ts";
@@ -49,7 +54,7 @@ export const QuizMaster: FC = () => {
     const [screenIsUnsupported, setScreenIsUnsupported] = useState(false)
     const [errorGettingSession, setErrorGettingSession] = useState(false)
     const [buttonClickDisabled, setButtonClickDisabled] = useState(false);
-    
+
     const setQuizFromFirestore = async (quizID: string) => {
         if (quizID == null) {
             showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
@@ -155,9 +160,13 @@ export const QuizMaster: FC = () => {
         window.addEventListener('resize', resize);
 
         const handleQuizSessionManagerChange = () => {
-            if (QuizSessionManager.getInstanceAsInterface().errorGettingSession) {
-                QuizSessionManager.getInstance().errorGettingSession = false
-                setErrorGettingSession(true)
+            if (QuizSessionManager.getInstanceAsInterface().errorGettingSession != QuizSessionStatus.Ok) {
+                if (QuizSessionManager.getInstanceAsInterface().errorGettingSession == QuizSessionStatus.NoSession) {
+                    showErrorPageNothingToFind(navigate, ErrorPageLinkedTo.Overview)
+                } else if (QuizSessionManager.getInstanceAsInterface().errorGettingSession != QuizSessionStatus.ConnectionClosed) {
+                    setErrorGettingSession(true)
+                }
+                QuizSessionManager.getInstance().errorGettingSession = QuizSessionStatus.Ok
                 return
             }
             setQuizSessionManager(QuizSessionManager.getInstanceAsInterface());

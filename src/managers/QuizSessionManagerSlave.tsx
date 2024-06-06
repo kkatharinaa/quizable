@@ -7,6 +7,7 @@ import {isEqualNullable} from "../helper/EqualHelpers.ts";
 import {Answer} from "../models/Answer.ts";
 import QuizSessionService from "../services/QuizSessionService.ts";
 import {QuizState} from "../models/QuizSessionState.ts";
+import {QuizSessionStatus} from "./QuizSessionManager.tsx";
 
 export interface QuizSessionManagerSlaveInterface {
     quizSession: QuizSession | null;
@@ -18,7 +19,7 @@ export interface QuizSessionManagerSlaveInterface {
     sessionExists: boolean;
     quizUser: QuizUser | null;
     remainingTime: number;
-    errorGettingSession: boolean;
+    errorGettingSession: QuizSessionStatus;
 }
 
 export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface {
@@ -28,7 +29,7 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
     private _connection: SignalR.HubConnection | null = null;
     private _quizUser: QuizUser | null = null;
     private _remainingTime: number = 0;
-    private _errorGettingSession: boolean = false
+    private _errorGettingSession: QuizSessionStatus = QuizSessionStatus.Ok
 
     private subscribers: ((quizSessionManagerSlave: QuizSessionManagerSlave) => void)[] = [];
 
@@ -100,7 +101,7 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
     public get remainingTime(): number {
         return this._remainingTime;
     }
-    public get errorGettingSession(): boolean {
+    public get errorGettingSession(): QuizSessionStatus {
         return this._errorGettingSession;
     }
 
@@ -121,7 +122,7 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
         this._quizUser = quizUser;
         this.notifySubscribers()
     }
-    public set errorGettingSession(errorGettingSession: boolean) {
+    public set errorGettingSession(errorGettingSession: QuizSessionStatus) {
         this._errorGettingSession = errorGettingSession;
         this.notifySubscribers()
     }
@@ -142,7 +143,7 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
         this._currentQuestion = null;
         this._connection = null;
         this._quizUser = null;
-        this._errorGettingSession = false;
+        this._errorGettingSession = QuizSessionStatus.Ok;
         this.notifySubscribers()
     }
     public selectAnswer(answer: Answer): void {
@@ -175,7 +176,7 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
         })
         connection.on(`nosession:${quizSessionId}/${quizUser.identifier}`, () => {
             console.log("no session")
-            this._errorGettingSession = true
+            this._errorGettingSession = QuizSessionStatus.NoSession
             this.notifySubscribers()
             this.resetManager()
         })
@@ -223,7 +224,7 @@ export class QuizSessionManagerSlave implements QuizSessionManagerSlaveInterface
 
         connection.onclose((error: Error | undefined) => {
             console.error('SignalR connection closed. ', error);
-            this._errorGettingSession = true
+            this._errorGettingSession = QuizSessionStatus.ConnectionClosed
             this.notifySubscribers()
         })
 
