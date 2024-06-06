@@ -21,7 +21,6 @@ import {BackgroundGems} from "../../../components/BackgroundGems/BackgroundGems.
 import {BackgroundGemsType} from "../../../components/BackgroundGems/BackgroundGemsExports.ts";
 import {useAuthState} from "react-firebase-hooks/auth";
 import {auth, logInWithEmailLink} from "../../../firebase/auth.ts";
-import {showPopupSomethingWentWrong} from "../../../components/Popup/PopupExports.ts";
 import {ErrorPage} from "../../ErrorPage/ErrorPage.tsx";
 import {handleResize} from "../../../helper/ResizeHelper.ts";
 
@@ -57,7 +56,7 @@ export const CreateEditor: FC = () => {
             return
         }
         if (user?.uid == null) {
-            showPopupSomethingWentWrong(showPopup, () => setShowingPopup(false))
+            showErrorPageSomethingWentWrong(navigate, ErrorPageLinkedTo.Overview)
             return
         }
         const quizFromFirestore: Quiz = await QuizRepository.getById(user!.uid!, quizID)
