@@ -14,6 +14,7 @@
     max-width: 100vw;
     height: 100vh;
     max-height: 100svh;
+    overflow: hidden;
     background: var(--black);
     opacity: 0.6;
     display: none;

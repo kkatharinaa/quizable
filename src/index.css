@@ -37,6 +37,7 @@ body {
   min-width: 320px;
   height: 100vh;
   max-height: 100svh;
+  overflow: hidden;
 }
 
 /* TODO: Update or remove */
@@ -64,6 +65,7 @@ h1 {
   width: 100vw;
   height: 100vh;
   max-height: 100svh;
+  overflow: hidden;
 
   justify-content: center;
   align-items: center;
