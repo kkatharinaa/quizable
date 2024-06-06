@@ -10,6 +10,7 @@
 .quizCardContainer .quizCardWithActions, .quizCardContainer .filler {
     flex-basis: 25%;
     max-width: 55%;
+    min-width: 300px;
 }
 
 .quizCardContainer .filler button {
