@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import "./Home.css"
 import { ButtonComponent } from "../../components/Button/Button";
-import {CREATE_ICON_DARK, ENTER_ICON_LIGHT, PLAY_ICON_LIGHT} from "../../assets/Icons";
+import {CREATE_ICON_DARK, ENTER_ICON_LIGHT, INFO_ICON_LIGHT, PLAY_ICON_LIGHT} from "../../assets/Icons";
 import { ButtonStyle, ButtonType } from "../../components/Button/ButtonExports";
 import { BackgroundGems } from "../../components/BackgroundGems/BackgroundGems";
 import { BackgroundGemsType } from "../../components/BackgroundGems/BackgroundGemsExports";
@@ -16,6 +16,8 @@ import {QuizSessionManagerSlave} from "../../managers/QuizSessionManagerSlave.ts
 import {useAuthState} from "react-firebase-hooks/auth";
 import {auth} from "../../firebase/auth.ts";
 import {QuizSessionManager} from "../../managers/QuizSessionManager.tsx";
+
+const env_var = import.meta.env
 
 const Home: FC = () => {
     const navigate = useNavigate();
@@ -95,6 +97,12 @@ const Home: FC = () => {
                     style={ButtonStyle.Secondary}
                     onClick={navigateCreateQuiz}
                 />
+                <div className={"linkToInfoPage"} onClick={() => {
+                    window.location.href = `https://info.${env_var.VITE_AUTH_DOMAIN}`
+                }}>
+                    <img src={INFO_ICON_LIGHT.path} alt={INFO_ICON_LIGHT.alt}/>
+                    <p>About Us</p>
+                </div>
             </div>
 
             {(showingPopup && popupProps != null) &&

@@ -134,3 +134,8 @@ export const COIN_ICON_GREEN: Icon = {
     path: '/assets/icon-coin-green.svg',
     alt: 'Coin',
 };
+
+export const INFO_ICON_LIGHT: Icon = {
+    path: '/assets/icon-info-light.svg',
+    alt: 'Info',
+};

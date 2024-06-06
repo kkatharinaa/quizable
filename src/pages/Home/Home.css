@@ -46,8 +46,42 @@
     margin-top: 20px;
 }
 
+.linkToInfoPage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+.linkToInfoPage img {
+    width: 18px;
+    height: 18px;
+}
+.linkToInfoPage p {
+    color: var(--white);
+    font-family: "Sansation", sans-serif;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: normal;
+    line-height: normal;
+    margin: 0;
+}
+.linkToInfoPage:hover {
+    cursor: pointer;
+}
+.linkToInfoPage:hover p {
+    text-decoration: underline;
+}
+
 @media only screen and (max-width: 768px) {
     .homeButtons button:last-of-type {
         display: none;
+    }
+
+    .linkToInfoPage img {
+        width: 14px;
+        height: 14px;
+    }
+    .linkToInfoPage p {
+        font-size: 18px;
     }
 }
