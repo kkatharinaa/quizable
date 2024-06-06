@@ -17,12 +17,13 @@
 
 .quizLeaderboard .content {
     display: flex;
-    padding: 100px 100px 0 100px;
+    padding: 100px 100px 20px 100px;
     flex-direction: column;
     align-items: center;
     gap: 100px;
     flex: 1 0 0;
     align-self: stretch;
+    overflow-y: scroll;
 }
 
 .quizLeaderboard .content h1 {
