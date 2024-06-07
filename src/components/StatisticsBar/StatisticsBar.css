@@ -74,11 +74,18 @@
 .statisticsBar.correct .answerValue {
     box-shadow: 0px 0px 40px 4px var(--white);
 }
-.statisticsBar .answerValue object {
+.statisticsBar .answerValue object:first-of-type {
     z-index: 1;
     position: absolute;
     left: 3px;
     top: 3px;
+}
+.statisticsBar .answerValue object:last-of-type {
+    z-index: 1;
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    rotate: 180deg;
 }
 .statisticsBar .answerValue p {
     max-height: 100%;

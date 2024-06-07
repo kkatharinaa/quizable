@@ -49,6 +49,7 @@ export const StatisticsBar: FC<StatisticsBarProps> = ({ value, type, answerCount
             <div className="answerValue">
                 <object type="image/svg+xml" data={gemsPath} aria-hidden="true"></object>
                 <p>{value}</p>
+                <object type="image/svg+xml" data={gemsPath} aria-hidden="true"></object>
             </div>
         </div>
     )
