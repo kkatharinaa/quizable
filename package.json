@@ -9,7 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "deploy-frontend": "npm run build && firebase deploy",
-    "deploy-backend": "gcloud builds submit --region=us-west2 --config ./backend/deploy/cloudbuild.yaml"
+    "deploy-backend": "gcloud builds submit --region=us-west2 --config ./backend/deploy/cloudbuild.yaml",
+    "generate-license": "node --loader ts-node/esm generate-license.ts"
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^4.2.2",
@@ -37,6 +38,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "generate-license-file": "^3.4.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.7"
   }
