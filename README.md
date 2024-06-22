@@ -1,6 +1,6 @@
 # Quizable
 
-Quizable is an open-source web quiz app designed to enhance interactive learning and research. It is seamless, simple, yet extremely effective, making it the ideal tool for conducting quizzes. Quizable is different from its competition thanks to its frictionless login setup and the ability to create and play quizzes immediately. Some of the features worth mentioning: frictionless login, importing and exporting quizzes in JSON format, joining a quiz session by inserting a code or scanning a QR code, answer statistics and a leaderboard while playing a quiz, generating a report of a played quiz (detailed analysis of participants' responses etc.), and the ability to reconnect to a previous session.
+Quizable is a web quiz app designed to enhance interactive learning and research. It is seamless, simple, yet extremely effective, making it the ideal tool for conducting quizzes in an academic setting. Quizable is different from its competitors thanks to its frictionless login and the ability to create and play quizzes immediately and without any paywalls. Some additional features worth mentioning include: importing and exporting quizzes in JSON format, joining a quiz session by inserting a code or simply scanning a QR code, answer statistics and a leaderboard while playing a quiz, generating a report of a played quiz (detailed analysis of participants’ responses), and the ability to reconnect after losing connection to a session.
 
 # How to Run and Deploy the App
 
